@@ -8,9 +8,6 @@ import agency.tango.core.models.SkaldTrack;
 import agency.tango.core.models.SkaldUser;
 
 public interface MusicService {
-  void login();
-
-  void logout();
 
   SkaldTrack getTrackInfo();
 
