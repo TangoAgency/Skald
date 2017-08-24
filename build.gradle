@@ -104,6 +104,7 @@ ext.deps = [
     // Third Party
     javaparser: 'com.github.javaparser:javaparser-core:2.4.0',
     javax: 'javax.inject:javax.inject:1',
+    gson: "com.squareup.retrofit2:converter-gson:2.3.0",
 
     // Test dependencies
     junit: 'junit:junit:4.12',
