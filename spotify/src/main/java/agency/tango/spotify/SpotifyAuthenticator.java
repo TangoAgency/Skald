@@ -1,69 +1,66 @@
 package agency.tango.spotify;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.player.Config;
 
 import agency.tango.core.Authenticator;
+import agency.tango.core.PlayerConfig;
 
 public class SpotifyAuthenticator implements Authenticator {
-  private final SpotifySkaldPlayer player;
-  private String oauthToken;
+  private static final int REQUEST_CODE = 1337;
   private final String clientID;
   private final String redirectUri;
-  private static final int REQUEST_CODE = 1337;
+  private String oauthToken;
 
-  public SpotifyAuthenticator(SpotifySkaldPlayer player, String clientID, String redirectUri) {
-    this.player = player;
+  public SpotifyAuthenticator(String clientID, String redirectUri) {
     this.clientID = clientID;
     this.redirectUri = redirectUri;
   }
 
-  public void login(Activity parentActivity) {
+  @Override
+  public void login(Activity activity) {
     final AuthenticationRequest request = new AuthenticationRequest.Builder(clientID,
         AuthenticationResponse.Type.TOKEN, redirectUri)
-        .setScopes(new String[] { "user-read-private", "playlist-read-private",
-            "playlist-read", "streaming" })
+        .setScopes(new String[] {
+            "user-read-private",
+            "playlist-read-private",
+            "playlist-read",
+            "streaming" })
         .build();
 
-    AuthenticationClient.openLoginActivity(parentActivity, REQUEST_CODE, request);
+    AuthenticationClient.openLoginActivity(activity, REQUEST_CODE, request);
   }
 
-  public void handleLoginResponse(Context context, int requestCode, int resultCode, Intent data) {
+  @Override
+  public void logout() {
+
+  }
+
+  @Override
+  public PlayerConfig retrievePlayerConfigFromLogin(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_CODE) {
       AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
       switch (response.getType()) {
         case TOKEN:
           saveUserToken(response.getAccessToken());
-          onAuthenticationComplete(context, response);
-          break;
+          return new PlayerConfig(PlayerConfig.SPOTIFY_PROVIDER, response.getAccessToken());
         case ERROR:
-          Log.e("SpotifyLoginActivity", "Auth error: " + response.getError());
+          Log.e("SpotifyAuthenticator", String.format("Auth error: %s", response.getError()));
           break;
         default:
-          Log.e("SpotifyLoginActivity", "Not handled response" + response.getType());
+          Log.e("SpotifyAuthenticator",
+              String.format("Not handled response %s", response.getType()));
       }
     }
+    return new PlayerConfig(PlayerConfig.SPOTIFY_PROVIDER, "");
   }
 
   private void saveUserToken(String accessToken) {
     this.oauthToken = accessToken;
-  }
-
-  private void onAuthenticationComplete(Context context, AuthenticationResponse response) {
-    String oauthToken = response.getAccessToken();
-    Config playerConfig = new Config(context.getApplicationContext(), oauthToken, clientID);
-
-    player.initializePlayer(playerConfig, context);
-  }
-
-  public void logout() {
-
   }
 }

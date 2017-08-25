@@ -1,9 +1,12 @@
 package agency.tango.core;
 
 import android.app.Activity;
+import android.content.Intent;
 
 public interface Authenticator {
-  void login(Activity parentActivity);
+  void login(Activity activity);
 
   void logout();
+
+  PlayerConfig retrievePlayerConfigFromLogin(int requestCode, int resultCode, Intent data);
 }
