@@ -7,31 +7,29 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import agency.tango.skald.R;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.PlayerConfig;
 import agency.tango.skald.core.listeners.PlayerReadyListener;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.R;
 import agency.tango.skald.spotify.SpotifyAuthenticator;
 import agency.tango.skald.spotify.SpotifySkaldPlayer;
+import agency.tango.skald.spotify.playerconfig.SpotifyPlayerConfigResolver;
 
 public class MainActivity extends Activity {
-
-  private final String CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
-  private final String REDIRECT_URI = "spotify-example-marcin-first-app://callback";
-  private SpotifyAuthenticator authenticator;
-  private SpotifySkaldPlayer player;
-
+  private static final String REDIRECT_URI = "spotify-example-marcin-first-app://callback";
+  private static final String CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
   private static final String TAG = "Spotify";
 
-  private Button spotifyLoginButton;
+  private SpotifyAuthenticator authenticator;
+  private SpotifySkaldPlayer player;
 
   @Override
   protected void onCreate(Bundle savedInstance) {
     super.onCreate(savedInstance);
     setContentView(R.layout.activity_main);
 
-    spotifyLoginButton = (Button) findViewById(R.id.spotify_login_btn);
+    Button spotifyLoginButton = (Button) findViewById(R.id.spotify_login_btn);
     spotifyLoginButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -58,8 +56,8 @@ public class MainActivity extends Activity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    PlayerConfig playerConfig = authenticator.retrievePlayerConfigFromLoginResult(requestCode, resultCode,
-        data);
+    PlayerConfig playerConfig = new SpotifyPlayerConfigResolver()
+        .resolve(requestCode, resultCode, data);
     player.initializePlayer(playerConfig, CLIENT_ID, this);
   }
 }

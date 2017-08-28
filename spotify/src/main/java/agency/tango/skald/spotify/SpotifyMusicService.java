@@ -6,10 +6,8 @@ import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.models.SkaldCategory;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.core.models.SkaldUser;
 
 public class SpotifyMusicService implements SkaldMusicService {
-
   @Override
   public SkaldTrack getTrackInfo() {
     return null;
@@ -32,11 +30,6 @@ public class SpotifyMusicService implements SkaldMusicService {
 
   @Override
   public List<SkaldTrack> getTracksForPlaylist() {
-    return null;
-  }
-
-  @Override
-  public SkaldUser getUser() {
     return null;
   }
 }
