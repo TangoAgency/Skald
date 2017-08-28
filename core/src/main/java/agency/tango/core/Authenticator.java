@@ -8,5 +8,5 @@ public interface Authenticator {
 
   void logout();
 
-  PlayerConfig retrievePlayerConfigFromLogin(int requestCode, int resultCode, Intent data);
+  PlayerConfig retrievePlayerConfigFromLoginResult(int requestCode, int resultCode, Intent data);
 }

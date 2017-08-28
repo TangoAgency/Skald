@@ -2,13 +2,13 @@ package agency.tango.spotify;
 
 import java.util.List;
 
-import agency.tango.core.MusicService;
+import agency.tango.core.SkaldMusicService;
 import agency.tango.core.models.SkaldCategory;
 import agency.tango.core.models.SkaldPlaylist;
 import agency.tango.core.models.SkaldTrack;
 import agency.tango.core.models.SkaldUser;
 
-public class SpotifyMusicService implements MusicService {
+public class SpotifyMusicService implements SkaldMusicService {
 
   @Override
   public SkaldTrack getTrackInfo() {

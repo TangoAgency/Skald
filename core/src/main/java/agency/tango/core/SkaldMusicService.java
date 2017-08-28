@@ -7,7 +7,7 @@ import agency.tango.core.models.SkaldPlaylist;
 import agency.tango.core.models.SkaldTrack;
 import agency.tango.core.models.SkaldUser;
 
-public interface MusicService {
+public interface SkaldMusicService {
 
   SkaldTrack getTrackInfo();
 
@@ -21,4 +21,3 @@ public interface MusicService {
 
   SkaldUser getUser();
 }
-

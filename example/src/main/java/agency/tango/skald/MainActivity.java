@@ -19,7 +19,9 @@ public class MainActivity extends Activity {
   private final String CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
   private final String REDIRECT_URI = "spotify-example-marcin-first-app://callback";
   private SpotifyAuthenticator authenticator;
-  SpotifySkaldPlayer player;
+  private SpotifySkaldPlayer player;
+
+  private static final String TAG = "Spotify";
 
   private Button spotifyLoginButton;
 
@@ -42,13 +44,12 @@ public class MainActivity extends Activity {
     player.addPlayerReadyListener(new PlayerReadyListener() {
       @Override
       public void onPlayerReady(Player player) {
-        Log.d("SPOTIFY", " DZIA ALAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
         player.play(new SkaldTrack("spotify:user:spotify:playlist:37i9dQZF1DX8vpLK1FoEw3", "Song"));
       }
 
       @Override
       public void onError() {
-        Log.e("SPOTIFY", "ERROR during logging in");
+        Log.e(TAG, "ERROR during logging in");
       }
     });
   }
@@ -56,7 +57,7 @@ public class MainActivity extends Activity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    PlayerConfig playerConfig = authenticator.retrievePlayerConfigFromLogin(requestCode, resultCode,
+    PlayerConfig playerConfig = authenticator.retrievePlayerConfigFromLoginResult(requestCode, resultCode,
         data);
     player.initializePlayer(playerConfig, CLIENT_ID, this);
   }

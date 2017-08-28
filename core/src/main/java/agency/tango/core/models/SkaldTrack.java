@@ -1,8 +1,8 @@
 package agency.tango.core.models;
 
 public class SkaldTrack {
-  private String uri;
-  private String name;
+  private final String uri;
+  private final String name;
 
   public SkaldTrack(String uri, String name) {
     this.uri = uri;

@@ -1,9 +1,14 @@
 package agency.tango.core.models;
 
 public class SkaldPlaylist {
-  private String uri;
+  private final String uri;
 
-  private String name;
+  private final String name;
+
+  public SkaldPlaylist(String uri, String name) {
+    this.uri = uri;
+    this.name = name;
+  }
 
   public String getUri() {
     return uri;

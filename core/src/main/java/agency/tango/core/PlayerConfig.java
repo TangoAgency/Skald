@@ -2,10 +2,9 @@ package agency.tango.core;
 
 public class PlayerConfig {
   public static final String SPOTIFY_PROVIDER = "spotify";
-  public static final String DEEZER_PROVIDER = "deezer";
 
-  private String provider; // Spotify or Deezer or Youtube
-  private String oauthToken;
+  private final String provider;
+  private final String oauthToken;
 
   public PlayerConfig(String provider, String oauthToken) {
     this.provider = provider;

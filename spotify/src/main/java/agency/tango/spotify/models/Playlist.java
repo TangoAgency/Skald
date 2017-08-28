@@ -27,7 +27,7 @@ public class Playlist {
   private Owner owner;
 
   @SerializedName("public")
-  private Boolean _public;
+  private Boolean isPublic;
 
   @SerializedName("snapshot_id")
   private String snapshotId;
@@ -69,8 +69,8 @@ public class Playlist {
     return owner;
   }
 
-  public Boolean get_public() {
-    return _public;
+  public Boolean getIsPublic() {
+    return isPublic;
   }
 
   public String getSnapshotId() {
