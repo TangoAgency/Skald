@@ -1,18 +1,7 @@
 package agency.tango.skald.core;
 
-import android.content.Context;
-
-import agency.tango.skald.core.listeners.ErrorListener;
-import agency.tango.skald.core.listeners.MetadataListener;
-import agency.tango.skald.core.listeners.PlaybackListener;
-import agency.tango.skald.core.listeners.PlayerReadyListener;
-import agency.tango.skald.core.models.SkaldPlaylist;
-import agency.tango.skald.core.models.SkaldTrack;
-
 public interface Player {
-  void play(SkaldTrack track);
-
-  void play(SkaldPlaylist playlist);
+  void play(String songUri);
 
   void stop();
 
@@ -21,22 +10,4 @@ public interface Player {
   void resume();
 
   void release();
-
-  void addErrorListener(ErrorListener errorListener);
-
-  void addPlaybackListener(PlaybackListener playbackListener);
-
-  void addMetadataListener(MetadataListener metadataListener);
-
-  void addPlayerReadyListener(PlayerReadyListener playerReadyListener);
-
-  void removeErrorListener(ErrorListener errorListener);
-
-  void removePlaybackListener(PlaybackListener playbackListener);
-
-  void removeMetadataListener(MetadataListener metadataListener);
-
-  void removePlayerReadyListener(PlayerReadyListener playerReadyListener);
-
-  void initializePlayer(PlayerConfig playerConfig, String clientId, Context context);
 }

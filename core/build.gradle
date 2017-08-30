@@ -25,6 +25,8 @@ dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
 
   compile deps.appCompat
+//  compile project(path : ":deezer")
+//  compile project(path : ":spotify")
 
   testCompile 'junit:junit:4.12'
 }
