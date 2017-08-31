@@ -18,9 +18,10 @@ import agency.tango.skald.core.models.SkaldTrack;
 public class SkaldMusicService {
   private static final String TAG = SkaldMusicService.class.getSimpleName();
   private final List<Provider> providers = new ArrayList<>();
-  private final SkaldAuthorizationStore authorizationStore = null;
   private final Context context;
-  private List<AuthorizationErrorListener> authorizationErrorListeners = new ArrayList<>();
+
+  private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
+  private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
 
   private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
     @Override
@@ -28,6 +29,8 @@ public class SkaldMusicService {
       // Get extra data included in the Intent
       String message = intent.getStringExtra("message");
       Log.d(TAG, "Got message: " + message);
+
+
     }
   };
 
@@ -75,12 +78,20 @@ public class SkaldMusicService {
   public void release() {
   }
 
-  public void addAuthorizationErrorListener(AuthorizationErrorListener authorizationErrorListener) {
-    authorizationErrorListeners.add(authorizationErrorListener);
+  public void addOnErrorListener(OnErrorListener onErrorListener) {
+    onErrorListeners.add(onErrorListener);
   }
 
-  public void removeAuthorizationListener(AuthorizationErrorListener authorizationErrorListener) {
-    authorizationErrorListeners.remove(authorizationErrorListener);
+  public void addOnPreparedListener(OnPreparedListener onPreparedListener) {
+    onPreparedListeners.add(onPreparedListener);
+  }
+
+  public void removeOnErrorListener(OnErrorListener onErrorListener) {
+    onErrorListeners.remove(onErrorListener);
+  }
+
+  public void removeOnPreparedListener(OnPreparedListener onPreparedListener) {
+    onPreparedListeners.remove(onPreparedListener);
   }
 
   public List<SkaldTrack> searchTrack(String query) {
