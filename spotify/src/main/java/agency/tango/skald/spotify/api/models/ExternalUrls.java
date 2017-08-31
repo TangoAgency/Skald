@@ -1,4 +1,4 @@
-package agency.tango.skald.spotify.models;
+package agency.tango.skald.spotify.api.models;
 
 import com.google.gson.annotations.SerializedName;
 

@@ -33,7 +33,7 @@ public class SkaldSpotifyPlayer implements Player {
             spotifyPlayer.addNotificationCallback(new NotificationCallback() {
               @Override
               public void onPlaybackEvent(PlayerEvent playerEvent) {
-                Log.i(TAG, "Event" + playerEvent);
+
               }
 
               @Override
@@ -59,7 +59,7 @@ public class SkaldSpotifyPlayer implements Player {
 
               @Override
               public void onLoginFailed(Error error) {
-                Log.e(TAG, "Login failed");
+
               }
 
               @Override
@@ -84,7 +84,7 @@ public class SkaldSpotifyPlayer implements Player {
   @Override
   public void play(SkaldTrack track) {
     Log.i(TAG, "Music Played");
-    if(isInitialized == false) {
+    if(!isInitialized) {
       trackToPlay = track;
       return;
     }
