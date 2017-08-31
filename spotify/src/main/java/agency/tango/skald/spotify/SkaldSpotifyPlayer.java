@@ -12,12 +12,17 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import agency.tango.skald.core.OnPlayerReadyListener;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public class SkaldSpotifyPlayer implements Player {
   private static final String TAG = SkaldSpotifyPlayer.class.getSimpleName();
   private SpotifyPlayer spotifyPlayer;
+  private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
 
   private boolean isInitialized = false;
   private SkaldTrack trackToPlay = null;
@@ -124,5 +129,13 @@ public class SkaldSpotifyPlayer implements Player {
   @Override
   public void release() {
 
+  }
+
+  private void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+    onPlayerReadyListeners.add(onPlayerReadyListener);
+  }
+
+  private void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+    onPlayerReadyListeners.remove(onPlayerReadyListener);
   }
 }
