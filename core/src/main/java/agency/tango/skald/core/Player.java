@@ -1,7 +1,9 @@
 package agency.tango.skald.core;
 
+import agency.tango.skald.core.models.SkaldTrack;
+
 public interface Player {
-  void play(String songUri);
+  void play(SkaldTrack track);
 
   void stop();
 

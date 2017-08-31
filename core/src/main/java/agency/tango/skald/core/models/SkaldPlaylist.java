@@ -1,15 +1,17 @@
 package agency.tango.skald.core.models;
 
+import android.net.Uri;
+
 public class SkaldPlaylist {
-  private final String uri;
+  private final Uri uri;
   private final String name;
 
-  public SkaldPlaylist(String uri, String name) {
+  public SkaldPlaylist(Uri uri, String name) {
     this.uri = uri;
     this.name = name;
   }
 
-  public String getUri() {
+  public Uri getUri() {
     return uri;
   }
 

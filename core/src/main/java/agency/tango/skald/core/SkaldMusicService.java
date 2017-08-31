@@ -1,6 +1,11 @@
 package agency.tango.skald.core;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,49 +16,78 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public class SkaldMusicService {
+  private static final String TAG = SkaldMusicService.class.getSimpleName();
   private final List<Provider> providers = new ArrayList<>();
+  private final SkaldAuthorizationStore authorizationStore = null;
+  private final Context context;
   private List<AuthorizationErrorListener> authorizationErrorListeners = new ArrayList<>();
 
-  public SkaldMusicService(Context context, Provider... providers) {
-    this.providers.addAll(Arrays.asList(providers));
-  }
-
-  void play(SkaldTrack skaldTrack) {
-    for(AuthorizationErrorListener listener : authorizationErrorListeners) {
-      listener.onAuthorizationError();
+  private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      // Get extra data included in the Intent
+      String message = intent.getStringExtra("message");
+      Log.d(TAG, "Got message: " + message);
     }
+  };
+
+  public SkaldMusicService(Context context, Provider... providers) {
+
+    this.providers.addAll(Arrays.asList(providers));
+    this.context = context.getApplicationContext();
+    LocalBroadcastManager
+        .getInstance(context.getApplicationContext())
+        .registerReceiver(mMessageReceiver, new IntentFilter());
   }
 
-  void play(SkaldPlaylist skaldPlaylist) {
-    for(AuthorizationErrorListener listener : authorizationErrorListeners)
-      listener.onAuthorizationError();
+  public void setSource(SkaldTrack skaldTrack) {
+    //this.currentTrack = skaldTrack
   }
 
-  void pause() {
-
-  }
-
-  void resume() {
+  public void setSource(SkaldPlaylist skaldPlaylist) {
 
   }
 
-  void stop() {
+  public void prepare() {
 
   }
 
-  void addAuthListener(AuthorizationErrorListener authorizationErrorListener) {
+  public void prepareAsync() {
+
+  }
+
+  public void play() {
+
+  }
+
+  public void pause() {
+
+  }
+
+  public void resume() {
+
+  }
+
+  public void stop() {
+
+  }
+
+  public void release() {
+  }
+
+  public void addAuthorizationErrorListener(AuthorizationErrorListener authorizationErrorListener) {
     authorizationErrorListeners.add(authorizationErrorListener);
   }
 
-  void removeAuth(AuthorizationErrorListener authorizationErrorListener) {
+  public void removeAuthorizationListener(AuthorizationErrorListener authorizationErrorListener) {
     authorizationErrorListeners.remove(authorizationErrorListener);
   }
 
-  List<SkaldTrack> searchTrack(String query) {
+  public List<SkaldTrack> searchTrack(String query) {
     return Collections.emptyList();
   }
 
-  List<SkaldPlaylist> searchPlayList(String query) {
+  public List<SkaldPlaylist> searchPlayList(String query) {
     return Collections.emptyList();
   }
 }

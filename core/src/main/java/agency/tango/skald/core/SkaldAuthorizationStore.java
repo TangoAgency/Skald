@@ -1,7 +1,7 @@
 package agency.tango.skald.core;
 
 public interface SkaldAuthorizationStore {
-  void save(SkaldAuthData session);
+  void save(SkaldAuthorizationData skaldAuthorizationData);
 
-  boolean restore(SkaldAuthData session);
+  SkaldAuthorizationData restore();
 }

@@ -1,5 +1,6 @@
 package agency.tango.skald.deezer;
 
+import agency.tango.skald.core.PlayerFactory;
 import agency.tango.skald.core.Provider;
 
 public class DeezerProvider extends Provider {
@@ -13,6 +14,11 @@ public class DeezerProvider extends Provider {
   @Override
   public String getProviderName() {
     return DEEZER_PROVIDER;
+  }
+
+  @Override
+  public PlayerFactory getPlayerFactory() {
+    return null;
   }
 
   public String getClientId() {

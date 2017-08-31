@@ -3,9 +3,9 @@
           package="agency.tango.skald"
   >
 
-  <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
   <application
     android:allowBackup="true"
@@ -22,8 +22,9 @@
       </intent-filter>
     </activity>
 
-    <activity android:name=".example.SpotifyActivity" />
-    <activity android:name=".deezer.DeezerActivity" />
+    <activity android:name=".example.SpotifyActivity"/>
+    <activity android:name=".deezer.DeezerActivity"/>
+    <activity android:name=".spotify.SpotifyAuthorizationActivity"/>
 
   </application>
 

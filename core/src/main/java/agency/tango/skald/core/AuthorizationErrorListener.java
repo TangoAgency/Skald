@@ -1,5 +1,5 @@
 package agency.tango.skald.core;
 
 public interface AuthorizationErrorListener {
-  void onAuthorizationError();
+  void onAuthorizationError(AuthorizationError authorizationError);
 }
