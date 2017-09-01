@@ -24,11 +24,8 @@ public class SkaldSpotifyPlayer implements Player {
   private SpotifyPlayer spotifyPlayer;
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
 
-  private boolean isInitialized = false;
-  private SkaldTrack trackToPlay = null;
-
   public SkaldSpotifyPlayer(Context context, String clientId) {
-    String oauthToken = "BQBrS5WFqCCVihr6HK5-iYDRpnVxwW1oiW66w-WAKAK5JJ-hvkXd62kVQcamRHjUGhZ-nRDLgTzZSQnBhRQ_GXYSSHdimrmU2lSyYF6TheGci14h2Ig8wc0hGor3TokqjTl1zKaSYyg8k3LK41M2d_eHVvIPlRQdG55XNRolarSg8eRXyXcNpcmZfpc7";
+    String oauthToken = "";
     final Config playerConfig = new Config(context, oauthToken, clientId);
 
     spotifyPlayer = Spotify.getPlayer(playerConfig, this,
@@ -50,11 +47,6 @@ public class SkaldSpotifyPlayer implements Player {
             spotifyPlayer.addConnectionStateCallback(new ConnectionStateCallback() {
               @Override
               public void onLoggedIn() {
-                //isInitialized = true;
-                //if(trackToPlay != null) {
-                //  play(trackToPlay);
-                //  trackToPlay = null;
-                //}
                 Log.d(TAG, "onLoggedIn");
                 for(OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
                   onPlayerReadyListener.onPlayerReady(SkaldSpotifyPlayer.this);
@@ -93,10 +85,6 @@ public class SkaldSpotifyPlayer implements Player {
   @Override
   public void play(SkaldTrack track) {
     Log.i(TAG, "Music Played");
-    //if(!isInitialized) {
-    //  trackToPlay = track;
-    //  return;
-    //}
 
     Uri uri = track.getUri();
     String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);

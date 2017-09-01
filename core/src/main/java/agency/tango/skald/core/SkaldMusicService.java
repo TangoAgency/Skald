@@ -16,7 +16,11 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public class SkaldMusicService {
+  public static final String INTENT_ACTION = "spotify_auth_action";
   private static final String TAG = SkaldMusicService.class.getSimpleName();
+
+  private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
+  private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Context context;
   //for now for simplicity only one player
@@ -24,16 +28,12 @@ public class SkaldMusicService {
   private SkaldTrack currentTrack;
   private UriParser uriParser;
 
-  private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
-  private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
 
   private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
-      // Get extra data included in the Intent
-      String message = intent.getStringExtra("message");
+      String message = intent.getStringExtra("token");
       Log.d(TAG, "Got message: " + message);
-
     }
   };
 
@@ -42,7 +42,7 @@ public class SkaldMusicService {
     this.context = context.getApplicationContext();
     LocalBroadcastManager
         .getInstance(context.getApplicationContext())
-        .registerReceiver(mMessageReceiver, new IntentFilter());
+        .registerReceiver(mMessageReceiver, new IntentFilter(INTENT_ACTION));
 
     //for now assume existing of only one provider
     uriParser = this.providers.get(0).getParser();

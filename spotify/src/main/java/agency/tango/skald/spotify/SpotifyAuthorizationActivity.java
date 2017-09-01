@@ -11,13 +11,12 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
+import static agency.tango.skald.core.SkaldMusicService.INTENT_ACTION;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_ID;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_REDIRECT_URI;
 import static com.spotify.sdk.android.authentication.AuthenticationResponse.Type.TOKEN;
 
 public class SpotifyAuthorizationActivity extends Activity {
-
-  public static final String INTENT_ACTION = "spotify_auth_action";
 
   private static final int REQUEST_CODE = 12334;
   private static final String TAG = SpotifyAuthorizationActivity.class.getSimpleName();

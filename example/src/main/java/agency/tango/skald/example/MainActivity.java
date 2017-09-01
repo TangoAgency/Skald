@@ -5,10 +5,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import agency.tango.skald.R;
-import agency.tango.skald.core.OnPreparedListener;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.SpotifyAuthorizationActivity;
@@ -30,7 +28,7 @@ public class MainActivity extends Activity {
     Intent intent = new Intent(this, SpotifyAuthorizationActivity.class);
     intent.putExtra(EXTRA_CLIENT_ID, SPOTIFY_CLIENT_ID);
     intent.putExtra(EXTRA_REDIRECT_URI, SPOTIFY_REDIRECT_URI);
-    //startActivity(intent);
+    startActivity(intent);
 
     SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI);
@@ -40,14 +38,14 @@ public class MainActivity extends Activity {
     final SkaldTrack skaldTrack = new SkaldTrack(spotifyUri);
 
     SkaldMusicService skaldMusicService = new SkaldMusicService(this, spotifyProvider);
-    skaldMusicService.setSource(skaldTrack);
-    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
-      @Override
-      public void onPrepared(SkaldMusicService skaldMusicService) {
-        Log.d(TAG, "onPrepared");
-        skaldMusicService.play();
-      }
-    });
+    //skaldMusicService.setSource(skaldTrack);
+    //skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
+    //  @Override
+    //  public void onPrepared(SkaldMusicService skaldMusicService) {
+    //    Log.d(TAG, "onPrepared");
+    //    skaldMusicService.play();
+    //  }
+    //});
 
     //Player player = spotifyProvider
     //    .getPlayerFactory()
