@@ -12,4 +12,8 @@ public interface Player {
   void resume();
 
   void release();
+
+  void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
+
+  void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
 }

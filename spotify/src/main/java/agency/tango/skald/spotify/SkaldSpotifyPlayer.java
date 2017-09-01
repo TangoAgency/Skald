@@ -28,7 +28,7 @@ public class SkaldSpotifyPlayer implements Player {
   private SkaldTrack trackToPlay = null;
 
   public SkaldSpotifyPlayer(Context context, String clientId) {
-    String oauthToken = "";
+    String oauthToken = "BQBrS5WFqCCVihr6HK5-iYDRpnVxwW1oiW66w-WAKAK5JJ-hvkXd62kVQcamRHjUGhZ-nRDLgTzZSQnBhRQ_GXYSSHdimrmU2lSyYF6TheGci14h2Ig8wc0hGor3TokqjTl1zKaSYyg8k3LK41M2d_eHVvIPlRQdG55XNRolarSg8eRXyXcNpcmZfpc7";
     final Config playerConfig = new Config(context, oauthToken, clientId);
 
     spotifyPlayer = Spotify.getPlayer(playerConfig, this,
@@ -50,10 +50,14 @@ public class SkaldSpotifyPlayer implements Player {
             spotifyPlayer.addConnectionStateCallback(new ConnectionStateCallback() {
               @Override
               public void onLoggedIn() {
-                isInitialized = true;
-                if(trackToPlay != null) {
-                  play(trackToPlay);
-                  trackToPlay = null;
+                //isInitialized = true;
+                //if(trackToPlay != null) {
+                //  play(trackToPlay);
+                //  trackToPlay = null;
+                //}
+                Log.d(TAG, "onLoggedIn");
+                for(OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
+                  onPlayerReadyListener.onPlayerReady(SkaldSpotifyPlayer.this);
                 }
               }
 
@@ -89,14 +93,13 @@ public class SkaldSpotifyPlayer implements Player {
   @Override
   public void play(SkaldTrack track) {
     Log.i(TAG, "Music Played");
-    if(!isInitialized) {
-      trackToPlay = track;
-      return;
-    }
+    //if(!isInitialized) {
+    //  trackToPlay = track;
+    //  return;
+    //}
 
     Uri uri = track.getUri();
-    String uri1 = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
-    Log.d(TAG, String.format("URLL %s", uri1));
+    String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
     spotifyPlayer.playUri(new com.spotify.sdk.android.player.Player.OperationCallback() {
                             @Override
                             public void onSuccess() {
@@ -108,7 +111,7 @@ public class SkaldSpotifyPlayer implements Player {
                               Log.e(TAG, error.toString());
                             }
                           },
-        uri1, 0, 0);
+        stringUri, 0, 0);
   }
 
   @Override
@@ -131,11 +134,13 @@ public class SkaldSpotifyPlayer implements Player {
 
   }
 
-  private void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+  @Override
+  public void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
   }
 
-  private void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+  @Override
+  public void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.remove(onPlayerReadyListener);
   }
 }

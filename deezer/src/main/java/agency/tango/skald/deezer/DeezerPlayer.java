@@ -1,5 +1,6 @@
 package agency.tango.skald.deezer;
 
+import agency.tango.skald.core.OnPlayerReadyListener;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.models.SkaldTrack;
 
@@ -26,6 +27,16 @@ public class DeezerPlayer implements Player {
 
   @Override
   public void release() {
+
+  }
+
+  @Override
+  public void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+
+  }
+
+  @Override
+  public void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
 
   }
 }
