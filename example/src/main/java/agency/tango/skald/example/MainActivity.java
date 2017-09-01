@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import agency.tango.skald.R;
-import agency.tango.skald.core.Player;
+import agency.tango.skald.core.OnPreparedListener;
+import agency.tango.skald.core.SkaldMusicService;
+import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.SpotifyAuthorizationActivity;
 import agency.tango.skald.spotify.SpotifyProvider;
-import agency.tango.skald.spotify.models.SpotifyTrack;
 
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_ID;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_REDIRECT_URI;
@@ -18,6 +20,7 @@ import static agency.tango.skald.spotify.SpotifyProvider.SPOTIFY_CLIENT_ID;
 import static agency.tango.skald.spotify.SpotifyProvider.SPOTIFY_REDIRECT_URI;
 
 public class MainActivity extends Activity {
+  private static final String TAG = MainActivity.class.getSimpleName();
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,11 +37,23 @@ public class MainActivity extends Activity {
 
     Uri spotifyUri = Uri.parse(
         "skald://spotify/track/spotify:user:spotify:playlist:37i9dQZF1DX8vpLK1FoEw3");
-    Player player = spotifyProvider
-        .getPlayerFactory()
-        .getPlayerFor(new SpotifyTrack(spotifyUri));
+    final SkaldTrack skaldTrack = new SkaldTrack(spotifyUri);
 
-    player.play(new SpotifyTrack(spotifyUri));
+    SkaldMusicService skaldMusicService = new SkaldMusicService(this, spotifyProvider);
+    skaldMusicService.setSource(skaldTrack);
+    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
+      @Override
+      public void onPrepared(SkaldMusicService skaldMusicService) {
+        Log.d(TAG, "onPrepared");
+        skaldMusicService.play();
+      }
+    });
+
+    //Player player = spotifyProvider
+    //    .getPlayerFactory()
+    //    .getPlayerFor(new SpotifyTrack(spotifyUri));
+    //
+    //player.play(new SpotifyTrack(spotifyUri));
 
     //Button spotifyButton = (Button) findViewById(R.id.button_spotify);
     //spotifyButton.setOnClickListener(new View.OnClickListener() {

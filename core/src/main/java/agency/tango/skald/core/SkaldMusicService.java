@@ -19,6 +19,10 @@ public class SkaldMusicService {
   private static final String TAG = SkaldMusicService.class.getSimpleName();
   private final List<Provider> providers = new ArrayList<>();
   private final Context context;
+  //for now for simplicity only one player
+  private Player player;
+  private SkaldTrack currentTrack;
+  private UriParser uriParser;
 
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
@@ -30,25 +34,41 @@ public class SkaldMusicService {
       String message = intent.getStringExtra("message");
       Log.d(TAG, "Got message: " + message);
 
-
     }
   };
 
-  public SkaldMusicService(Context context, Provider... providers) {
-
+  public SkaldMusicService(Context context, final Provider... providers) {
     this.providers.addAll(Arrays.asList(providers));
     this.context = context.getApplicationContext();
     LocalBroadcastManager
         .getInstance(context.getApplicationContext())
         .registerReceiver(mMessageReceiver, new IntentFilter());
+
+    //for now assume existing of only one provider
+    uriParser = this.providers.get(0).getParser();
   }
 
   public void setSource(SkaldTrack skaldTrack) {
-    //this.currentTrack = skaldTrack
+    this.currentTrack = uriParser.parseSkaldTrack(skaldTrack);
+
+    if(player == null) {
+      player = SkaldMusicService.this.providers.get(0)
+          .getPlayerFactory()
+          .getPlayerFor(currentTrack);
+
+      player.addPlayerReadyListener(new OnPlayerReadyListener() {
+        @Override
+        public void onPlayerReady(Player player) {
+          for(OnPreparedListener onPreparedListener: onPreparedListeners){
+            Log.d(TAG, "onPlayerReady");
+            onPreparedListener.onPrepared(SkaldMusicService.this);
+          }
+        }
+      });
+    }
   }
 
   public void setSource(SkaldPlaylist skaldPlaylist) {
-
   }
 
   public void prepare() {
@@ -60,7 +80,7 @@ public class SkaldMusicService {
   }
 
   public void play() {
-
+    player.play(currentTrack);
   }
 
   public void pause() {
@@ -101,4 +121,12 @@ public class SkaldMusicService {
   public List<SkaldPlaylist> searchPlayList(String query) {
     return Collections.emptyList();
   }
+
+  //private SkaldTrack parseSkaldTrack(SkaldTrack skaldTrack) {
+  //  Uri uri = skaldTrack.getUri();
+  //  String authority = uri.getAuthority();
+  //  if(authority.equals("spotify")) {
+  //    return new SpotifyTrack(
+  //
+  //}
 }
