@@ -1,5 +1,6 @@
 package agency.tango.skald.deezer;
 
+import agency.tango.skald.core.UriParser;
 import agency.tango.skald.core.PlayerFactory;
 import agency.tango.skald.core.Provider;
 
@@ -18,6 +19,11 @@ public class DeezerProvider extends Provider {
 
   @Override
   public PlayerFactory getPlayerFactory() {
+    return null;
+  }
+
+  @Override
+  public UriParser getParser() {
     return null;
   }
 

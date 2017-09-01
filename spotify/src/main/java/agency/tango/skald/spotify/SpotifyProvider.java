@@ -2,6 +2,7 @@ package agency.tango.skald.spotify;
 
 import android.content.Context;
 
+import agency.tango.skald.core.UriParser;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.PlayerFactory;
 import agency.tango.skald.core.Provider;
@@ -35,6 +36,11 @@ public class SpotifyProvider extends Provider {
   @Override
   public PlayerFactory getPlayerFactory() {
     return new SpotifyPlayerFactory(context, clientId);
+  }
+
+  @Override
+  public UriParser getParser() {
+    return new SpotifyUriParser();
   }
 
   public String getClientId() {
