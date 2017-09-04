@@ -38,6 +38,7 @@ dependencies {
   compile deps.spotifyAuth
   compile deps.spotifyPlayer
   compile deps.gson
+  compile deps.rxAndroid
 
   testCompile 'junit:junit:4.12'
 }
