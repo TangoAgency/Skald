@@ -24,8 +24,7 @@ public class SkaldSpotifyPlayer implements Player {
   private SpotifyPlayer spotifyPlayer;
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
 
-  public SkaldSpotifyPlayer(Context context, String clientId) {
-    String oauthToken = "";
+  public SkaldSpotifyPlayer(Context context, String clientId, String oauthToken) {
     final Config playerConfig = new Config(context, oauthToken, clientId);
 
     spotifyPlayer = Spotify.getPlayer(playerConfig, this,

@@ -2,10 +2,10 @@ package agency.tango.skald.spotify;
 
 import android.content.Context;
 
-import agency.tango.skald.core.UriParser;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.PlayerFactory;
 import agency.tango.skald.core.Provider;
+import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.models.SpotifyTrack;
 
@@ -38,11 +38,6 @@ public class SpotifyProvider extends Provider {
     return new SpotifyPlayerFactory(context, clientId);
   }
 
-  @Override
-  public UriParser getParser() {
-    return new SpotifyUriParser();
-  }
-
   public String getClientId() {
     return clientId;
   }
@@ -62,10 +57,10 @@ public class SpotifyProvider extends Provider {
     }
 
     @Override
-    public Player getPlayerFor(SkaldTrack track) {
+    public Player getPlayerFor(SkaldTrack track, SkaldAuthData skaldAuthData) {
       if (track instanceof SpotifyTrack) {
-
-        return new SkaldSpotifyPlayer(context, clientId);
+        String accessToken = ((SpotifyAuthData) skaldAuthData).getOauthToken();
+        return new SkaldSpotifyPlayer(context, clientId, accessToken);
       }
       return null;
     }
