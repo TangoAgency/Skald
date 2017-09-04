@@ -1,8 +1,9 @@
 package agency.tango.skald.deezer;
 
-import agency.tango.skald.core.UriParser;
+import agency.tango.skald.core.AuthErrorFactory;
 import agency.tango.skald.core.PlayerFactory;
 import agency.tango.skald.core.Provider;
+import agency.tango.skald.core.SkaldAuthStoreFactory;
 
 public class DeezerProvider extends Provider {
   public static final String DEEZER_PROVIDER = "deezer";
@@ -23,7 +24,12 @@ public class DeezerProvider extends Provider {
   }
 
   @Override
-  public UriParser getParser() {
+  public SkaldAuthStoreFactory getSkaldAuthStoreFactory() {
+    return null;
+  }
+
+  @Override
+  public AuthErrorFactory getAuthErrorFactory() {
     return null;
   }
 
