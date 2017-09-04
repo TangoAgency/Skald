@@ -7,45 +7,53 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import agency.tango.skald.R;
+import agency.tango.skald.core.AuthError;
+import agency.tango.skald.core.AuthErrorListener;
+import agency.tango.skald.core.OnPreparedListener;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.spotify.SpotifyAuthorizationActivity;
 import agency.tango.skald.spotify.SpotifyProvider;
-
-import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_ID;
-import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_REDIRECT_URI;
-import static agency.tango.skald.spotify.SpotifyProvider.SPOTIFY_CLIENT_ID;
-import static agency.tango.skald.spotify.SpotifyProvider.SPOTIFY_REDIRECT_URI;
+import agency.tango.skald.spotify.models.SpotifyTrack;
 
 public class MainActivity extends Activity {
   private static final String TAG = MainActivity.class.getSimpleName();
+  public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
+  public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    Intent intent = new Intent(this, SpotifyAuthorizationActivity.class);
-    intent.putExtra(EXTRA_CLIENT_ID, SPOTIFY_CLIENT_ID);
-    intent.putExtra(EXTRA_REDIRECT_URI, SPOTIFY_REDIRECT_URI);
-    startActivity(intent);
-
     SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI);
 
+    SkaldMusicService skaldMusicService = new SkaldMusicService(this, spotifyProvider);
+
+    skaldMusicService.addAuthErrorListener(new AuthErrorListener() {
+      @Override
+      public void onAuthError(AuthError authError) {
+        if(authError.hasResolution()) {
+          Intent intent = authError.getResolution();
+          startActivity(intent);
+        }
+      }
+    });
+
+    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
+      @Override
+      public void onPrepared(SkaldMusicService skaldMusicService) {
+        skaldMusicService.play();
+      }
+    });
+
     Uri spotifyUri = Uri.parse(
         "skald://spotify/track/spotify:user:spotify:playlist:37i9dQZF1DX8vpLK1FoEw3");
-    final SkaldTrack skaldTrack = new SkaldTrack(spotifyUri);
+    final SkaldTrack skaldTrack = new SpotifyTrack(spotifyUri);
 
-    SkaldMusicService skaldMusicService = new SkaldMusicService(this, spotifyProvider);
-    //skaldMusicService.setSource(skaldTrack);
-    //skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
-    //  @Override
-    //  public void onPrepared(SkaldMusicService skaldMusicService) {
-    //    Log.d(TAG, "onPrepared");
-    //    skaldMusicService.play();
-    //  }
-    //});
+    skaldMusicService.setSource(skaldTrack);
+    skaldMusicService.prepare();
+
 
     //Player player = spotifyProvider
     //    .getPlayerFactory()
