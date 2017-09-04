@@ -43,6 +43,14 @@ public class SpotifyAuthData extends SkaldAuthData {
     dest.writeInt(expiresIn);
   }
 
+  @Override
+  public String toString() {
+    return "SpotifyAuthData{" +
+        "oauthToken='" + oauthToken + '\'' +
+        ", expiresIn=" + expiresIn +
+        '}';
+  }
+
   public String getOauthToken() {
     return oauthToken;
   }
