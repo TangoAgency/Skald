@@ -3,19 +3,19 @@ package agency.tango.skald.spotify;
 import android.content.Context;
 import android.content.Intent;
 
-import agency.tango.skald.core.AuthorizationError;
+import agency.tango.skald.core.AuthError;
 
-public class SpotifyAuthorizationError extends AuthorizationError {
+public class SpotifyAuthError extends AuthError {
 
   private final Context context;
 
-  public SpotifyAuthorizationError(Context context) {
+  public SpotifyAuthError(Context context) {
     this.context = context.getApplicationContext();
   }
 
   @Override
   public Intent getResolution() {
-    return new Intent(context, SpotifyAuthorizationActivity.class);
+    return new Intent(context, SpotifyAuthActivity.class);
   }
 
   @Override

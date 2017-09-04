@@ -2,8 +2,8 @@ package agency.tango.skald.core;
 
 import android.content.Intent;
 
-public abstract class AuthorizationError{
-  public AuthorizationError() {
+public abstract class AuthError {
+  public AuthError() {
   }
 
   public abstract Intent getResolution();

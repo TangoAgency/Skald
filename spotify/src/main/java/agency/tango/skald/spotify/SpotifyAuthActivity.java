@@ -16,10 +16,10 @@ import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_ID;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_REDIRECT_URI;
 import static com.spotify.sdk.android.authentication.AuthenticationResponse.Type.TOKEN;
 
-public class SpotifyAuthorizationActivity extends Activity {
+public class SpotifyAuthActivity extends Activity {
 
   private static final int REQUEST_CODE = 12334;
-  private static final String TAG = SpotifyAuthorizationActivity.class.getSimpleName();
+  private static final String TAG = SpotifyAuthActivity.class.getSimpleName();
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,7 +43,7 @@ public class SpotifyAuthorizationActivity extends Activity {
       AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, data);
       switch (response.getType()) {
         case TOKEN:
-          notifyToken(response.getAccessToken());
+          notifyAuthData(response.getAccessToken(), response.getExpiresIn());
           break;
         case ERROR:
           notifyError(response.getError());
@@ -56,11 +56,13 @@ public class SpotifyAuthorizationActivity extends Activity {
 
   }
 
-  private void notifyToken(String accessToken) {
+  private void notifyAuthData(String accessToken, int expiresIn) {
     Log.d(TAG, accessToken);
 
+    SpotifyAuthData spotifyAuthorizationData =
+        new SpotifyAuthData(accessToken, expiresIn);
     Intent intent = new Intent(INTENT_ACTION);
-    intent.putExtra("token", accessToken);
+    intent.putExtra("authData", spotifyAuthorizationData);
     LocalBroadcastManager
         .getInstance(this)
         .sendBroadcast(intent);
