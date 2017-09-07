@@ -9,10 +9,7 @@ import java.util.List;
 import agency.tango.skald.core.ApiCalls;
 import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.spotify.api.models.Track;
 import agency.tango.skald.spotify.api.models.Tracks;
-import agency.tango.skald.spotify.models.SpotifyTrack;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Interceptor;
@@ -60,15 +57,17 @@ public class SpotifyApiCalls implements ApiCalls {
   public List<SkaldTrack> searchForTracks(String query) {
     final List<SkaldTrack> spotifyTracks = new ArrayList<>();
 
-    spotifyAPI.getTracksForQuery(query)
+    spotifyAPI.getTracksForQuery("abba", "track")
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn(Schedulers.newThread())
         .subscribe(new DisposableSingleObserver<Tracks>() {
           @Override
           public void onSuccess(Tracks tracks) {
-            for(Track track : tracks.getTracks()) {
-              spotifyTracks.add(new SpotifyTrack(track));
-            }
+            //for(Track track : tracks.getItems()) {
+            //  Log.d(TAG, track.toString());
+            //  spotifyTracks.add(new SpotifyTrack(track));
+            //}
+            Log.d(TAG, "Tracks got");
           }
 
           @Override
@@ -77,6 +76,13 @@ public class SpotifyApiCalls implements ApiCalls {
           }
         });
 
+    //try {
+    //  Thread.sleep(3000);
+    //} catch (InterruptedException e) {
+    //  e.printStackTrace();
+    //}
+
+    //Log.d(TAG, spotifyTracks.get(0).toString());
     return spotifyTracks;
   }
 }
