@@ -39,6 +39,7 @@ dependencies {
   compile deps.spotifyPlayer
   compile deps.gson
   compile deps.rxAndroid
+  compile deps.rxJavaAdapter
 
   testCompile 'junit:junit:4.12'
 }

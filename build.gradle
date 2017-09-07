@@ -104,6 +104,7 @@ ext.deps = [// Android
 
             // Square
             javapoet              : 'com.squareup:javapoet:1.7.0',
+            rxJavaAdapter         : 'com.squareup.retrofit2:adapter-rxjava2:2.3.0',
 
             // Third Party
             javaparser            : 'com.github.javaparser:javaparser-core:2.4.0',
