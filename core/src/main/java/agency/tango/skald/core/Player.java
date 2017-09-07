@@ -1,5 +1,6 @@
 package agency.tango.skald.core;
 
+import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public interface Player {

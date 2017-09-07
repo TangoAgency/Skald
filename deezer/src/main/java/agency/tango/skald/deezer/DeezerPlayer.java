@@ -1,6 +1,6 @@
 package agency.tango.skald.deezer;
 
-import agency.tango.skald.core.OnPlayerReadyListener;
+import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.models.SkaldTrack;
 

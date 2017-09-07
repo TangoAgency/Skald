@@ -8,8 +8,8 @@ import android.support.annotation.Nullable;
 
 import agency.tango.skald.R;
 import agency.tango.skald.core.AuthError;
-import agency.tango.skald.core.AuthErrorListener;
-import agency.tango.skald.core.OnPreparedListener;
+import agency.tango.skald.core.listeners.AuthErrorListener;
+import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.SpotifyProvider;

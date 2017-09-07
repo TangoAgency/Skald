@@ -15,7 +15,7 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 import java.util.ArrayList;
 import java.util.List;
 
-import agency.tango.skald.core.OnPlayerReadyListener;
+import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.models.SkaldTrack;
 
