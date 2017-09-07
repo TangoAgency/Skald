@@ -1,5 +1,7 @@
 package agency.tango.skald.spotify;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SpotifyApiCalls implements ApiCalls {
+  private static final String TAG = SpotifyApiCalls.class.getSimpleName();
   private final SpotifyAPI spotifyAPI;
 
   public SpotifyApiCalls(SkaldAuthData skaldAuthData) {
@@ -69,8 +72,8 @@ public class SpotifyApiCalls implements ApiCalls {
           }
 
           @Override
-          public void onError(Throwable e) {
-
+          public void onError(Throwable error) {
+            Log.e(TAG, "Observer error", error);
           }
         });
 
