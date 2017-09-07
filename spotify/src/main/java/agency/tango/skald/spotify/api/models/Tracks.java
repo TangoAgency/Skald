@@ -33,4 +33,24 @@ public class Tracks {
   public Integer getTotal() {
     return total;
   }
+
+  public List<Track> getTracks() {
+    return tracks;
+  }
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public String getNext() {
+    return next;
+  }
+
+  public Integer getOffset() {
+    return offset;
+  }
+
+  public Tracks getPrevious() {
+    return previous;
+  }
 }
