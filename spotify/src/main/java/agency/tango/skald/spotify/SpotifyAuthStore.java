@@ -16,11 +16,10 @@ public class SpotifyAuthStore implements SkaldAuthStore {
   public void save(SkaldAuthData skaldAuthData, Context context) {
     SharedPreferences sharedPreferences = getSharedPreferences(context);
 
-    SpotifyAuthData spotifyAuthorizationData =
-        (SpotifyAuthData) skaldAuthData;
+    SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthData;
 
     Gson gson = new Gson();
-    String json = gson.toJson(spotifyAuthorizationData);
+    String json = gson.toJson(spotifyAuthData);
 
     SharedPreferences.Editor editor = sharedPreferences.edit();
     editor.putString(SPOTIFY_JSON_KEY, json);
