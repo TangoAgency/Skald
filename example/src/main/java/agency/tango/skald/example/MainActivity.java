@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import java.util.List;
 
 import agency.tango.skald.R;
 import agency.tango.skald.core.AuthError;
+import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.listeners.AuthErrorListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
-import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.SpotifyProvider;
 import agency.tango.skald.spotify.models.SpotifyTrack;
@@ -43,6 +46,12 @@ public class MainActivity extends Activity {
     skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
       @Override
       public void onPrepared(SkaldMusicService skaldMusicService) {
+        Log.d(TAG, "Inside onPreparedList");
+
+        List<SkaldTrack> skaldTracks;
+        skaldTracks = skaldMusicService.searchTrack("abba");
+
+        //skaldMusicService.setSource(skaldTracks.get(0));
         skaldMusicService.play();
       }
     });

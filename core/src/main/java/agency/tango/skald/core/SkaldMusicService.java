@@ -116,7 +116,7 @@ public class SkaldMusicService {
   }
 
   public List<SkaldTrack> searchTrack(String query) {
-    return Collections.emptyList();
+    return getApiCalls().searchForTracks(query);
   }
 
   public List<SkaldPlaylist> searchPlayList(String query) {
@@ -151,5 +151,11 @@ public class SkaldMusicService {
     return providers.get(0)
         .getAuthErrorFactory()
         .getAuthError();
+  }
+
+  private ApiCalls getApiCalls() {
+    return providers.get(0)
+        .getApiCallsFactory()
+        .getApiCalls(skaldAuthData);
   }
 }

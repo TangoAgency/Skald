@@ -3,6 +3,7 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:weightSum="1"
   >
 
   <Button
@@ -12,7 +13,8 @@
     android:background="@android:color/holo_green_light"
     android:padding="8dp"
     android:text="Spotify"
-    android:textColor="@android:color/white"/>
+    android:textColor="@android:color/white"
+    />
 
   <Button
     android:id="@+id/button_deezer"
