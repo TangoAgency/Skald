@@ -2,14 +2,16 @@ package agency.tango.skald.spotify;
 
 import android.content.Context;
 
+import agency.tango.skald.core.ApiCalls;
 import agency.tango.skald.core.AuthError;
-import agency.tango.skald.core.AuthErrorFactory;
+import agency.tango.skald.core.factories.ApiCallsFactory;
+import agency.tango.skald.core.factories.AuthErrorFactory;
 import agency.tango.skald.core.Player;
-import agency.tango.skald.core.PlayerFactory;
+import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.Provider;
 import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.SkaldAuthStore;
-import agency.tango.skald.core.SkaldAuthStoreFactory;
+import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.models.SpotifyTrack;
 
@@ -45,8 +47,12 @@ public class SpotifyProvider extends Provider {
 
   @Override
   public AuthErrorFactory getAuthErrorFactory() {
-    return new SpotifyAuthErrorFactory(context,
-        clientId, redirectUri);
+    return new SpotifyAuthErrorFactory(context, clientId, redirectUri);
+  }
+
+  @Override
+  public ApiCallsFactory getApiCallsFactory() {
+    return new SpotifyApiCallsFactory();
   }
 
   public String getClientId() {
@@ -57,11 +63,11 @@ public class SpotifyProvider extends Provider {
     return redirectUri;
   }
 
-  public static class SpotifyPlayerFactory extends PlayerFactory {
+  private static class SpotifyPlayerFactory extends PlayerFactory {
     private final Context context;
     private String clientId;
 
-    public SpotifyPlayerFactory(Context context, String clientId) {
+    private SpotifyPlayerFactory(Context context, String clientId) {
       this.context = context;
       this.clientId = clientId;
     }
@@ -97,6 +103,13 @@ public class SpotifyProvider extends Provider {
     @Override
     public AuthError getAuthError() {
       return new SpotifyAuthError(context, clientId, redirectUri);
+    }
+  }
+
+  private static class SpotifyApiCallsFactory extends ApiCallsFactory {
+    @Override
+    public ApiCalls getApiCalls(SkaldAuthData skaldAuthData) {
+      return new SpotifyApiCalls(skaldAuthData);
     }
   }
 }
