@@ -55,7 +55,7 @@ public class SpotifyActivity extends Activity {
 //    player.addPlayerReadyListener(new PlayerReadyListener() {
 //      @Override
 //      public void onPlayerReady(Player player) {
-//        player.play(new SkaldTrack("spotify:user:spotify:playlist:37i9dQZF1DX8vpLK1FoEw3", "Song"));
+//        player.playTrack(new SkaldTrack("spotify:user:spotify:playlist:37i9dQZF1DX8vpLK1FoEw3", "Song"));
 //        /// Uri.parse(skald://spotify/track/spotify:user:spotify:playlist:37i9dQZF1DX8vpLK1FoEw3)
 //      }
 //

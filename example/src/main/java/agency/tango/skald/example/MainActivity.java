@@ -15,6 +15,7 @@ import agency.tango.skald.core.AuthError;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.listeners.AuthErrorListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
+import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.SpotifyProvider;
 import agency.tango.skald.spotify.models.SpotifyTrack;
@@ -51,7 +52,8 @@ public class MainActivity extends Activity {
       @Override
       public void onPrepared(final SkaldMusicService skaldMusicService) {
         Log.d(TAG, "Inside onPreparedList");
-        final List<SkaldTrack> skaldTracks = new ArrayList<SkaldTrack>();
+        final List<SkaldTrack> skaldTracks = new ArrayList<>();
+        final List<SkaldPlaylist> skaldPlaylists = new ArrayList<>();
 
         skaldMusicService.searchTrack("Desiigner")
             .subscribeOn(Schedulers.io())
@@ -59,7 +61,6 @@ public class MainActivity extends Activity {
             .subscribe(new DisposableObserver<SkaldTrack>() {
               @Override
               public void onNext(SkaldTrack skaldTrack) {
-                Log.d(TAG, "onNext");
                 skaldTracks.add(skaldTrack);
               }
 
@@ -70,9 +71,29 @@ public class MainActivity extends Activity {
 
               @Override
               public void onComplete() {
-                Log.d(TAG, "onComplete");
-                skaldMusicService.setSource(skaldTracks.get(0));
-                skaldMusicService.play();
+                //skaldMusicService.setSource(skaldTracks.get(0));
+                //skaldMusicService.playTrack();
+              }
+            });
+
+        skaldMusicService.searchPlayList("hip-hop")
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new DisposableObserver<SkaldPlaylist>() {
+              @Override
+              public void onNext(SkaldPlaylist skaldPlaylist) {
+                skaldPlaylists.add(skaldPlaylist);
+              }
+
+              @Override
+              public void onError(Throwable error) {
+                Log.e(TAG, "Observer error", error);
+              }
+
+              @Override
+              public void onComplete() {
+                skaldMusicService.setSource(skaldPlaylists.get(0));
+                skaldMusicService.playPlaylist();
               }
             });
       }
@@ -90,7 +111,7 @@ public class MainActivity extends Activity {
     //    .getPlayerFactory()
     //    .getPlayerFor(new SpotifyTrack(spotifyUri));
     //
-    //player.play(new SpotifyTrack(spotifyUri));
+    //player.playTrack(new SpotifyTrack(spotifyUri));
 
     //Button spotifyButton = (Button) findViewById(R.id.button_spotify);
     //spotifyButton.setOnClickListener(new View.OnClickListener() {
