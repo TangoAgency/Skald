@@ -6,24 +6,18 @@
               android:weightSum="1"
   >
 
-  <Button
-    android:id="@+id/button_spotify"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@android:color/holo_green_light"
-    android:padding="8dp"
-    android:text="Spotify"
-    android:textColor="@android:color/white"
+  <ListView
+    android:id="@+id/list_view_playlists"
+    android:layout_width="match_parent"
+    android:layout_height="398dp"
+    android:layout_weight="0.99"
     />
 
   <Button
-    android:id="@+id/button_deezer"
-    android:layout_width="wrap_content"
+    android:id="@+id/button_stop"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/holo_blue_bright"
-    android:padding="8dp"
-    android:text="Deezer"
-    android:textColor="@android:color/white"
+    android:background="@android:color/holo_orange_dark"
+    android:text="Stop"
     />
-
 </LinearLayout>

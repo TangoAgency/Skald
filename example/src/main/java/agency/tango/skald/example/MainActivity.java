@@ -6,6 +6,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +36,12 @@ public class MainActivity extends Activity {
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    final ListView listView = (ListView) findViewById(R.id.list_view_playlists);
 
     SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI);
 
-    SkaldMusicService skaldMusicService = new SkaldMusicService(this, spotifyProvider);
+    final SkaldMusicService skaldMusicService = new SkaldMusicService(this, spotifyProvider);
 
     skaldMusicService.addAuthErrorListener(new AuthErrorListener() {
       @Override
@@ -92,10 +97,21 @@ public class MainActivity extends Activity {
 
               @Override
               public void onComplete() {
-                skaldMusicService.setSource(skaldPlaylists.get(0));
-                skaldMusicService.playPlaylist();
+                listView.setAdapter(new ArrayAdapter<>(MainActivity.this,
+                    android.R.layout.simple_list_item_1, skaldPlaylists));
+                //skaldMusicService.setSource(skaldPlaylists.get(0));
+                //skaldMusicService.playPlaylist();
               }
             });
+      }
+    });
+
+    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        final SkaldPlaylist item = (SkaldPlaylist) parent.getItemAtPosition(position);
+        skaldMusicService.setSource(item);
+        skaldMusicService.playPlaylist();
       }
     });
 
