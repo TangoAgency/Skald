@@ -5,7 +5,7 @@ import agency.tango.skald.spotify.api.models.BrowsePlaylists;
 import agency.tango.skald.spotify.api.models.Category;
 import agency.tango.skald.spotify.api.models.Playlists;
 import agency.tango.skald.spotify.api.models.SpotifyUser;
-import agency.tango.skald.spotify.api.models.Tracks;
+import agency.tango.skald.spotify.api.models.TrackSearch;
 import io.reactivex.Single;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -30,5 +30,5 @@ public interface SpotifyAPI {
   Single<BrowsePlaylists> getPlaylistsInCategory(@Path("id") String id);
 
   @GET("/v1/search")
-  Single<Tracks> getTracksForQuery(@Query("q") String query, @Query("type") String type);
+  Single<TrackSearch> getTracksForQuery(@Query("q") String query, @Query("type") String type);
 }

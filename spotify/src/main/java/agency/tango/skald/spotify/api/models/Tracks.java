@@ -21,7 +21,7 @@ public class Tracks {
   private Integer offset;
 
   @SerializedName("previous")
-  private Tracks previous;
+  private String previous;
 
   @SerializedName("total")
   private Integer total;
@@ -50,7 +50,20 @@ public class Tracks {
     return offset;
   }
 
-  public Tracks getPrevious() {
+  public String getPrevious() {
     return previous;
+  }
+
+  @Override
+  public String toString() {
+    return "Tracks{" +
+        "href='" + href + '\'' +
+        ", tracks=" + tracks +
+        ", limit=" + limit +
+        ", next='" + next + '\'' +
+        ", offset=" + offset +
+        ", previous=" + previous +
+        ", total=" + total +
+        '}';
   }
 }
