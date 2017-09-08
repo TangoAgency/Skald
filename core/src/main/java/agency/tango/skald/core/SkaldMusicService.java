@@ -141,7 +141,6 @@ public class SkaldMusicService {
       public void onLoginFailed() {
         for(AuthErrorListener authErrorListener : authErrorListeners) {
           authErrorListener.onAuthError(getAuthError());
-          prepare();
         }
       }
     });

@@ -62,7 +62,7 @@ public class SkaldSpotifyPlayer implements Player {
 
               @Override
               public void onLoginFailed(Error error) {
-                Log.d(TAG, "onLoginFailed");
+                Log.e(TAG, String.format("onLoginFailed %s", error.toString()));
                 for(LoginFailedListener loginFailedListener : loginFailedListeners) {
                   loginFailedListener.onLoginFailed();
                 }
