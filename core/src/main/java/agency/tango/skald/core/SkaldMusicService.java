@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import agency.tango.skald.core.listeners.AuthErrorListener;
+import agency.tango.skald.core.listeners.LoginFailedListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
@@ -134,6 +135,16 @@ public class SkaldMusicService {
     Player player = providers.get(0)
         .getPlayerFactory()
         .getPlayerFor(currentTrack, skaldAuthData);
+
+    player.addLoginFailedListener(new LoginFailedListener() {
+      @Override
+      public void onLoginFailed() {
+        for(AuthErrorListener authErrorListener : authErrorListeners) {
+          authErrorListener.onAuthError(getAuthError());
+          prepare();
+        }
+      }
+    });
 
     player.addPlayerReadyListener(new OnPlayerReadyListener() {
       @Override

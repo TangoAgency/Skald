@@ -15,6 +15,7 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 import java.util.ArrayList;
 import java.util.List;
 
+import agency.tango.skald.core.listeners.LoginFailedListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -24,6 +25,7 @@ public class SkaldSpotifyPlayer implements Player {
   private static final String TAG = SkaldSpotifyPlayer.class.getSimpleName();
   private SpotifyPlayer spotifyPlayer;
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
+  private final List<LoginFailedListener> loginFailedListeners = new ArrayList<>();
 
   public SkaldSpotifyPlayer(Context context, String clientId, String oauthToken) {
     final Config playerConfig = new Config(context, oauthToken, clientId);
@@ -60,7 +62,10 @@ public class SkaldSpotifyPlayer implements Player {
 
               @Override
               public void onLoginFailed(Error error) {
-
+                Log.d(TAG, "onLoginFailed");
+                for(LoginFailedListener loginFailedListener : loginFailedListeners) {
+                  loginFailedListener.onLoginFailed();
+                }
               }
 
               @Override
@@ -128,5 +133,15 @@ public class SkaldSpotifyPlayer implements Player {
   @Override
   public void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.remove(onPlayerReadyListener);
+  }
+
+  @Override
+  public void addLoginFailedListener(LoginFailedListener loginFailedListener) {
+    loginFailedListeners.add(loginFailedListener);
+  }
+
+  @Override
+  public void removeLoginFailedListener(LoginFailedListener loginFailedListener) {
+    loginFailedListeners.remove(loginFailedListener);
   }
 }
