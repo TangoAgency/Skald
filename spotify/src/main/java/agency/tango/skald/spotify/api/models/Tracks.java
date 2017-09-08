@@ -9,7 +9,7 @@ public class Tracks {
   private String href;
 
   @SerializedName("items")
-  private List<Track> tracks;
+  private List<Track> items;
 
   @SerializedName("limit")
   private Integer limit;
@@ -30,12 +30,8 @@ public class Tracks {
     return href;
   }
 
-  public Integer getTotal() {
-    return total;
-  }
-
-  public List<Track> getTracks() {
-    return tracks;
+  public List<Track> getItems() {
+    return items;
   }
 
   public Integer getLimit() {
@@ -54,11 +50,15 @@ public class Tracks {
     return previous;
   }
 
+  public Integer getTotal() {
+    return total;
+  }
+
   @Override
   public String toString() {
     return "Tracks{" +
         "href='" + href + '\'' +
-        ", tracks=" + tracks +
+        ", items=" + items +
         ", limit=" + limit +
         ", next='" + next + '\'' +
         ", offset=" + offset +

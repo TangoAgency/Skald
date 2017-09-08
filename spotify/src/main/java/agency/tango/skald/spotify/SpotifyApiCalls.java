@@ -1,17 +1,16 @@
 package agency.tango.skald.spotify;
 
-import android.util.Log;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.ApiCalls;
 import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.spotify.api.models.Tracks;
-import io.reactivex.observers.DisposableSingleObserver;
-import io.reactivex.schedulers.Schedulers;
+import agency.tango.skald.spotify.api.models.Track;
+import agency.tango.skald.spotify.api.models.TrackSearch;
+import agency.tango.skald.spotify.models.SpotifyTrack;
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -54,35 +53,26 @@ public class SpotifyApiCalls implements ApiCalls {
   }
 
   @Override
-  public List<SkaldTrack> searchForTracks(String query) {
-    final List<SkaldTrack> spotifyTracks = new ArrayList<>();
-
-    spotifyAPI.getTracksForQuery("abba", "track")
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.newThread())
-        .subscribe(new DisposableSingleObserver<Tracks>() {
+  public Observable<SkaldTrack> searchForTracks(String query) {
+    return spotifyAPI.getTracksForQuery(query, "track")
+        .toObservable()
+        .map(new Function<TrackSearch, List<Track>>() {
           @Override
-          public void onSuccess(Tracks tracks) {
-            //for(Track track : tracks.getItems()) {
-            //  Log.d(TAG, track.toString());
-            //  spotifyTracks.add(new SpotifyTrack(track));
-            //}
-            Log.d(TAG, "Tracks got");
+          public List<Track> apply(TrackSearch searchTrack) throws Exception {
+            return searchTrack.getTracks().getItems();
           }
-
+        })
+        .flatMapIterable(new Function<List<Track>, Iterable<? extends Track>>() {
           @Override
-          public void onError(Throwable error) {
-            Log.e(TAG, "Observer error", error);
+          public Iterable<? extends Track> apply(List<Track> item) throws Exception {
+            return item;
+          }
+        })
+        .map(new Function<Track, SkaldTrack>() {
+          @Override
+          public SkaldTrack apply(Track track) throws Exception {
+            return new SpotifyTrack(track);
           }
         });
-
-    //try {
-    //  Thread.sleep(3000);
-    //} catch (InterruptedException e) {
-    //  e.printStackTrace();
-    //}
-
-    //Log.d(TAG, spotifyTracks.get(0).toString());
-    return spotifyTracks;
   }
 }
