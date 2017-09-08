@@ -31,4 +31,8 @@ public interface SpotifyAPI {
 
   @GET("/v1/search")
   Single<TrackSearch> getTracksForQuery(@Query("q") String query, @Query("type") String type);
+
+  @GET("/v1/search")
+  Single<BrowsePlaylists> getPlaylistsForQuery(@Query("q") String query,
+      @Query("type") String type);
 }

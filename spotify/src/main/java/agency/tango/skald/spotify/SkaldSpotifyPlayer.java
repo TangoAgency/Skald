@@ -17,6 +17,7 @@ import java.util.List;
 
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public class SkaldSpotifyPlayer implements Player {
@@ -83,22 +84,20 @@ public class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void play(SkaldTrack track) {
-    Log.i(TAG, "Music Played");
+    Log.d(TAG, "Track played");
 
     Uri uri = track.getUri();
     String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
-    spotifyPlayer.playUri(new com.spotify.sdk.android.player.Player.OperationCallback() {
-                            @Override
-                            public void onSuccess() {
+    spotifyPlayer.playUri(new SpotifyOperationCallback(), stringUri, 0, 0);
+  }
 
-                            }
+  @Override
+  public void play(SkaldPlaylist playlist) {
+    Log.d(TAG, "Playlist played");
 
-                            @Override
-                            public void onError(Error error) {
-                              Log.e(TAG, error.toString());
-                            }
-                          },
-        stringUri, 0, 0);
+    Uri uri = playlist.getUri();
+    String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
+    spotifyPlayer.playUri(new SpotifyOperationCallback(), stringUri, 0, 0);
   }
 
   @Override

@@ -18,4 +18,12 @@ public class SkaldPlaylist {
   public String getName() {
     return name;
   }
+
+  @Override
+  public String toString() {
+    return "SkaldPlaylist{" +
+        "uri=" + uri +
+        ", name='" + name + '\'' +
+        '}';
+  }
 }

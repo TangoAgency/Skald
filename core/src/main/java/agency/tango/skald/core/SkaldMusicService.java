@@ -8,7 +8,6 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import agency.tango.skald.core.listeners.AuthErrorListener;
@@ -31,6 +30,7 @@ public class SkaldMusicService {
 
   private Player player;
   private SkaldTrack currentTrack;
+  private SkaldPlaylist currentPlaylist;
   private SkaldAuthData skaldAuthData;
 
   private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
@@ -51,10 +51,11 @@ public class SkaldMusicService {
   }
 
   public void setSource(SkaldTrack skaldTrack) {
-    this.currentTrack = skaldTrack;
+    currentTrack = skaldTrack;
   }
 
   public void setSource(SkaldPlaylist skaldPlaylist) {
+    currentPlaylist = skaldPlaylist;
   }
 
   public void prepare() {
@@ -73,8 +74,12 @@ public class SkaldMusicService {
 
   }
 
-  public void play() {
+  public void playTrack() {
     player.play(currentTrack);
+  }
+
+  public void playPlaylist() {
+    player.play(currentPlaylist);
   }
 
   public void pause() {
@@ -120,8 +125,8 @@ public class SkaldMusicService {
     return getApiCalls().searchForTracks(query);
   }
 
-  public List<SkaldPlaylist> searchPlayList(String query) {
-    return Collections.emptyList();
+  public Observable<SkaldPlaylist> searchPlayList(String query) {
+    return getApiCalls().searchForPlaylists(query);
   }
 
   private Player getPlayer() {

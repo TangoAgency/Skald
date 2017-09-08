@@ -2,11 +2,17 @@ package agency.tango.skald.deezer;
 
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public class DeezerPlayer implements Player {
   @Override
   public void play(SkaldTrack track) {
+
+  }
+
+  @Override
+  public void play(SkaldPlaylist playlist) {
 
   }
 

@@ -5,9 +5,13 @@ import java.util.List;
 
 import agency.tango.skald.core.ApiCalls;
 import agency.tango.skald.core.SkaldAuthData;
+import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.spotify.api.models.BrowsePlaylists;
+import agency.tango.skald.spotify.api.models.Playlist;
 import agency.tango.skald.spotify.api.models.Track;
 import agency.tango.skald.spotify.api.models.TrackSearch;
+import agency.tango.skald.spotify.models.SpotifyPlaylist;
 import agency.tango.skald.spotify.models.SpotifyTrack;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
@@ -64,8 +68,8 @@ public class SpotifyApiCalls implements ApiCalls {
         })
         .flatMapIterable(new Function<List<Track>, Iterable<? extends Track>>() {
           @Override
-          public Iterable<? extends Track> apply(List<Track> item) throws Exception {
-            return item;
+          public Iterable<? extends Track> apply(List<Track> tracks) throws Exception {
+            return tracks;
           }
         })
         .map(new Function<Track, SkaldTrack>() {
@@ -74,5 +78,31 @@ public class SpotifyApiCalls implements ApiCalls {
             return new SpotifyTrack(track);
           }
         });
+  }
+
+  @Override
+  public Observable<SkaldPlaylist> searchForPlaylists(String query) {
+    return spotifyAPI.getPlaylistsForQuery(query, "playlist")
+    .toObservable()
+        .map(new Function<BrowsePlaylists, List<Playlist>>() {
+          @Override
+          public List<Playlist> apply(BrowsePlaylists browsePlaylists) throws Exception {
+            return browsePlaylists.getPlaylists().getItems();
+          }
+        })
+        .flatMapIterable(new Function<List<Playlist>, Iterable<? extends Playlist>>() {
+          @Override
+          public Iterable<? extends Playlist> apply(List<Playlist> playlists)
+              throws Exception {
+            return playlists;
+          }
+        })
+        .map(new Function<Playlist, SkaldPlaylist>() {
+          @Override
+          public SkaldPlaylist apply(Playlist playlist) throws Exception {
+            return new SpotifyPlaylist(playlist);
+          }
+        });
+
   }
 }
