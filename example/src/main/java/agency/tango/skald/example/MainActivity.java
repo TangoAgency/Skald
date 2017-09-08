@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.R;
@@ -17,6 +18,9 @@ import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.SpotifyProvider;
 import agency.tango.skald.spotify.models.SpotifyTrack;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends Activity {
   private static final String TAG = MainActivity.class.getSimpleName();
@@ -45,14 +49,32 @@ public class MainActivity extends Activity {
 
     skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
       @Override
-      public void onPrepared(SkaldMusicService skaldMusicService) {
+      public void onPrepared(final SkaldMusicService skaldMusicService) {
         Log.d(TAG, "Inside onPreparedList");
+        final List<SkaldTrack> skaldTracks = new ArrayList<SkaldTrack>();
 
-        List<SkaldTrack> skaldTracks;
-        skaldTracks = skaldMusicService.searchTrack("abba");
+        skaldMusicService.searchTrack("Desiigner")
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new DisposableObserver<SkaldTrack>() {
+              @Override
+              public void onNext(SkaldTrack skaldTrack) {
+                Log.d(TAG, "onNext");
+                skaldTracks.add(skaldTrack);
+              }
 
-        //skaldMusicService.setSource(skaldTracks.get(0));
-        skaldMusicService.play();
+              @Override
+              public void onError(Throwable error) {
+                Log.e(TAG, "Observer error", error);
+              }
+
+              @Override
+              public void onComplete() {
+                Log.d(TAG, "onComplete");
+                skaldMusicService.setSource(skaldTracks.get(0));
+                skaldMusicService.play();
+              }
+            });
       }
     });
 
