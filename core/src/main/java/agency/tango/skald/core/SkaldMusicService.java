@@ -17,7 +17,7 @@ import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public class SkaldMusicService {
   public static final String INTENT_ACTION = "spotify_auth_action";
@@ -41,8 +41,7 @@ public class SkaldMusicService {
       getSkaldAuthStore().save(skaldAuthData, context);
       if (player == null) {
         player = getPlayer();
-      }
-      else {
+      } else {
         player.login(skaldAuthData);
       }
     }
@@ -126,11 +125,11 @@ public class SkaldMusicService {
     authErrorListeners.remove(authErrorListener);
   }
 
-  public Observable<SkaldTrack> searchTrack(String query) {
+  public Single<List<SkaldTrack>> searchTrack(String query) {
     return getApiCalls().searchForTracks(query);
   }
 
-  public Observable<SkaldPlaylist> searchPlayList(String query) {
+  public Single<List<SkaldPlaylist>> searchPlayList(String query) {
     return getApiCalls().searchForPlaylists(query);
   }
 

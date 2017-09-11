@@ -1,6 +1,7 @@
 package agency.tango.skald.spotify;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.ApiCalls;
@@ -13,7 +14,7 @@ import agency.tango.skald.spotify.api.models.Track;
 import agency.tango.skald.spotify.api.models.TrackSearch;
 import agency.tango.skald.spotify.models.SpotifyPlaylist;
 import agency.tango.skald.spotify.models.SpotifyTrack;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.functions.Function;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -57,52 +58,32 @@ public class SpotifyApiCalls implements ApiCalls {
   }
 
   @Override
-  public Observable<SkaldTrack> searchForTracks(String query) {
+  public Single<List<SkaldTrack>> searchForTracks(String query) {
     return spotifyAPI.getTracksForQuery(query, "track")
-        .toObservable()
-        .map(new Function<TrackSearch, List<Track>>() {
+        .map(new Function<TrackSearch, List<SkaldTrack>>() {
           @Override
-          public List<Track> apply(TrackSearch searchTrack) throws Exception {
-            return searchTrack.getTracks().getItems();
-          }
-        })
-        .flatMapIterable(new Function<List<Track>, Iterable<? extends Track>>() {
-          @Override
-          public Iterable<? extends Track> apply(List<Track> tracks) throws Exception {
-            return tracks;
-          }
-        })
-        .map(new Function<Track, SkaldTrack>() {
-          @Override
-          public SkaldTrack apply(Track track) throws Exception {
-            return new SpotifyTrack(track);
+          public List<SkaldTrack> apply(TrackSearch searchTrack) throws Exception {
+            List<SkaldTrack> skaldTracks = new ArrayList<>();
+            for (Track track : searchTrack.getTracks().getItems()) {
+              skaldTracks.add(new SpotifyTrack(track));
+            }
+            return skaldTracks;
           }
         });
   }
 
   @Override
-  public Observable<SkaldPlaylist> searchForPlaylists(String query) {
+  public Single<List<SkaldPlaylist>> searchForPlaylists(String query) {
     return spotifyAPI.getPlaylistsForQuery(query, "playlist")
-    .toObservable()
-        .map(new Function<BrowsePlaylists, List<Playlist>>() {
+        .map(new Function<BrowsePlaylists, List<SkaldPlaylist>>() {
           @Override
-          public List<Playlist> apply(BrowsePlaylists browsePlaylists) throws Exception {
-            return browsePlaylists.getPlaylists().getItems();
-          }
-        })
-        .flatMapIterable(new Function<List<Playlist>, Iterable<? extends Playlist>>() {
-          @Override
-          public Iterable<? extends Playlist> apply(List<Playlist> playlists)
-              throws Exception {
-            return playlists;
-          }
-        })
-        .map(new Function<Playlist, SkaldPlaylist>() {
-          @Override
-          public SkaldPlaylist apply(Playlist playlist) throws Exception {
-            return new SpotifyPlaylist(playlist);
+          public List<SkaldPlaylist> apply(BrowsePlaylists browsePlaylists) throws Exception {
+            List<SkaldPlaylist> skaldPlaylists = new ArrayList<>();
+            for (Playlist playlist : browsePlaylists.getPlaylists().getItems()) {
+              skaldPlaylists.add(new SpotifyPlaylist(playlist));
+            }
+            return skaldPlaylists;
           }
         });
-
   }
 }

@@ -1,11 +1,13 @@
 package agency.tango.skald.core;
 
+import java.util.List;
+
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public interface ApiCalls {
-  Observable<SkaldTrack> searchForTracks(String query);
+  Single<List<SkaldTrack>> searchForTracks(String query);
 
-  Observable<SkaldPlaylist> searchForPlaylists(String query);
+  Single<List<SkaldPlaylist>> searchForPlaylists(String query);
 }
