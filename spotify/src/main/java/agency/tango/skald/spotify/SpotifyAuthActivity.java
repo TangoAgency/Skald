@@ -45,6 +45,8 @@ public class SpotifyAuthActivity extends Activity {
         case TOKEN:
           notifyAuthData(response.getAccessToken(), response.getExpiresIn());
           break;
+        case CODE:
+          notifyAuthData(response.getCode());
         case ERROR:
           notifyError(response.getError());
       }
@@ -66,5 +68,9 @@ public class SpotifyAuthActivity extends Activity {
     LocalBroadcastManager
         .getInstance(this)
         .sendBroadcast(intent);
+  }
+
+  private void notifyAuthData(String code) {
+    //TODO getTokens call and send broadcast
   }
 }
