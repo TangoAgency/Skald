@@ -3,14 +3,12 @@ package agency.tango.skald.spotify;
 import android.content.Context;
 
 import agency.tango.skald.core.ApiCalls;
-import agency.tango.skald.core.AuthError;
-import agency.tango.skald.core.factories.ApiCallsFactory;
-import agency.tango.skald.core.factories.AuthErrorFactory;
 import agency.tango.skald.core.Player;
-import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.Provider;
 import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.SkaldAuthStore;
+import agency.tango.skald.core.factories.ApiCallsFactory;
+import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.models.SpotifyTrack;
@@ -43,11 +41,6 @@ public class SpotifyProvider extends Provider {
   @Override
   public SkaldAuthStoreFactory getSkaldAuthStoreFactory() {
     return new SpotifyAuthStoreFactory();
-  }
-
-  @Override
-  public AuthErrorFactory getAuthErrorFactory() {
-    return new SpotifyAuthErrorFactory(context, clientId, redirectUri);
   }
 
   @Override
@@ -86,23 +79,6 @@ public class SpotifyProvider extends Provider {
     @Override
     public SkaldAuthStore getSkaldAuthStore() {
       return new SpotifyAuthStore();
-    }
-  }
-
-  private static class SpotifyAuthErrorFactory extends AuthErrorFactory {
-    private final Context context;
-    private final String clientId;
-    private final String redirectUri;
-
-    private SpotifyAuthErrorFactory(Context context, String clientId, String redirectUri) {
-      this.context = context;
-      this.clientId = clientId;
-      this.redirectUri = redirectUri;
-    }
-
-    @Override
-    public AuthError getAuthError() {
-      return new SpotifyAuthError(context, clientId, redirectUri);
     }
   }
 

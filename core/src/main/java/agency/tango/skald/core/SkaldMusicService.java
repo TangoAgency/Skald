@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import agency.tango.skald.core.listeners.AuthErrorListener;
-import agency.tango.skald.core.listeners.LoginFailedListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
@@ -20,7 +19,8 @@ import agency.tango.skald.core.models.SkaldTrack;
 import io.reactivex.Single;
 
 public class SkaldMusicService {
-  public static final String INTENT_ACTION = "spotify_auth_action";
+  public static final String INTENT_ACTION = "auth_action";
+  public static final String EXTRA_AUTH_DATA = "auth_data";
   private static final String TAG = SkaldMusicService.class.getSimpleName();
 
   private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
@@ -37,7 +37,7 @@ public class SkaldMusicService {
   private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
-      skaldAuthData = intent.getExtras().getParcelable("authData");
+      skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
       getSkaldAuthStore().save(skaldAuthData, context);
       if (player == null) {
         player = getPlayer();
@@ -63,15 +63,10 @@ public class SkaldMusicService {
     currentPlaylist = skaldPlaylist;
   }
 
-  public void prepare() {
-    skaldAuthData = getSkaldAuthStore().restore(context);
-    if (skaldAuthData == null) {
-      for (AuthErrorListener authErrorListener : authErrorListeners) {
-        authErrorListener.onAuthError(getAuthError());
-      }
-    } else {
-      player = getPlayer();
-    }
+  public void prepare() throws AuthException {
+    //for now assume existing of only one provider
+    skaldAuthData = getSkaldAuthStore().restore(context, providers.get(0));
+    player = getPlayer();
   }
 
   public void prepareAsync() {
@@ -134,19 +129,18 @@ public class SkaldMusicService {
   }
 
   private Player getPlayer() {
-    //for now assume existing of only one provider
     Player player = providers.get(0)
         .getPlayerFactory()
         .getPlayerFor(currentTrack, skaldAuthData);
 
-    player.addLoginFailedListener(new LoginFailedListener() {
-      @Override
-      public void onLoginFailed() {
-        for (AuthErrorListener authErrorListener : authErrorListeners) {
-          authErrorListener.onAuthError(getAuthError());
-        }
-      }
-    });
+    //player.addLoginFailedListener(new LoginFailedListener() {
+    //  @Override
+    //  public void onLoginFailed() {
+    //    for (AuthErrorListener authErrorListener : authErrorListeners) {
+    //      authErrorListener.onAuthError(getAuthError());
+    //    }
+    //  }
+    //});
 
     player.addPlayerReadyListener(new OnPlayerReadyListener() {
       @Override
@@ -164,12 +158,6 @@ public class SkaldMusicService {
     return providers.get(0)
         .getSkaldAuthStoreFactory()
         .getSkaldAuthStore();
-  }
-
-  private AuthError getAuthError() {
-    return providers.get(0)
-        .getAuthErrorFactory()
-        .getAuthError();
   }
 
   private ApiCalls getApiCalls() {

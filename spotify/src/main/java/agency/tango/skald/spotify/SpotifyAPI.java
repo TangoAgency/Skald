@@ -35,4 +35,9 @@ public interface SpotifyAPI {
   @GET("/v1/search")
   Single<BrowsePlaylists> getPlaylistsForQuery(@Query("q") String query,
       @Query("type") String type);
+
+  //@FormUrlEncoded
+  //@POST("https://accounts.spotify.com/api/token")
+  //Single<> getAccessToken(@Field("grant_type") String grantType, @Field("code") String code,
+  //    @Field("redirect_uri") String redirectUri);
 }

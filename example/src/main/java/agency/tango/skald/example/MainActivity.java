@@ -15,8 +15,8 @@ import java.util.List;
 
 import agency.tango.skald.R;
 import agency.tango.skald.core.AuthError;
+import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.SkaldMusicService;
-import agency.tango.skald.core.listeners.AuthErrorListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
@@ -41,16 +41,6 @@ public class MainActivity extends Activity {
         SPOTIFY_REDIRECT_URI);
 
     final SkaldMusicService skaldMusicService = new SkaldMusicService(this, spotifyProvider);
-
-    skaldMusicService.addAuthErrorListener(new AuthErrorListener() {
-      @Override
-      public void onAuthError(AuthError authError) {
-        if (authError.hasResolution()) {
-          Intent intent = authError.getResolution();
-          startActivity(intent);
-        }
-      }
-    });
 
     skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
       @Override
@@ -119,7 +109,16 @@ public class MainActivity extends Activity {
     final SkaldTrack skaldTrack = new SpotifyTrack(spotifyUri);
 
     skaldMusicService.setSource(skaldTrack);
-    skaldMusicService.prepare();
+    try {
+      skaldMusicService.prepare();
+    } catch (AuthException authException) {
+      Log.d(TAG, "Exception got");
+      AuthError authError = authException.getAuthError();
+      if (authError.hasResolution()) {
+        Intent intent = authError.getResolution();
+        startActivity(intent);
+      }
+    }
 
     //Player player = spotifyProvider
     //    .getPlayerFactory()
