@@ -1,5 +1,6 @@
 package agency.tango.skald.deezer;
 
+import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.listeners.LoginFailedListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.Player;
@@ -34,6 +35,11 @@ public class DeezerPlayer implements Player {
 
   @Override
   public void release() {
+
+  }
+
+  @Override
+  public void login(SkaldAuthData authData) {
 
   }
 

@@ -18,6 +18,8 @@ public interface Player {
 
   void release();
 
+  void login(SkaldAuthData authData);
+
   void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
 
   void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);

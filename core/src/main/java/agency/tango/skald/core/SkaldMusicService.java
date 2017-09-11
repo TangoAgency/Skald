@@ -39,7 +39,12 @@ public class SkaldMusicService {
     public void onReceive(Context context, Intent intent) {
       skaldAuthData = intent.getExtras().getParcelable("authData");
       getSkaldAuthStore().save(skaldAuthData, context);
-      player = getPlayer();
+      if (player == null) {
+        player = getPlayer();
+      }
+      else {
+        player.login(skaldAuthData);
+      }
     }
   };
 
@@ -61,12 +66,11 @@ public class SkaldMusicService {
 
   public void prepare() {
     skaldAuthData = getSkaldAuthStore().restore(context);
-    if(skaldAuthData == null) {
-      for(AuthErrorListener authErrorListener : authErrorListeners) {
+    if (skaldAuthData == null) {
+      for (AuthErrorListener authErrorListener : authErrorListeners) {
         authErrorListener.onAuthError(getAuthError());
       }
-    }
-    else {
+    } else {
       player = getPlayer();
     }
   }
@@ -139,7 +143,7 @@ public class SkaldMusicService {
     player.addLoginFailedListener(new LoginFailedListener() {
       @Override
       public void onLoginFailed() {
-        for(AuthErrorListener authErrorListener : authErrorListeners) {
+        for (AuthErrorListener authErrorListener : authErrorListeners) {
           authErrorListener.onAuthError(getAuthError());
         }
       }
@@ -148,7 +152,7 @@ public class SkaldMusicService {
     player.addPlayerReadyListener(new OnPlayerReadyListener() {
       @Override
       public void onPlayerReady(Player player) {
-        for(OnPreparedListener onPreparedListener: onPreparedListeners){
+        for (OnPreparedListener onPreparedListener : onPreparedListeners) {
           onPreparedListener.onPrepared(SkaldMusicService.this);
         }
       }

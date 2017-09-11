@@ -15,9 +15,10 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 import java.util.ArrayList;
 import java.util.List;
 
+import agency.tango.skald.core.Player;
+import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.listeners.LoginFailedListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
-import agency.tango.skald.core.Player;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
@@ -51,7 +52,7 @@ public class SkaldSpotifyPlayer implements Player {
               @Override
               public void onLoggedIn() {
                 Log.d(TAG, "onLoggedIn");
-                for(OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
+                for (OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
                   onPlayerReadyListener.onPlayerReady(SkaldSpotifyPlayer.this);
                 }
               }
@@ -64,7 +65,7 @@ public class SkaldSpotifyPlayer implements Player {
               @Override
               public void onLoginFailed(Error error) {
                 Log.e(TAG, String.format("onLoginFailed %s", error.toString()));
-                for(LoginFailedListener loginFailedListener : loginFailedListeners) {
+                for (LoginFailedListener loginFailedListener : loginFailedListeners) {
                   loginFailedListener.onLoginFailed();
                 }
               }
@@ -113,14 +114,14 @@ public class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void pause() {
-    if(spotifyPlayer.getPlaybackState().isPlaying) {
+    if (spotifyPlayer.getPlaybackState().isPlaying) {
       spotifyPlayer.pause(spotifyOperationCallback);
     }
   }
 
   @Override
   public void resume() {
-    if(!spotifyPlayer.getPlaybackState().isPlaying) {
+    if (!spotifyPlayer.getPlaybackState().isPlaying) {
       spotifyPlayer.resume(spotifyOperationCallback);
     }
   }
@@ -128,6 +129,12 @@ public class SkaldSpotifyPlayer implements Player {
   @Override
   public void release() {
 
+  }
+
+  @Override
+  public void login(SkaldAuthData authData) {
+    String oauthToken = ((SpotifyAuthData) authData).getOauthToken();
+    spotifyPlayer.login(oauthToken);
   }
 
   @Override
