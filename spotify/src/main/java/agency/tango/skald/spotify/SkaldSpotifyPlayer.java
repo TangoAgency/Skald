@@ -26,6 +26,7 @@ public class SkaldSpotifyPlayer implements Player {
   private SpotifyPlayer spotifyPlayer;
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
   private final List<LoginFailedListener> loginFailedListeners = new ArrayList<>();
+  private final SpotifyOperationCallback spotifyOperationCallback = new SpotifyOperationCallback();
 
   public SkaldSpotifyPlayer(Context context, String clientId, String oauthToken) {
     final Config playerConfig = new Config(context, oauthToken, clientId);
@@ -93,7 +94,7 @@ public class SkaldSpotifyPlayer implements Player {
 
     Uri uri = track.getUri();
     String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
-    spotifyPlayer.playUri(new SpotifyOperationCallback(), stringUri, 0, 0);
+    spotifyPlayer.playUri(spotifyOperationCallback, stringUri, 0, 0);
   }
 
   @Override
@@ -102,7 +103,7 @@ public class SkaldSpotifyPlayer implements Player {
 
     Uri uri = playlist.getUri();
     String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
-    spotifyPlayer.playUri(new SpotifyOperationCallback(), stringUri, 0, 0);
+    spotifyPlayer.playUri(spotifyOperationCallback, stringUri, 0, 0);
   }
 
   @Override
@@ -112,12 +113,16 @@ public class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void pause() {
-
+    if(spotifyPlayer.getPlaybackState().isPlaying) {
+      spotifyPlayer.pause(spotifyOperationCallback);
+    }
   }
 
   @Override
   public void resume() {
-
+    if(!spotifyPlayer.getPlaybackState().isPlaying) {
+      spotifyPlayer.resume(spotifyOperationCallback);
+    }
   }
 
   @Override

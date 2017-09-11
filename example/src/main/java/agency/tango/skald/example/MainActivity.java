@@ -115,6 +115,20 @@ public class MainActivity extends Activity {
       }
     });
 
+    findViewById(R.id.button_pause).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        skaldMusicService.pause();
+      }
+    });
+
+    findViewById(R.id.button_resume).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        skaldMusicService.resume();
+      }
+    });
+
     Uri spotifyUri = Uri.parse(
         "skald://spotify/track/spotify:user:spotify:playlist:37i9dQZF1DX8vpLK1FoEw3");
     final SkaldTrack skaldTrack = new SpotifyTrack(spotifyUri);

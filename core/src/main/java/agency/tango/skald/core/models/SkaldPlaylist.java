@@ -21,9 +21,6 @@ public class SkaldPlaylist {
 
   @Override
   public String toString() {
-    return "SkaldPlaylist{" +
-        "uri=" + uri +
-        ", name='" + name + '\'' +
-        '}';
+    return name;
   }
 }

@@ -10,14 +10,21 @@
     android:id="@+id/list_view_playlists"
     android:layout_width="match_parent"
     android:layout_height="398dp"
-    android:layout_weight="0.99"
+    android:layout_weight="1.03"
     />
 
   <Button
-    android:id="@+id/button_stop"
+    android:id="@+id/button_pause"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/holo_orange_dark"
-    android:text="Stop"
+    android:text="Pause"
+    />
+  <Button
+    android:id="@+id/button_resume"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/holo_blue_light"
+    android:text="Resume"
     />
 </LinearLayout>

@@ -84,11 +84,11 @@ public class SkaldMusicService {
   }
 
   public void pause() {
-
+    player.pause();
   }
 
   public void resume() {
-
+    player.resume();
   }
 
   public void stop() {
