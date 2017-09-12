@@ -36,7 +36,8 @@ public class SpotifyAuthStore implements SkaldAuthStore {
     if(json.equals("")) {
       SpotifyProvider spotifyProvider = (SpotifyProvider) provider;
       throw new SpotifyAuthException("Cannot restore token", new SpotifyAuthError(context,
-          spotifyProvider.getClientId(), spotifyProvider.getRedirectUri()));
+          spotifyProvider.getClientId(), spotifyProvider.getRedirectUri(),
+          spotifyProvider.getClientSecret()));
     }
 
     Gson gson = new Gson();

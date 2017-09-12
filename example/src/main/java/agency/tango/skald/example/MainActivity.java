@@ -30,6 +30,7 @@ public class MainActivity extends Activity {
   private static final String TAG = MainActivity.class.getSimpleName();
   public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
   public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
+  private static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,7 +39,7 @@ public class MainActivity extends Activity {
     final ListView listView = (ListView) findViewById(R.id.list_view_playlists);
 
     SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
-        SPOTIFY_REDIRECT_URI);
+        SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
 
     final SkaldMusicService skaldMusicService = new SkaldMusicService(this, spotifyProvider);
 

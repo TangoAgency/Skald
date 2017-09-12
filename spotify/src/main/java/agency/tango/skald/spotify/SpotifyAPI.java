@@ -17,6 +17,7 @@ import retrofit2.http.Query;
 
 public interface SpotifyAPI {
   String BASE_URL = "https://api.spotify.com";
+  String BASE_URL_TOKENS = "https://accounts.spotify.com";
 
   @GET("/v1/me")
   Single<SpotifyUser> getSpotifyUser();
@@ -41,13 +42,13 @@ public interface SpotifyAPI {
       @Query("type") String type);
 
   @FormUrlEncoded
-  @POST("https://accounts.spotify.com/api/token")
+  @POST("/api/token")
   Single<Tokens> getTokens(@Field("client_id") String clientId,
       @Field("client_secret") String clientSecret, @Field("grant_type") String grantType,
       @Field("code") String code, @Field("redirect_uri") String redirectUri);
 
   @FormUrlEncoded
-  @POST("https://accounts.spotify.com/api/token")
+  @POST("/api/token")
   Single<Tokens> getRefreshToken(@Field("client_id") String clientId,
       @Field("client_secret") String clientSecret, @Field("grant_type") String grantType,
       @Field("refresh_token") String refreshToken);

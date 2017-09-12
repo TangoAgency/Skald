@@ -1,7 +1,7 @@
 package agency.tango.skald.deezer;
 
 import agency.tango.skald.core.Provider;
-import agency.tango.skald.core.factories.ApiCallsFactory;
+import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 
@@ -29,7 +29,7 @@ public class DeezerProvider extends Provider {
   }
 
   @Override
-  public ApiCallsFactory getApiCallsFactory() {
+  public SearchServiceFactory getSearchServiceFactory() {
     return null;
   }
 

@@ -1,7 +1,9 @@
 package agency.tango.skald.spotify;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.spotify.sdk.android.player.Config;
@@ -16,26 +18,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.Player;
-import agency.tango.skald.core.SkaldAuthData;
-import agency.tango.skald.core.listeners.LoginFailedListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.spotify.api.models.Tokens;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
+
+import static agency.tango.skald.core.SkaldMusicService.EXTRA_AUTH_DATA;
+import static agency.tango.skald.core.SkaldMusicService.INTENT_ACTION;
 
 public class SkaldSpotifyPlayer implements Player {
   private static final String TAG = SkaldSpotifyPlayer.class.getSimpleName();
   private SpotifyPlayer spotifyPlayer;
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
-  private final List<LoginFailedListener> loginFailedListeners = new ArrayList<>();
   private final SpotifyOperationCallback spotifyOperationCallback = new SpotifyOperationCallback();
 
-  public SkaldSpotifyPlayer(Context context, String clientId, String oauthToken) {
-    final Config playerConfig = new Config(context, oauthToken, clientId);
+  public SkaldSpotifyPlayer(final Context context, final SpotifyAuthData spotifyAuthData,
+      final String clientId, final String clientSecret) {
+    final Config playerConfig = new Config(context, spotifyAuthData.getOauthToken(), clientId);
 
     spotifyPlayer = Spotify.getPlayer(playerConfig, this,
         new SpotifyPlayer.InitializationObserver() {
           @Override
-          public void onInitialized(SpotifyPlayer spotifyPlayer) {
+          public void onInitialized(final SpotifyPlayer spotifyPlayer) {
             spotifyPlayer.addNotificationCallback(new NotificationCallback() {
               @Override
               public void onPlaybackEvent(PlayerEvent playerEvent) {
@@ -65,9 +72,31 @@ public class SkaldSpotifyPlayer implements Player {
               @Override
               public void onLoginFailed(Error error) {
                 Log.e(TAG, String.format("onLoginFailed %s", error.toString()));
-                for (LoginFailedListener loginFailedListener : loginFailedListeners) {
-                  loginFailedListener.onLoginFailed();
-                }
+
+                new TokenService()
+                    .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(new DisposableSingleObserver<Tokens>() {
+                      @Override
+                      public void onSuccess(Tokens tokens) {
+                        spotifyPlayer.login(tokens.getAccessToken());
+
+                        SpotifyAuthData spotifyAuthDataRefreshed = new SpotifyAuthData(
+                            tokens.getAccessToken(), spotifyAuthData.getRefreshToken(),
+                            tokens.getExpiresIn());
+                        Intent intent = new Intent(INTENT_ACTION);
+                        intent.putExtra(EXTRA_AUTH_DATA, spotifyAuthDataRefreshed);
+                        LocalBroadcastManager
+                            .getInstance(context)
+                            .sendBroadcast(intent);
+                      }
+
+                      @Override
+                      public void onError(Throwable error) {
+                        Log.e(TAG, "RefreshToken Observer error", error);
+                      }
+                    });
               }
 
               @Override
@@ -132,12 +161,6 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void login(SkaldAuthData authData) {
-    String oauthToken = ((SpotifyAuthData) authData).getOauthToken();
-    spotifyPlayer.login(oauthToken);
-  }
-
-  @Override
   public void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
   }
@@ -145,15 +168,5 @@ public class SkaldSpotifyPlayer implements Player {
   @Override
   public void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.remove(onPlayerReadyListener);
-  }
-
-  @Override
-  public void addLoginFailedListener(LoginFailedListener loginFailedListener) {
-    loginFailedListeners.add(loginFailedListener);
-  }
-
-  @Override
-  public void removeLoginFailedListener(LoginFailedListener loginFailedListener) {
-    loginFailedListeners.remove(loginFailedListener);
   }
 }

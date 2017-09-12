@@ -6,17 +6,20 @@ import android.content.Intent;
 import agency.tango.skald.core.AuthError;
 
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_ID;
+import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_SECRET;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_REDIRECT_URI;
 
 public class SpotifyAuthError extends AuthError {
   private final Context context;
   private final String clientId;
   private final String redirectUri;
+  private final String clientSecret;
 
-  public SpotifyAuthError(Context context, String clientId, String redirectUri) {
+  public SpotifyAuthError(Context context, String clientId, String redirectUri, String clientSecret) {
     this.context = context.getApplicationContext();
     this.clientId = clientId;
     this.redirectUri = redirectUri;
+    this.clientSecret = clientSecret;
   }
 
   @Override
@@ -24,6 +27,7 @@ public class SpotifyAuthError extends AuthError {
     Intent intent = new Intent(context, SpotifyAuthActivity.class);
     intent.putExtra(EXTRA_CLIENT_ID, clientId);
     intent.putExtra(EXTRA_REDIRECT_URI, redirectUri);
+    intent.putExtra(EXTRA_CLIENT_SECRET, clientSecret);
     return intent;
   }
 

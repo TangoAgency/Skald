@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import agency.tango.skald.core.ApiCalls;
+import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
@@ -24,11 +24,11 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class SpotifyApiCalls implements ApiCalls {
-  private static final String TAG = SpotifyApiCalls.class.getSimpleName();
+public class SpotifySearchService implements SearchService {
+  private static final String TAG = SpotifySearchService.class.getSimpleName();
   private final SpotifyAPI spotifyAPI;
 
-  public SpotifyApiCalls(SkaldAuthData skaldAuthData) {
+  public SpotifySearchService(SkaldAuthData skaldAuthData) {
     this.spotifyAPI = resolveApi(skaldAuthData);
   }
 

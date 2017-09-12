@@ -20,15 +20,18 @@ public class SpotifyAuthData extends SkaldAuthData {
   };
 
   private final String oauthToken;
+  private final String refreshToken;
   private final int expiresIn;
 
-  public SpotifyAuthData(String oauthToken, int expiresIn) {
+  SpotifyAuthData(String oauthToken, String refreshToken, int expiresIn) {
     this.oauthToken = oauthToken;
+    this.refreshToken = refreshToken;
     this.expiresIn = expiresIn;
   }
 
   private SpotifyAuthData(Parcel in) {
     oauthToken = in.readString();
+    refreshToken = in.readString();
     expiresIn = in.readInt();
   }
 
@@ -40,6 +43,7 @@ public class SpotifyAuthData extends SkaldAuthData {
   @Override
   public void writeToParcel(Parcel dest, int flags) {
     dest.writeString(oauthToken);
+    dest.writeString(refreshToken);
     dest.writeInt(expiresIn);
   }
 
@@ -47,15 +51,20 @@ public class SpotifyAuthData extends SkaldAuthData {
   public String toString() {
     return "SpotifyAuthData{" +
         "oauthToken='" + oauthToken + '\'' +
+        ", refreshToken='" + refreshToken + '\'' +
         ", expiresIn=" + expiresIn +
         '}';
   }
 
-  public String getOauthToken() {
+  String getOauthToken() {
     return oauthToken;
   }
 
-  public int getExpiresIn() {
+  String getRefreshToken() {
+    return refreshToken;
+  }
+
+  int getExpiresIn() {
     return expiresIn;
   }
 }
