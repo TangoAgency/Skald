@@ -1,5 +1,7 @@
 package agency.tango.skald.spotify;
 
+import android.content.Context;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +11,13 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.api.models.BrowsePlaylists;
 import agency.tango.skald.spotify.api.models.Playlist;
+import agency.tango.skald.spotify.api.models.Tokens;
 import agency.tango.skald.spotify.api.models.Track;
 import agency.tango.skald.spotify.api.models.TrackSearch;
 import agency.tango.skald.spotify.models.SpotifyPlaylist;
 import agency.tango.skald.spotify.models.SpotifyTrack;
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
 import io.reactivex.functions.Function;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -26,20 +30,31 @@ import retrofit2.converter.gson.GsonConverterFactory;
 class SpotifySearchService implements SearchService {
   private static final String TAG = SpotifySearchService.class.getSimpleName();
   private final SpotifyAPI spotifyAPI;
+  private final String clientId;
+  private final String clientSecret;
+  private final Context context;
 
-  SpotifySearchService(SpotifyAuthData spotifyAuthData) {
-    this.spotifyAPI = resolveApi(spotifyAuthData);
+  private SpotifyAuthData spotifyAuthData;
+  private String token;
+
+  SpotifySearchService(Context context, SpotifyAuthData spotifyAuthData, String clientId,
+      String clientSecret) {
+    token = spotifyAuthData.getOauthToken();
+    this.context = context;
+    this.spotifyAuthData = spotifyAuthData;
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    this.spotifyAPI = resolveApi();
   }
 
-  private SpotifyAPI resolveApi(final SpotifyAuthData spotifyAuthData) {
+  private SpotifyAPI resolveApi() {
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
         .addInterceptor(new Interceptor() {
           @Override
           public Response intercept(Chain chain) throws IOException {
             Request request = chain.request()
                 .newBuilder()
-                .header("Authorization", String.format("Bearer %s",
-                    spotifyAuthData.getOauthToken()))
+                .header("Authorization", String.format("Bearer %s", token))
                 .build();
 
             return chain.proceed(request);
@@ -72,8 +87,30 @@ class SpotifySearchService implements SearchService {
   }
 
   @Override
-  public Single<List<SkaldPlaylist>> searchForPlaylists(String query) {
+  public Single<List<SkaldPlaylist>> searchForPlaylists(final String query) {
     return spotifyAPI.getPlaylistsForQuery(query, "playlist")
+        .onErrorResumeNext(new Function<Throwable, SingleSource<? extends BrowsePlaylists>>() {
+          @Override
+          public SingleSource<? extends BrowsePlaylists> apply(Throwable throwable)
+              throws Exception {
+            if (throwable != null) { // sprawdzic czy blad jest zwiazany z tym ze token expired
+              new TokenService()
+                  .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
+                  .flatMap(new Function<Tokens, SingleSource<?>>() {
+                    @Override
+                    public SingleSource<?> apply(Tokens tokens) throws Exception {
+                      token = tokens.getAccessToken();
+                      SpotifyAuthData spotifyAuthDataRestored = new SpotifyAuthData(token,
+                          spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
+                      new SpotifyAuthStore().save(context, spotifyAuthDataRestored);
+
+                      return spotifyAPI.getPlaylistsForQuery(query, "playlist");
+                    }
+                  });
+            }
+            return Single.just(new BrowsePlaylists());
+          }
+        })
         .map(new Function<BrowsePlaylists, List<SkaldPlaylist>>() {
           @Override
           public List<SkaldPlaylist> apply(BrowsePlaylists browsePlaylists) throws Exception {

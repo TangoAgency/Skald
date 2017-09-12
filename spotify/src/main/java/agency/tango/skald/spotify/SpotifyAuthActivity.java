@@ -57,6 +57,7 @@ public class SpotifyAuthActivity extends Activity {
           notifyError(response.getError());
       }
     }
+    this.finish();
   }
 
   private void notifyError(String error) {

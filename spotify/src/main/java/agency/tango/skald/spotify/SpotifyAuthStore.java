@@ -13,9 +13,10 @@ import agency.tango.skald.core.SkaldAuthStore;
 class SpotifyAuthStore implements SkaldAuthStore {
   private static final String SPOTIFY_JSON_KEY = "spotify_json";
   private static final String SPOTIFY_FILE_KEY = "agency.tango.skald.spotify.SPOTIFY_FILE_KEY";
+  private static final String EMPTY = "";
 
   @Override
-  public void save(SkaldAuthData skaldAuthData, Context context) {
+  public void save(Context context, SkaldAuthData skaldAuthData) {
     SharedPreferences sharedPreferences = getSharedPreferences(context);
 
     SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthData;
@@ -32,8 +33,8 @@ class SpotifyAuthStore implements SkaldAuthStore {
   public SkaldAuthData restore(Context context, Provider provider) throws AuthException {
     SharedPreferences sharedPreferences = getSharedPreferences(context);
 
-    String json = sharedPreferences.getString(SPOTIFY_JSON_KEY, "");
-    if(json.equals("")) {
+    String json = sharedPreferences.getString(SPOTIFY_JSON_KEY, EMPTY);
+    if(json.equals(EMPTY)) {
       SpotifyProvider spotifyProvider = (SpotifyProvider) provider;
       throw new SpotifyAuthException("Cannot restore token", new SpotifyAuthError(context,
           spotifyProvider.getClientId(), spotifyProvider.getRedirectUri(),

@@ -47,7 +47,7 @@ public class SpotifyProvider extends Provider {
 
   @Override
   public SearchServiceFactory getSearchServiceFactory() {
-    return new SpotifySearchServiceFactory();
+    return new SpotifySearchServiceFactory(context, clientId, clientSecret);
   }
 
   String getClientId() {
@@ -91,11 +91,21 @@ public class SpotifyProvider extends Provider {
   }
 
   private static class SpotifySearchServiceFactory extends SearchServiceFactory {
+    private final Context context;
+    private final String clientId;
+    private final String clientSecret;
+
+    private SpotifySearchServiceFactory(Context context, String clientId, String clientSecret) {
+      this.context = context;
+      this.clientId = clientId;
+      this.clientSecret = clientSecret;
+    }
+
     @Override
     public SearchService getSearchService(SkaldAuthData skaldAuthData) {
       if (skaldAuthData instanceof SpotifyAuthData) {
         SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthData;
-        return new SpotifySearchService(spotifyAuthData);
+        return new SpotifySearchService(context, spotifyAuthData, clientId, clientSecret);
       }
       return null;
     }

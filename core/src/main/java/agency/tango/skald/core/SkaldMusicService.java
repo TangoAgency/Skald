@@ -22,7 +22,6 @@ import io.reactivex.Single;
 public class SkaldMusicService {
   public static final String INTENT_ACTION = "auth_action";
   public static final String EXTRA_AUTH_DATA = "auth_data";
-  private static final String TAG = SkaldMusicService.class.getSimpleName();
 
   private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
@@ -33,7 +32,6 @@ public class SkaldMusicService {
   private Player player;
   private SkaldTrack currentTrack;
   private SkaldPlaylist currentPlaylist;
-  private SkaldAuthData skaldAuthData;
 
   public SkaldMusicService(Context context, final Provider... providers) {
     this.providers.addAll(Arrays.asList(providers));
@@ -42,10 +40,10 @@ public class SkaldMusicService {
     BroadcastReceiver messageReceiver = new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
-        skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
-        getSkaldAuthStore().save(skaldAuthData, context);
+        SkaldAuthData skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
+        getSkaldAuthStore().save(context, skaldAuthData);
         if (player == null) {
-          player = getPlayer();
+          player = getPlayer(skaldAuthData);
         }
       }
     };
@@ -64,9 +62,7 @@ public class SkaldMusicService {
   }
 
   public void prepare() throws AuthException {
-    //for now assume existing of only one provider
-    skaldAuthData = getSkaldAuthStore().restore(context, providers.get(0));
-    player = getPlayer();
+    player = getPlayer(getSkaldAuthStore().restore(context, providers.get(0)));
   }
 
   public void prepareAsync() {
@@ -121,14 +117,28 @@ public class SkaldMusicService {
   }
 
   public Single<List<SkaldTrack>> searchTrack(String query) {
-    return getSearchService().searchForTracks(query);
+    try {
+      return getSearchService().searchForTracks(query);
+    } catch (AuthException authException) {
+      authException.printStackTrace();
+      //TODO refresh token and again searchTrack
+    }
+    //return Single.just(new ArrayList<SkaldTrack>());
+    return null;
   }
 
   public Single<List<SkaldPlaylist>> searchPlayList(String query) {
-    return getSearchService().searchForPlaylists(query);
+    try {
+      return getSearchService().searchForPlaylists(query);
+    } catch (AuthException authException) {
+      authException.printStackTrace();
+      //TODO refresh token and agaoin searchPlaylist
+    }
+    //return Single.just(new ArrayList<SkaldPlaylist>());
+    return null;
   }
 
-  private Player getPlayer() {
+  private Player getPlayer(SkaldAuthData skaldAuthData) {
     Player player = providers.get(0)
         .getPlayerFactory()
         .getPlayer(skaldAuthData);
@@ -160,9 +170,9 @@ public class SkaldMusicService {
         .getSkaldAuthStore();
   }
 
-  private SearchService getSearchService() {
+  private SearchService getSearchService() throws AuthException {
     return providers.get(0)
         .getSearchServiceFactory()
-        .getSearchService(skaldAuthData);
+        .getSearchService(getSkaldAuthStore().restore(context, providers.get(0)));
   }
 }

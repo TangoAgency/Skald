@@ -3,7 +3,7 @@ package agency.tango.skald.core;
 import android.content.Context;
 
 public interface SkaldAuthStore {
-  void save(SkaldAuthData skaldAuthData, Context context);
+  void save(Context context, SkaldAuthData skaldAuthData);
 
   SkaldAuthData restore(Context context, Provider provider) throws AuthException;
 }
