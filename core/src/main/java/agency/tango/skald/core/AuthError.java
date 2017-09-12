@@ -7,6 +7,8 @@ public abstract class AuthError {
   }
 
   public abstract Intent getResolution();
+
   public abstract boolean hasResolution();
+
   public abstract int errorCode();
 }

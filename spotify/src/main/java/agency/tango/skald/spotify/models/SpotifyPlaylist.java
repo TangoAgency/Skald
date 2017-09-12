@@ -6,7 +6,7 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.spotify.api.models.Playlist;
 
 public class SpotifyPlaylist extends SkaldPlaylist {
-  public SpotifyPlaylist(Uri uri, String name) {
+  private SpotifyPlaylist(Uri uri, String name) {
     super(uri, name);
   }
 

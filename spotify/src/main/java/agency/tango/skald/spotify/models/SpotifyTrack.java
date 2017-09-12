@@ -6,8 +6,7 @@ import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.api.models.Track;
 
 public class SpotifyTrack extends SkaldTrack {
-
-  public SpotifyTrack(Uri uri) {
+  private SpotifyTrack(Uri uri) {
     super(uri);
   }
 

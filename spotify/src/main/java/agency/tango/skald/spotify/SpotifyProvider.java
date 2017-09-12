@@ -2,29 +2,28 @@ package agency.tango.skald.spotify;
 
 import android.content.Context;
 
-import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.Provider;
+import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.SkaldAuthStore;
-import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.PlayerFactory;
+import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
-import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.spotify.models.SpotifyTrack;
 
 public class SpotifyProvider extends Provider {
-  public static final String EXTRA_CLIENT_ID = "SPOTIFY_CLIENT_ID";
-  public static final String EXTRA_REDIRECT_URI = "SPOTIFY_REDIRECT_URI";
-  public static final String EXTRA_CLIENT_SECRET = "SPOTIFY_CLIENT_SECRET";
+  static final String EXTRA_CLIENT_ID = "SPOTIFY_CLIENT_ID";
+  static final String EXTRA_REDIRECT_URI = "SPOTIFY_REDIRECT_URI";
+  static final String EXTRA_CLIENT_SECRET = "SPOTIFY_CLIENT_SECRET";
+  private static final String SPOTIFY_PROVIDER = "spotify";
 
-  public static final String SPOTIFY_PROVIDER = "spotify";
   private final Context context;
   private final String clientId;
   private final String redirectUri;
   private final String clientSecret;
 
-  public SpotifyProvider(Context context, String clientId, String redirectUri, String clientSecret) {
+  public SpotifyProvider(Context context, String clientId, String redirectUri,
+      String clientSecret) {
     this.context = context;
     this.clientId = clientId;
     this.redirectUri = redirectUri;
@@ -51,15 +50,15 @@ public class SpotifyProvider extends Provider {
     return new SpotifySearchServiceFactory();
   }
 
-  public String getClientId() {
+  String getClientId() {
     return clientId;
   }
 
-  public String getRedirectUri() {
+  String getRedirectUri() {
     return redirectUri;
   }
 
-  public String getClientSecret() {
+  String getClientSecret() {
     return clientSecret;
   }
 
@@ -75,8 +74,8 @@ public class SpotifyProvider extends Provider {
     }
 
     @Override
-    public Player getPlayerFor(SkaldTrack track, SkaldAuthData skaldAuthData) {
-      if (track instanceof SpotifyTrack) {
+    public Player getPlayer(SkaldAuthData skaldAuthData) {
+      if (skaldAuthData instanceof SpotifyAuthData) {
         SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthData;
         return new SkaldSpotifyPlayer(context, spotifyAuthData, clientId, clientSecret);
       }
@@ -94,7 +93,11 @@ public class SpotifyProvider extends Provider {
   private static class SpotifySearchServiceFactory extends SearchServiceFactory {
     @Override
     public SearchService getSearchService(SkaldAuthData skaldAuthData) {
-      return new SpotifySearchService(skaldAuthData);
+      if (skaldAuthData instanceof SpotifyAuthData) {
+        SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthData;
+        return new SpotifySearchService(spotifyAuthData);
+      }
+      return null;
     }
   }
 }

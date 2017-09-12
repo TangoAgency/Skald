@@ -2,13 +2,13 @@ package agency.tango.skald.example;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.List;
@@ -18,10 +18,10 @@ import agency.tango.skald.core.AuthError;
 import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.listeners.OnPreparedListener;
+import agency.tango.skald.core.listeners.onPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
-import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.spotify.SpotifyProvider;
-import agency.tango.skald.spotify.models.SpotifyTrack;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -37,6 +37,11 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     final ListView listView = (ListView) findViewById(R.id.list_view_playlists);
+    final Button pauseButton = (Button) findViewById(R.id.button_pause);
+    final Button resumeButton = (Button) findViewById(R.id.button_resume);
+
+    pauseButton.setEnabled(false);
+    resumeButton.setEnabled(false);
 
     SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
@@ -46,24 +51,6 @@ public class MainActivity extends Activity {
     skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
       @Override
       public void onPrepared(final SkaldMusicService skaldMusicService) {
-        Log.d(TAG, "Inside onPreparedList");
-
-        skaldMusicService.searchTrack("Desiigner")
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
-              @Override
-              public void onSuccess(List<SkaldTrack> skaldTracks) {
-                skaldMusicService.setSource(skaldTracks.get(0));
-                //skaldMusicService.playTrack();
-              }
-
-              @Override
-              public void onError(Throwable error) {
-                Log.e(TAG, "Observer error", error);
-              }
-            });
-
         skaldMusicService.searchPlayList("hip-hop")
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -82,67 +69,51 @@ public class MainActivity extends Activity {
       }
     });
 
+    skaldMusicService.addOnPlabackListener(new onPlaybackListener() {
+      @Override
+      public void onPlaybackEvent(TrackMetadata trackMetadata) {
+        Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
+            trackMetadata.getTitle()));
+      }
+    });
+
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final SkaldPlaylist item = (SkaldPlaylist) parent.getItemAtPosition(position);
         skaldMusicService.setSource(item);
         skaldMusicService.playPlaylist();
+        resumeButton.setEnabled(false);
+        pauseButton.setEnabled(true);
       }
     });
 
-    findViewById(R.id.button_pause).setOnClickListener(new View.OnClickListener() {
+    pauseButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         skaldMusicService.pause();
+        resumeButton.setEnabled(true);
+        pauseButton.setEnabled(false);
       }
     });
 
-    findViewById(R.id.button_resume).setOnClickListener(new View.OnClickListener() {
+    resumeButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         skaldMusicService.resume();
+        pauseButton.setEnabled(true);
+        resumeButton.setEnabled(false);
       }
     });
 
-    Uri spotifyUri = Uri.parse(
-        "skald://spotify/track/spotify:user:spotify:playlist:37i9dQZF1DX8vpLK1FoEw3");
-    final SkaldTrack skaldTrack = new SpotifyTrack(spotifyUri);
-
-    skaldMusicService.setSource(skaldTrack);
     try {
       skaldMusicService.prepare();
     } catch (AuthException authException) {
-      Log.d(TAG, "Exception got");
       AuthError authError = authException.getAuthError();
       if (authError.hasResolution()) {
         Intent intent = authError.getResolution();
         startActivity(intent);
       }
     }
-
-    //Player player = spotifyProvider
-    //    .getPlayerFactory()
-    //    .getPlayerFor(new SpotifyTrack(spotifyUri));
-    //
-    //player.playTrack(new SpotifyTrack(spotifyUri));
-
-    //Button spotifyButton = (Button) findViewById(R.id.button_spotify);
-    //spotifyButton.setOnClickListener(new View.OnClickListener() {
-    //  @Override
-    //  public void onClick(View v) {
-    //    Intent intent = new Intent(MainActivity.this, SpotifyActivity.class);
-    //    startActivity(intent);
-    //  }
-    //});
-    //
-    //Button deezerButton = (Button) findViewById(R.id.button_deezer);
-    //deezerButton.setOnClickListener(new View.OnClickListener() {
-    //  @Override
-    //  public void onClick(View v) {
-    //    Intent intent = new Intent(MainActivity.this, DeezerActivity.class);
-    //    startActivity(intent);
-    //  }
-    //});
   }
 }

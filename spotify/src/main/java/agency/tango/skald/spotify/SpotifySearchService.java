@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.SearchService;
-import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.api.models.BrowsePlaylists;
@@ -24,15 +23,15 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class SpotifySearchService implements SearchService {
+class SpotifySearchService implements SearchService {
   private static final String TAG = SpotifySearchService.class.getSimpleName();
   private final SpotifyAPI spotifyAPI;
 
-  public SpotifySearchService(SkaldAuthData skaldAuthData) {
-    this.spotifyAPI = resolveApi(skaldAuthData);
+  SpotifySearchService(SpotifyAuthData spotifyAuthData) {
+    this.spotifyAPI = resolveApi(spotifyAuthData);
   }
 
-  private SpotifyAPI resolveApi(final SkaldAuthData skaldAuthData) {
+  private SpotifyAPI resolveApi(final SpotifyAuthData spotifyAuthData) {
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
         .addInterceptor(new Interceptor() {
           @Override
@@ -40,7 +39,7 @@ public class SpotifySearchService implements SearchService {
             Request request = chain.request()
                 .newBuilder()
                 .header("Authorization", String.format("Bearer %s",
-                    ((SpotifyAuthData) skaldAuthData).getOauthToken()))
+                    spotifyAuthData.getOauthToken()))
                 .build();
 
             return chain.proceed(request);

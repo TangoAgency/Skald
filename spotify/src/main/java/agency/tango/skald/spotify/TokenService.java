@@ -6,10 +6,10 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class TokenService {
+class TokenService {
   private final SpotifyAPI spotifyAPI;
 
-  public TokenService() {
+  TokenService() {
     this.spotifyAPI = resolveApi();
   }
 
@@ -23,12 +23,12 @@ public class TokenService {
     return retrofit.create(SpotifyAPI.class);
   }
 
-  public Single<Tokens> getTokens(String clientId, String clientSecret, String code,
+  Single<Tokens> getTokens(String clientId, String clientSecret, String code,
       String redirectUri) {
     return spotifyAPI.getTokens(clientId, clientSecret, "authorization_code", code, redirectUri);
   }
 
-  public Single<Tokens> getRefreshToken(String clientId, String clientSecret, String refreshToken) {
+  Single<Tokens> getRefreshToken(String clientId, String clientSecret, String refreshToken) {
     return spotifyAPI.getRefreshToken(clientId, clientSecret, "refresh_token", refreshToken);
   }
 }

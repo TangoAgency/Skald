@@ -13,8 +13,10 @@ import java.util.List;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
+import agency.tango.skald.core.listeners.onPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.models.TrackMetadata;
 import io.reactivex.Single;
 
 public class SkaldMusicService {
@@ -24,6 +26,7 @@ public class SkaldMusicService {
 
   private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
+  private final List<onPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Context context;
 
@@ -32,20 +35,21 @@ public class SkaldMusicService {
   private SkaldPlaylist currentPlaylist;
   private SkaldAuthData skaldAuthData;
 
-  private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-      skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
-      getSkaldAuthStore().save(skaldAuthData, context);
-      if (player == null) {
-        player = getPlayer();
-      }
-    }
-  };
-
   public SkaldMusicService(Context context, final Provider... providers) {
     this.providers.addAll(Arrays.asList(providers));
     this.context = context.getApplicationContext();
+
+    BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
+        getSkaldAuthStore().save(skaldAuthData, context);
+        if (player == null) {
+          player = getPlayer();
+        }
+      }
+    };
+
     LocalBroadcastManager
         .getInstance(context.getApplicationContext())
         .registerReceiver(messageReceiver, new IntentFilter(INTENT_ACTION));
@@ -96,36 +100,53 @@ public class SkaldMusicService {
     onErrorListeners.add(onErrorListener);
   }
 
-  public void addOnPreparedListener(OnPreparedListener onPreparedListener) {
-    onPreparedListeners.add(onPreparedListener);
-  }
-
   public void removeOnErrorListener(OnErrorListener onErrorListener) {
     onErrorListeners.remove(onErrorListener);
+  }
+
+  public void addOnPreparedListener(OnPreparedListener onPreparedListener) {
+    onPreparedListeners.add(onPreparedListener);
   }
 
   public void removeOnPreparedListener(OnPreparedListener onPreparedListener) {
     onPreparedListeners.remove(onPreparedListener);
   }
 
+  public void addOnPlabackListener(onPlaybackListener onPlaybackListener) {
+    onPlaybackListeners.add(onPlaybackListener);
+  }
+
+  public void removeOnPlabackListener(onPlaybackListener onPlaybackListener) {
+    onPlaybackListeners.remove(onPlaybackListener);
+  }
+
   public Single<List<SkaldTrack>> searchTrack(String query) {
-    return getApiCalls().searchForTracks(query);
+    return getSearchService().searchForTracks(query);
   }
 
   public Single<List<SkaldPlaylist>> searchPlayList(String query) {
-    return getApiCalls().searchForPlaylists(query);
+    return getSearchService().searchForPlaylists(query);
   }
 
   private Player getPlayer() {
     Player player = providers.get(0)
         .getPlayerFactory()
-        .getPlayerFor(currentTrack, skaldAuthData);
+        .getPlayer(skaldAuthData);
 
     player.addPlayerReadyListener(new OnPlayerReadyListener() {
       @Override
       public void onPlayerReady(Player player) {
         for (OnPreparedListener onPreparedListener : onPreparedListeners) {
           onPreparedListener.onPrepared(SkaldMusicService.this);
+        }
+      }
+    });
+
+    player.addOnPlabackListener(new onPlaybackListener() {
+      @Override
+      public void onPlaybackEvent(TrackMetadata trackMetadata) {
+        for (onPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onPlaybackEvent(trackMetadata);
         }
       }
     });
@@ -139,7 +160,7 @@ public class SkaldMusicService {
         .getSkaldAuthStore();
   }
 
-  private SearchService getApiCalls() {
+  private SearchService getSearchService() {
     return providers.get(0)
         .getSearchServiceFactory()
         .getSearchService(skaldAuthData);

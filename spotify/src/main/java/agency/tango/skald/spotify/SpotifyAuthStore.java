@@ -10,7 +10,7 @@ import agency.tango.skald.core.Provider;
 import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.SkaldAuthStore;
 
-public class SpotifyAuthStore implements SkaldAuthStore {
+class SpotifyAuthStore implements SkaldAuthStore {
   private static final String SPOTIFY_JSON_KEY = "spotify_json";
   private static final String SPOTIFY_FILE_KEY = "agency.tango.skald.spotify.SPOTIFY_FILE_KEY";
 

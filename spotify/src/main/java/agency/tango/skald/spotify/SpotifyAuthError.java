@@ -9,13 +9,14 @@ import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_ID;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_SECRET;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_REDIRECT_URI;
 
-public class SpotifyAuthError extends AuthError {
+class SpotifyAuthError extends AuthError {
   private final Context context;
   private final String clientId;
   private final String redirectUri;
   private final String clientSecret;
 
-  public SpotifyAuthError(Context context, String clientId, String redirectUri, String clientSecret) {
+  SpotifyAuthError(Context context, String clientId, String redirectUri,
+      String clientSecret) {
     this.context = context.getApplicationContext();
     this.clientId = clientId;
     this.redirectUri = redirectUri;

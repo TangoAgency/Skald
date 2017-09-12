@@ -8,16 +8,16 @@ import agency.tango.skald.core.SkaldAuthData;
 public class SpotifyAuthData extends SkaldAuthData {
   static final Parcelable.Creator<SpotifyAuthData> CREATOR =
       new Parcelable.Creator<SpotifyAuthData>() {
-    @Override
-    public SpotifyAuthData createFromParcel(Parcel in) {
-      return new SpotifyAuthData(in);
-    }
+        @Override
+        public SpotifyAuthData createFromParcel(Parcel in) {
+          return new SpotifyAuthData(in);
+        }
 
-    @Override
-    public SpotifyAuthData[] newArray(int size) {
-      return new SpotifyAuthData[size];
-    }
-  };
+        @Override
+        public SpotifyAuthData[] newArray(int size) {
+          return new SpotifyAuthData[size];
+        }
+      };
 
   private final String oauthToken;
   private final String refreshToken;

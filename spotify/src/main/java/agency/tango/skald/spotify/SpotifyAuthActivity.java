@@ -87,6 +87,5 @@ public class SpotifyAuthActivity extends Activity {
             Log.e(TAG, "Tokens observer error", error);
           }
         });
-
   }
 }
