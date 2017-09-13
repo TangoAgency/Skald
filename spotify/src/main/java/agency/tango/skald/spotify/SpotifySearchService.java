@@ -30,8 +30,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 class SpotifySearchService implements SearchService {
   private static final String TAG = SpotifySearchService.class.getSimpleName();
-  public static final int UNAUTHORIZED_ERROR_CODE = 401;
-  private final SpotifyAPI spotifyAPI;
+  private static final int UNAUTHORIZED_ERROR_CODE = 401;
+  private final SpotifyApi spotifyApi;
   private final String clientId;
   private final String clientSecret;
   private final Context context;
@@ -46,10 +46,10 @@ class SpotifySearchService implements SearchService {
     this.spotifyAuthData = spotifyAuthData;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
-    this.spotifyAPI = resolveApi();
+    this.spotifyApi = resolveApi();
   }
 
-  private SpotifyAPI resolveApi() {
+  private SpotifyApi resolveApi() {
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
         .addInterceptor(new Interceptor() {
           @Override
@@ -64,18 +64,18 @@ class SpotifySearchService implements SearchService {
         }).build();
 
     Retrofit retrofit = new Retrofit.Builder()
-        .baseUrl(SpotifyAPI.BASE_URL)
+        .baseUrl(SpotifyApi.BASE_URL)
         .client(okHttpClient)
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .build();
 
-    return retrofit.create(SpotifyAPI.class);
+    return retrofit.create(SpotifyApi.class);
   }
 
   @Override
   public Single<List<SkaldTrack>> searchForTracks(String query) {
-    return spotifyAPI.getTracksForQuery(query, "track")
+    return spotifyApi.getTracksForQuery(query, "track")
         .map(new Function<TrackSearch, List<SkaldTrack>>() {
           @Override
           public List<SkaldTrack> apply(TrackSearch searchTrack) throws Exception {
@@ -90,7 +90,7 @@ class SpotifySearchService implements SearchService {
 
   @Override
   public Single<List<SkaldPlaylist>> searchForPlaylists(final String query) {
-    return spotifyAPI.getPlaylistsForQuery(query, "playlist")
+    return spotifyApi.getPlaylistsForQuery(query, "playlist")
         .onErrorResumeNext(new Function<Throwable, SingleSource<? extends BrowsePlaylists>>() {
           @Override
           public SingleSource<? extends BrowsePlaylists> apply(Throwable throwable)
@@ -107,7 +107,7 @@ class SpotifySearchService implements SearchService {
                           spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
                       new SpotifyAuthStore().save(context, spotifyAuthDataRestored);
 
-                      return spotifyAPI.getPlaylistsForQuery(query, "playlist");
+                      return spotifyApi.getPlaylistsForQuery(query, "playlist");
                     }
                   });
             }

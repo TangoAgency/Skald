@@ -116,26 +116,12 @@ public class SkaldMusicService {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
-  public Single<List<SkaldTrack>> searchTrack(String query) {
-    try {
-      return getSearchService().searchForTracks(query);
-    } catch (AuthException authException) {
-      authException.printStackTrace();
-      //TODO refresh token and again searchTrack
-    }
-    //return Single.just(new ArrayList<SkaldTrack>());
-    return null;
+  public Single<List<SkaldTrack>> searchTrack(String query) throws AuthException {
+    return getSearchService().searchForTracks(query);
   }
 
-  public Single<List<SkaldPlaylist>> searchPlayList(String query) {
-    try {
-      return getSearchService().searchForPlaylists(query);
-    } catch (AuthException authException) {
-      authException.printStackTrace();
-      //TODO refresh token and agaoin searchPlaylist
-    }
-    //return Single.just(new ArrayList<SkaldPlaylist>());
-    return null;
+  public Single<List<SkaldPlaylist>> searchPlayList(String query) throws AuthException {
+    return getSearchService().searchForPlaylists(query);
   }
 
   private Player getPlayer(SkaldAuthData skaldAuthData) {
