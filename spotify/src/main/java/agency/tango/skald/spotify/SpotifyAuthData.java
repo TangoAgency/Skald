@@ -23,7 +23,7 @@ public class SpotifyAuthData extends SkaldAuthData {
   private final String refreshToken;
   private final int expiresIn;
 
-  SpotifyAuthData(String oauthToken, String refreshToken, int expiresIn) {
+  public SpotifyAuthData(String oauthToken, String refreshToken, int expiresIn) {
     this.oauthToken = oauthToken;
     this.refreshToken = refreshToken;
     this.expiresIn = expiresIn;

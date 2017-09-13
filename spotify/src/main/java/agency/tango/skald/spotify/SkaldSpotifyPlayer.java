@@ -51,7 +51,7 @@ class SkaldSpotifyPlayer implements Player {
               @Override
               public void onPlaybackEvent(PlayerEvent playerEvent) {
                 Metadata metadata = spotifyPlayer.getMetadata();
-                if (playerEvent.toString().equals("kSpPlaybackNotifyTrackChanged")) {
+                if (playerEvent == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
                   TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
                       metadata.currentTrack.name);
                   for (onPlaybackListener onPlaybackListener : onPlaybackListeners) {

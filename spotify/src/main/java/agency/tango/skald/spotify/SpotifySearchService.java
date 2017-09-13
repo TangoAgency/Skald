@@ -23,18 +23,20 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.HttpException;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 class SpotifySearchService implements SearchService {
   private static final String TAG = SpotifySearchService.class.getSimpleName();
+  public static final int UNAUTHORIZED_ERROR_CODE = 401;
   private final SpotifyAPI spotifyAPI;
   private final String clientId;
   private final String clientSecret;
   private final Context context;
+  private final SpotifyAuthData spotifyAuthData;
 
-  private SpotifyAuthData spotifyAuthData;
   private String token;
 
   SpotifySearchService(Context context, SpotifyAuthData spotifyAuthData, String clientId,
@@ -93,12 +95,13 @@ class SpotifySearchService implements SearchService {
           @Override
           public SingleSource<? extends BrowsePlaylists> apply(Throwable throwable)
               throws Exception {
-            if (throwable != null) { // sprawdzic czy blad jest zwiazany z tym ze token expired
-              new TokenService()
+            if (throwable instanceof HttpException
+                && ((HttpException) throwable).code() == UNAUTHORIZED_ERROR_CODE) {
+              return new TokenService()
                   .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
-                  .flatMap(new Function<Tokens, SingleSource<?>>() {
+                  .flatMap(new Function<Tokens, SingleSource<BrowsePlaylists>>() {
                     @Override
-                    public SingleSource<?> apply(Tokens tokens) throws Exception {
+                    public SingleSource<BrowsePlaylists> apply(Tokens tokens) throws Exception {
                       token = tokens.getAccessToken();
                       SpotifyAuthData spotifyAuthDataRestored = new SpotifyAuthData(token,
                           spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
@@ -110,8 +113,7 @@ class SpotifySearchService implements SearchService {
             }
             return Single.just(new BrowsePlaylists());
           }
-        })
-        .map(new Function<BrowsePlaylists, List<SkaldPlaylist>>() {
+        }).map(new Function<BrowsePlaylists, List<SkaldPlaylist>>() {
           @Override
           public List<SkaldPlaylist> apply(BrowsePlaylists browsePlaylists) throws Exception {
             List<SkaldPlaylist> skaldPlaylists = new ArrayList<>();
