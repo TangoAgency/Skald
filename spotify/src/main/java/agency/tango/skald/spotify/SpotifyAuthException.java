@@ -1,6 +1,6 @@
 package agency.tango.skald.spotify;
 
-import agency.tango.skald.core.AuthError;
+import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.AuthException;
 
 class SpotifyAuthException extends AuthException{

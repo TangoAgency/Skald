@@ -1,4 +1,4 @@
-package agency.tango.skald.core;
+package agency.tango.skald.core.errors;
 
 import android.content.Intent;
 

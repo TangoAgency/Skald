@@ -1,5 +1,7 @@
 package agency.tango.skald.core;
 
+import agency.tango.skald.core.errors.AuthError;
+
 public abstract class AuthException extends Exception {
   private AuthError authError;
 

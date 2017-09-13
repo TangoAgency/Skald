@@ -14,9 +14,10 @@ import android.widget.ListView;
 import java.util.List;
 
 import agency.tango.skald.R;
-import agency.tango.skald.core.AuthError;
+import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.SkaldMusicService;
+import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -81,6 +82,16 @@ public class MainActivity extends Activity {
           public void onResumeEvent() {
             Log.d(TAG, "Resume Event");
           }
+
+          @Override
+          public void onStopEvent() {
+
+          }
+
+          @Override
+          public void onError(PlaybackError playbackError) {
+            Log.e(TAG, "Playback error occurred");
+          }
         });
       }
     });
@@ -99,7 +110,7 @@ public class MainActivity extends Activity {
     pauseButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        skaldMusicService.pause();
+        skaldMusicService.stop();
         resumeButton.setEnabled(true);
         pauseButton.setEnabled(false);
       }

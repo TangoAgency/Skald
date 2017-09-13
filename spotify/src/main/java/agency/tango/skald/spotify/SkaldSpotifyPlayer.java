@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -49,85 +50,9 @@ class SkaldSpotifyPlayer implements Player {
         new SpotifyPlayer.InitializationObserver() {
           @Override
           public void onInitialized(final SpotifyPlayer spotifyPlayer) {
-            spotifyPlayer.addNotificationCallback(new NotificationCallback() {
-              @Override
-              public void onPlaybackEvent(PlayerEvent playerEvent) {
-                Metadata metadata = spotifyPlayer.getMetadata();
-
-                if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
-                  if (metadata.currentTrack != null) {
-                    TrackMetadata trackMetadata = new TrackMetadata(
-                        metadata.currentTrack.artistName,
-                        metadata.currentTrack.name);
-                    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-                      onPlaybackListener.onPlayEvent(trackMetadata);
-                    }
-                  }
-                } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
-                  for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-                    onPlaybackListener.onPauseEvent();
-                  }
-                }
-              }
-
-              @Override
-              public void onPlaybackError(Error error) {
-                Log.e(TAG, String.format("PlaybackError occurred %s", error.toString()));
-              }
-            });
-
-            spotifyPlayer.addConnectionStateCallback(new ConnectionStateCallback() {
-              @Override
-              public void onLoggedIn() {
-                for (OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
-                  onPlayerReadyListener.onPlayerReady(SkaldSpotifyPlayer.this);
-                }
-              }
-
-              @Override
-              public void onLoggedOut() {
-
-              }
-
-              @Override
-              public void onLoginFailed(Error error) {
-                Log.e(TAG, String.format("onLoginFailed %s", error.toString()));
-
-                new TokenService()
-                    .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(new DisposableSingleObserver<Tokens>() {
-                      @Override
-                      public void onSuccess(Tokens tokens) {
-                        spotifyPlayer.login(tokens.getAccessToken());
-
-                        SpotifyAuthData spotifyAuthDataRefreshed = new SpotifyAuthData(
-                            tokens.getAccessToken(), spotifyAuthData.getRefreshToken(),
-                            tokens.getExpiresIn());
-                        Intent intent = new Intent(INTENT_ACTION);
-                        intent.putExtra(EXTRA_AUTH_DATA, spotifyAuthDataRefreshed);
-                        LocalBroadcastManager
-                            .getInstance(context)
-                            .sendBroadcast(intent);
-                      }
-
-                      @Override
-                      public void onError(Throwable error) {
-                        Log.e(TAG, "RefreshToken Observer error", error);
-                      }
-                    });
-              }
-
-              @Override
-              public void onTemporaryError() {
-
-              }
-
-              @Override
-              public void onConnectionMessage(String s) {
-
-              }
-            });
+            addNotificationCallback(spotifyPlayer);
+            addConnectionStateCallback(spotifyPlayer, clientId, clientSecret, spotifyAuthData,
+                context);
           }
 
           @Override
@@ -155,7 +80,26 @@ class SkaldSpotifyPlayer implements Player {
   public void stop() {
     if (spotifyPlayer.getPlaybackState().isPlaying) {
       spotifyPlayer.pause(spotifyOperationCallback);
-      spotifyPlayer.seekToPosition(spotifyOperationCallback, 0);
+      if (!spotifyPlayer.getPlaybackState().isPlaying) {
+        spotifyPlayer.seekToPosition(new com.spotify.sdk.android.player.Player.OperationCallback() {
+                                       @Override
+                                       public void onSuccess() {
+                                         for (OnPlaybackListener onPlaybackListener :
+                                             onPlaybackListeners) {
+                                           onPlaybackListener.onStopEvent();
+                                         }
+                                       }
+
+                                       @Override
+                                       public void onError(Error error) {
+                                         for (OnPlaybackListener onPlaybackListener :
+                                             onPlaybackListeners) {
+                                           onPlaybackListener.onError(new PlaybackError());
+                                         }
+                                       }
+                                     },
+            0);
+      }
     }
   }
 
@@ -170,9 +114,6 @@ class SkaldSpotifyPlayer implements Player {
   public void resume() {
     if (!spotifyPlayer.getPlaybackState().isPlaying) {
       spotifyPlayer.resume(spotifyOperationCallback);
-      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-        onPlaybackListener.onResumeEvent();
-      }
     }
   }
 
@@ -199,5 +140,101 @@ class SkaldSpotifyPlayer implements Player {
   @Override
   public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
+  }
+
+  private void addNotificationCallback(final SpotifyPlayer spotifyPlayer) {
+    spotifyPlayer.addNotificationCallback(new NotificationCallback() {
+      @Override
+      public void onPlaybackEvent(PlayerEvent playerEvent) {
+        Metadata metadata = spotifyPlayer.getMetadata();
+
+        if (playerEvent == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
+          if (metadata.currentTrack != null) {
+            notifyPlayEvent(metadata);
+          }
+        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
+          for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+            onPlaybackListener.onResumeEvent();
+          }
+        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
+          for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+            onPlaybackListener.onPauseEvent();
+          }
+        }
+      }
+
+      @Override
+      public void onPlaybackError(Error error) {
+        Log.e(TAG, String.format("PlaybackError occurred %s", error.toString()));
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onError(new PlaybackError());
+        }
+      }
+    });
+  }
+
+  private void addConnectionStateCallback(final SpotifyPlayer spotifyPlayer, final String clientId,
+      final String clientSecret, final SpotifyAuthData spotifyAuthData, final Context context) {
+    spotifyPlayer.addConnectionStateCallback(new ConnectionStateCallback() {
+      @Override
+      public void onLoggedIn() {
+        Log.d(TAG, "onLoggedIn");
+        for (OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
+          onPlayerReadyListener.onPlayerReady(SkaldSpotifyPlayer.this);
+        }
+      }
+
+      @Override
+      public void onLoggedOut() {
+
+      }
+
+      @Override
+      public void onLoginFailed(Error error) {
+        Log.e(TAG, String.format("onLoginFailed %s", error.toString()));
+
+        new TokenService()
+            .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
+            .subscribeOn(Schedulers.io())
+            .subscribe(new DisposableSingleObserver<Tokens>() {
+              @Override
+              public void onSuccess(Tokens tokens) {
+                spotifyPlayer.login(tokens.getAccessToken());
+
+                SpotifyAuthData spotifyAuthDataRefreshed = new SpotifyAuthData(
+                    tokens.getAccessToken(), spotifyAuthData.getRefreshToken(),
+                    tokens.getExpiresIn());
+                Intent intent = new Intent(INTENT_ACTION);
+                intent.putExtra(EXTRA_AUTH_DATA, spotifyAuthDataRefreshed);
+                LocalBroadcastManager
+                    .getInstance(context)
+                    .sendBroadcast(intent);
+              }
+
+              @Override
+              public void onError(Throwable error) {
+                Log.e(TAG, "RefreshToken Observer error", error);
+              }
+            });
+      }
+
+      @Override
+      public void onTemporaryError() {
+
+      }
+
+      @Override
+      public void onConnectionMessage(String s) {
+
+      }
+    });
+  }
+
+  private void notifyPlayEvent(Metadata metadata) {
+    TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
+        metadata.currentTrack.name);
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onPlayEvent(trackMetadata);
+    }
   }
 }

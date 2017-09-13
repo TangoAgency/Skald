@@ -3,7 +3,7 @@ package agency.tango.skald.spotify;
 import android.content.Context;
 import android.content.Intent;
 
-import agency.tango.skald.core.AuthError;
+import agency.tango.skald.core.errors.AuthError;
 
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_ID;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_SECRET;
