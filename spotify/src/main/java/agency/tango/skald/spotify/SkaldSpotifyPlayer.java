@@ -19,13 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
-import agency.tango.skald.core.listeners.onPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.spotify.api.models.Tokens;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -34,13 +33,16 @@ import static agency.tango.skald.core.SkaldMusicService.INTENT_ACTION;
 
 class SkaldSpotifyPlayer implements Player {
   private static final String TAG = SkaldSpotifyPlayer.class.getSimpleName();
-  private SpotifyPlayer spotifyPlayer;
+
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
-  private final List<onPlaybackListener> onPlaybackListeners = new ArrayList<>();
+  private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final SpotifyOperationCallback spotifyOperationCallback = new SpotifyOperationCallback();
+  private final Context context;
+  private SpotifyPlayer spotifyPlayer;
 
   SkaldSpotifyPlayer(final Context context, final SpotifyAuthData spotifyAuthData,
       final String clientId, final String clientSecret) {
+    this.context = context;
     final Config playerConfig = new Config(context, spotifyAuthData.getOauthToken(), clientId);
 
     spotifyPlayer = Spotify.getPlayer(playerConfig, this,
@@ -51,11 +53,19 @@ class SkaldSpotifyPlayer implements Player {
               @Override
               public void onPlaybackEvent(PlayerEvent playerEvent) {
                 Metadata metadata = spotifyPlayer.getMetadata();
-                if (playerEvent == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
-                  TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
-                      metadata.currentTrack.name);
-                  for (onPlaybackListener onPlaybackListener : onPlaybackListeners) {
-                    onPlaybackListener.onPlaybackEvent(trackMetadata);
+
+                if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
+                  if (metadata.currentTrack != null) {
+                    TrackMetadata trackMetadata = new TrackMetadata(
+                        metadata.currentTrack.artistName,
+                        metadata.currentTrack.name);
+                    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+                      onPlaybackListener.onPlayEvent(trackMetadata);
+                    }
+                  }
+                } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
+                  for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+                    onPlaybackListener.onPauseEvent();
                   }
                 }
               }
@@ -85,7 +95,6 @@ class SkaldSpotifyPlayer implements Player {
 
                 new TokenService()
                     .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
-                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe(new DisposableSingleObserver<Tokens>() {
                       @Override
@@ -144,7 +153,10 @@ class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void stop() {
-
+    if (spotifyPlayer.getPlaybackState().isPlaying) {
+      spotifyPlayer.pause(spotifyOperationCallback);
+      spotifyPlayer.seekToPosition(spotifyOperationCallback, 0);
+    }
   }
 
   @Override
@@ -158,12 +170,15 @@ class SkaldSpotifyPlayer implements Player {
   public void resume() {
     if (!spotifyPlayer.getPlaybackState().isPlaying) {
       spotifyPlayer.resume(spotifyOperationCallback);
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onResumeEvent();
+      }
     }
   }
 
   @Override
   public void release() {
-
+    Spotify.destroyPlayer(context);
   }
 
   @Override
@@ -177,12 +192,12 @@ class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void addOnPlabackListener(onPlaybackListener onPlaybackListener) {
+  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
   @Override
-  public void removeOnPlabackListener(onPlaybackListener onPlaybackListener) {
+  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 }

@@ -2,7 +2,7 @@ package agency.tango.skald.deezer;
 
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
-import agency.tango.skald.core.listeners.onPlaybackListener;
+import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
@@ -48,12 +48,12 @@ public class DeezerPlayer implements Player {
   }
 
   @Override
-  public void addOnPlabackListener(onPlaybackListener onPlaybackListener) {
+  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
 
   }
 
   @Override
-  public void removeOnPlabackListener(onPlaybackListener onPlaybackListener) {
+  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
 
   }
 }

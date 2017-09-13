@@ -11,12 +11,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import agency.tango.skald.core.listeners.OnErrorListener;
+import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
-import agency.tango.skald.core.listeners.onPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.core.models.TrackMetadata;
 import io.reactivex.Single;
 
 public class SkaldMusicService {
@@ -25,7 +24,6 @@ public class SkaldMusicService {
 
   private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
-  private final List<onPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Context context;
 
@@ -86,10 +84,13 @@ public class SkaldMusicService {
   }
 
   public void stop() {
-
+    player.stop();
   }
 
   public void release() {
+   if (player != null) {
+      player.release();
+    }
   }
 
   public void addOnErrorListener(OnErrorListener onErrorListener) {
@@ -108,12 +109,12 @@ public class SkaldMusicService {
     onPreparedListeners.remove(onPreparedListener);
   }
 
-  public void addOnPlabackListener(onPlaybackListener onPlaybackListener) {
-    onPlaybackListeners.add(onPlaybackListener);
+  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+    player.addOnPlaybackListener(onPlaybackListener);
   }
 
-  public void removeOnPlabackListener(onPlaybackListener onPlaybackListener) {
-    onPlaybackListeners.remove(onPlaybackListener);
+  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+    player.removeOnPlaybackListener(onPlaybackListener);
   }
 
   public Single<List<SkaldTrack>> searchTrack(String query) throws AuthException {
@@ -134,15 +135,6 @@ public class SkaldMusicService {
       public void onPlayerReady(Player player) {
         for (OnPreparedListener onPreparedListener : onPreparedListeners) {
           onPreparedListener.onPrepared(SkaldMusicService.this);
-        }
-      }
-    });
-
-    player.addOnPlabackListener(new onPlaybackListener() {
-      @Override
-      public void onPlaybackEvent(TrackMetadata trackMetadata) {
-        for (onPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPlaybackEvent(trackMetadata);
         }
       }
     });
