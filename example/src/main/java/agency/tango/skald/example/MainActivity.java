@@ -2,6 +2,7 @@ package agency.tango.skald.example;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -14,15 +15,18 @@ import android.widget.ListView;
 import java.util.List;
 
 import agency.tango.skald.R;
-import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.AuthException;
+import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.SkaldMusicService;
+import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
-import agency.tango.skald.core.models.SkaldPlaylist;
+import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.spotify.SpotifyProvider;
+import agency.tango.skald.spotify.models.SpotifyTrack;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -37,6 +41,7 @@ public class MainActivity extends Activity {
   private Button pauseButton;
   private Button resumeButton;
   private Button stopButton;
+  private SearchService spotifySearchService;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +61,19 @@ public class MainActivity extends Activity {
 
     skaldMusicService = new SkaldMusicService(this, spotifyProvider);
 
+    try {
+      spotifySearchService = spotifyProvider
+          .getSearchServiceFactory()
+          .getSearchService();
+    } catch (AuthException authException) {
+      AuthError authError = authException.getAuthError();
+      if (authError.hasResolution()) {
+        Intent intent = authError.getResolution();
+        startActivity(intent);
+      }
+    }
+
+    skaldMusicService.setSource(new SpotifyTrack(Uri.parse("skald://spotify/track/123"), "A", "B"));
     try {
       skaldMusicService.prepare();
     } catch (AuthException authException) {
@@ -99,12 +117,19 @@ public class MainActivity extends Activity {
       }
     });
 
+    skaldMusicService.addOnErrorListener(new OnErrorListener() {
+      @Override
+      public void onError() {
+        Log.e(TAG, "Error occurred");
+      }
+    });
+
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final SkaldPlaylist item = (SkaldPlaylist) parent.getItemAtPosition(position);
+        final SkaldTrack item = (SkaldTrack) parent.getItemAtPosition(position);
         skaldMusicService.setSource(item);
-        skaldMusicService.playPlaylist();
+        skaldMusicService.play();
         resumeButton.setEnabled(false);
         pauseButton.setEnabled(true);
         stopButton.setEnabled(true);
@@ -146,27 +171,24 @@ public class MainActivity extends Activity {
   protected void onStart() {
     super.onStart();
 
-    try {
-      skaldMusicService.searchPlayList("hip-hop")
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(new DisposableSingleObserver<List<SkaldPlaylist>>() {
-            @Override
-            public void onSuccess(List<SkaldPlaylist> skaldPlaylists) {
-              Log.d(TAG, "Get Hip-hop playlist success");
+    spotifySearchService.searchForTracks("hip-hop")
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
+          @Override
+          public void onSuccess(List<SkaldTrack> skaldTracks) {
+            //refactor
+            listView.setAdapter(new ArrayAdapter<>(MainActivity.this,
+                android.R.layout.simple_list_item_1, skaldTracks));
+            //ArrayAdapter arrayAdapter;
+          }
 
-              listView.setAdapter(new ArrayAdapter<>(MainActivity.this,
-                  android.R.layout.simple_list_item_1, skaldPlaylists));
-            }
-
-            @Override
-            public void onError(Throwable error) {
-              Log.e(TAG, "Observer error", error);
-            }
-          });
-    } catch (AuthException authException) {
-      authException.printStackTrace();
-    }
+          @Override
+          public void onError(Throwable error) {
+            //wiecej wypisac
+            Log.e(TAG, "Observer error", error);
+          }
+        });
   }
 
   @Override

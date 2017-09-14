@@ -20,4 +20,28 @@ public class Artist {
 
   @SerializedName("uri")
   private String uri;
+
+  public ExternalUrls getExternalUrls() {
+    return externalUrls;
+  }
+
+  public String getHref() {
+    return href;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String getUri() {
+    return uri;
+  }
 }
