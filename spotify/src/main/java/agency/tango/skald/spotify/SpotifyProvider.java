@@ -2,14 +2,18 @@ package agency.tango.skald.spotify;
 
 import android.content.Context;
 
+import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.Provider;
 import agency.tango.skald.core.SearchService;
-import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.SkaldAuthStore;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
+import agency.tango.skald.core.models.SkaldPlaylist;
+import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.spotify.models.SpotifyPlaylist;
+import agency.tango.skald.spotify.models.SpotifyTrack;
 
 public class SpotifyProvider extends Provider {
   static final String EXTRA_CLIENT_ID = "SPOTIFY_CLIENT_ID";
@@ -37,17 +41,27 @@ public class SpotifyProvider extends Provider {
 
   @Override
   public PlayerFactory getPlayerFactory() {
-    return new SpotifyPlayerFactory(context, clientId, clientSecret);
+    return new SpotifyPlayerFactory(context, this);
   }
 
   @Override
   public SkaldAuthStoreFactory getSkaldAuthStoreFactory() {
-    return new SpotifyAuthStoreFactory();
+    return new SpotifyAuthStoreFactory(this);
   }
 
   @Override
   public SearchServiceFactory getSearchServiceFactory() {
-    return new SpotifySearchServiceFactory(context, clientId, clientSecret);
+    return new SpotifySearchServiceFactory(context, this);
+  }
+
+  @Override
+  public boolean canHandle(SkaldPlaylist skaldPlaylist) {
+    return skaldPlaylist instanceof SpotifyPlaylist;
+  }
+
+  @Override
+  public boolean canHandle(SkaldTrack skaldTrack) {
+    return skaldTrack instanceof SpotifyTrack;
   }
 
   String getClientId() {
@@ -64,50 +78,50 @@ public class SpotifyProvider extends Provider {
 
   private static class SpotifyPlayerFactory extends PlayerFactory {
     private final Context context;
-    private final String clientId;
-    private final String clientSecret;
+    private final SkaldAuthStore skaldAuthDataStore;
+    private final SpotifyProvider spotifyProvider;
 
-    private SpotifyPlayerFactory(Context context, String clientId, String clientSecret) {
+    private SpotifyPlayerFactory(Context context, SpotifyProvider spotifyProvider) {
       this.context = context;
-      this.clientId = clientId;
-      this.clientSecret = clientSecret;
+      this.skaldAuthDataStore = new SpotifyAuthStore(spotifyProvider);
+      this.spotifyProvider = spotifyProvider;
     }
 
     @Override
-    public Player getPlayer(SkaldAuthData skaldAuthData) {
-      if (skaldAuthData instanceof SpotifyAuthData) {
-        SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthData;
-        return new SkaldSpotifyPlayer(context, spotifyAuthData, clientId, clientSecret);
-      }
-      return null;
+    public Player getPlayer() throws AuthException {
+      SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthDataStore.restore(context);
+      return new SkaldSpotifyPlayer(context, spotifyAuthData, spotifyProvider);
     }
   }
 
   private static class SpotifyAuthStoreFactory extends SkaldAuthStoreFactory {
+    private final SpotifyProvider spotifyProvider;
+
+    private SpotifyAuthStoreFactory(SpotifyProvider spotifyProvider) {
+      this.spotifyProvider = spotifyProvider;
+    }
+
     @Override
     public SkaldAuthStore getSkaldAuthStore() {
-      return new SpotifyAuthStore();
+      return new SpotifyAuthStore(spotifyProvider);
     }
   }
 
   private static class SpotifySearchServiceFactory extends SearchServiceFactory {
     private final Context context;
-    private final String clientId;
-    private final String clientSecret;
+    private final SkaldAuthStore skaldAuthDataStore;
+    private final SpotifyProvider spotifyProvider;
 
-    private SpotifySearchServiceFactory(Context context, String clientId, String clientSecret) {
+    private SpotifySearchServiceFactory(Context context, SpotifyProvider spotifyProvider) {
       this.context = context;
-      this.clientId = clientId;
-      this.clientSecret = clientSecret;
+      this.skaldAuthDataStore = new SpotifyAuthStore(spotifyProvider);
+      this.spotifyProvider = spotifyProvider;
     }
 
     @Override
-    public SearchService getSearchService(SkaldAuthData skaldAuthData) {
-      if (skaldAuthData instanceof SpotifyAuthData) {
-        SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthData;
-        return new SpotifySearchService(context, spotifyAuthData, clientId, clientSecret);
-      }
-      return null;
+    public SearchService getSearchService() throws AuthException {
+      SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthDataStore.restore(context);
+      return new SpotifySearchService(context, spotifyAuthData, spotifyProvider);
     }
   }
 }
