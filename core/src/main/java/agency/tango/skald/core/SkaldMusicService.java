@@ -8,7 +8,9 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
@@ -26,23 +28,21 @@ public class SkaldMusicService {
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Context context;
+  private final PlayerCache playerCache;
 
-  private Player player;
   private SkaldTrack currentTrack;
   private SkaldPlaylist currentPlaylist;
 
   public SkaldMusicService(Context context, final Provider... providers) {
     this.providers.addAll(Arrays.asList(providers));
     this.context = context.getApplicationContext();
+    this.playerCache = new PlayerCache();
 
     BroadcastReceiver messageReceiver = new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
         SkaldAuthData skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
         getSkaldAuthStore().save(context, skaldAuthData);
-        if (player == null) {
-          player = getPlayer(skaldAuthData);
-        }
       }
     };
 
@@ -60,36 +60,61 @@ public class SkaldMusicService {
   }
 
   public void prepare() throws AuthException {
-    player = getPlayer(getSkaldAuthStore().restore(context, providers.get(0)));
+    getPlayer(currentTrack);
   }
 
   public void prepareAsync() {
 
   }
 
-  public void playTrack() {
-    player.play(currentTrack);
-  }
-
-  public void playPlaylist() {
-    player.play(currentPlaylist);
+  public void play() {
+    if (currentPlaylist != null) {
+      //getPlayer(currentPlaylist).play(currentPlaylist);
+    } else if (currentTrack != null) {
+      try {
+        getPlayer(currentTrack).play(currentTrack);
+      } catch (AuthException authException) {
+        notifyError();
+      }
+    }
   }
 
   public void pause() {
-    player.pause();
+    try {
+      getPlayer(currentTrack).pause();
+    } catch (AuthException authException) {
+      notifyError();
+    }
   }
 
   public void resume() {
-    player.resume();
+    try {
+      getPlayer(currentTrack).resume();
+    } catch (AuthException authException) {
+      notifyError();
+    }
   }
 
   public void stop() {
-    player.stop();
+    try {
+      getPlayer(currentTrack).stop();
+    } catch (AuthException authException) {
+      notifyError();
+    }
   }
 
   public void release() {
-   if (player != null) {
-      player.release();
+    try {
+      getPlayer(currentTrack).release();
+    } catch (AuthException authException) {
+      notifyError();
+    }
+
+  }
+
+  private void notifyError() {
+    for(OnErrorListener onErrorListener : onErrorListeners) {
+      onErrorListener.onError();
     }
   }
 
@@ -110,11 +135,19 @@ public class SkaldMusicService {
   }
 
   public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
-    player.addOnPlaybackListener(onPlaybackListener);
+    try {
+      getPlayer(currentTrack).addOnPlaybackListener(onPlaybackListener);
+    } catch (AuthException e) {
+      notifyError();
+    }
   }
 
   public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
-    player.removeOnPlaybackListener(onPlaybackListener);
+    try {
+      getPlayer(currentTrack).removeOnPlaybackListener(onPlaybackListener);
+    } catch (AuthException e) {
+      notifyError();
+    }
   }
 
   public Single<List<SkaldTrack>> searchTrack(String query) throws AuthException {
@@ -125,22 +158,15 @@ public class SkaldMusicService {
     return getSearchService().searchForPlaylists(query);
   }
 
-  private Player getPlayer(SkaldAuthData skaldAuthData) {
-    Player player = providers.get(0)
-        .getPlayerFactory()
-        .getPlayer(skaldAuthData);
-
-    player.addPlayerReadyListener(new OnPlayerReadyListener() {
-      @Override
-      public void onPlayerReady(Player player) {
-        for (OnPreparedListener onPreparedListener : onPreparedListeners) {
-          onPreparedListener.onPrepared(SkaldMusicService.this);
-        }
+  private Player getPlayer(SkaldTrack skaldTrack) throws AuthException {
+    for (Provider provider : providers) {
+      if (provider.canHandle(skaldTrack)) {
+        return playerCache.getForProvider(provider);
       }
-    });
-
-    return player;
+    }
+    throw new IllegalStateException();
   }
+
 
   private SkaldAuthStore getSkaldAuthStore() {
     return providers.get(0)
@@ -149,8 +175,32 @@ public class SkaldMusicService {
   }
 
   private SearchService getSearchService() throws AuthException {
-    return providers.get(0)
-        .getSearchServiceFactory()
-        .getSearchService(getSkaldAuthStore().restore(context, providers.get(0)));
+    return null;
   }
+
+private class PlayerCache {
+  private Map<String, Player> playerMap = new HashMap<>();
+
+  private Player getForProvider(Provider provider) throws AuthException {
+    if (playerMap.containsKey(provider.getProviderName())) {
+      return playerMap.get(provider.getProviderName());
+    } else {
+      Player player = provider.getPlayerFactory().getPlayer();
+      addPlayerReadyListner(player);
+      playerMap.put(provider.getProviderName(), player);
+      return player;
+    }
+  }
+
+  private void addPlayerReadyListner(Player player) {
+    player.addPlayerReadyListener(new OnPlayerReadyListener() {
+      @Override
+      public void onPlayerReady(Player player) {
+        for (OnPreparedListener onPreparedListener : onPreparedListeners) {
+          onPreparedListener.onPrepared(SkaldMusicService.this);
+        }
+      }
+    });
+  }
+}
 }
