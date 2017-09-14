@@ -5,13 +5,8 @@ import android.util.Log;
 import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Player;
 
-class SpotifyOperationCallback implements Player.OperationCallback {
+abstract class SpotifyOperationCallback implements Player.OperationCallback {
   private static final String TAG = SpotifyOperationCallback.class.getSimpleName();
-
-  @Override
-  public void onSuccess() {
-    Log.i(TAG, "Operation succeed");
-  }
 
   @Override
   public void onError(Error error) {

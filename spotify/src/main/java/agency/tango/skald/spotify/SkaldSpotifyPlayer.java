@@ -1,9 +1,7 @@
 package agency.tango.skald.spotify;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.spotify.sdk.android.player.Config;
@@ -29,15 +27,18 @@ import agency.tango.skald.spotify.api.models.Tokens;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-import static agency.tango.skald.core.SkaldMusicService.EXTRA_AUTH_DATA;
-import static agency.tango.skald.core.SkaldMusicService.INTENT_ACTION;
-
 class SkaldSpotifyPlayer implements Player {
   private static final String TAG = SkaldSpotifyPlayer.class.getSimpleName();
 
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
-  private final SpotifyOperationCallback spotifyOperationCallback = new SpotifyOperationCallback();
+  private final SpotifyOperationCallback spotifyOperationCallback = new SpotifyOperationCallback() {
+    @Override
+    public void onSuccess() {
+      Log.i(TAG, "Operation succeed");
+    }
+  };
+
   private final Context context;
   private SpotifyPlayer spotifyPlayer;
 
@@ -79,27 +80,23 @@ class SkaldSpotifyPlayer implements Player {
   @Override
   public void stop() {
     if (spotifyPlayer.getPlaybackState().isPlaying) {
-      spotifyPlayer.pause(spotifyOperationCallback);
-      if (!spotifyPlayer.getPlaybackState().isPlaying) {
-        spotifyPlayer.seekToPosition(new com.spotify.sdk.android.player.Player.OperationCallback() {
-                                       @Override
-                                       public void onSuccess() {
-                                         for (OnPlaybackListener onPlaybackListener :
-                                             onPlaybackListeners) {
-                                           onPlaybackListener.onStopEvent();
-                                         }
-                                       }
+      spotifyPlayer.pause(new SpotifyOperationCallback() {
+        @Override
+        public void onSuccess() {
+          spotifyPlayer.seekToPosition(new SpotifyOperationCallback() {
+            @Override
+            public void onSuccess() {
+              notifyStopEvent();
+            }
+          }, 0);
+        }
+      });
+    }
+  }
 
-                                       @Override
-                                       public void onError(Error error) {
-                                         for (OnPlaybackListener onPlaybackListener :
-                                             onPlaybackListeners) {
-                                           onPlaybackListener.onError(new PlaybackError());
-                                         }
-                                       }
-                                     },
-            0);
-      }
+  private void notifyStopEvent() {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onStopEvent();
     }
   }
 
@@ -146,6 +143,7 @@ class SkaldSpotifyPlayer implements Player {
     spotifyPlayer.addNotificationCallback(new NotificationCallback() {
       @Override
       public void onPlaybackEvent(PlayerEvent playerEvent) {
+        Log.d(TAG, playerEvent.toString());
         Metadata metadata = spotifyPlayer.getMetadata();
 
         if (playerEvent == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
@@ -153,13 +151,11 @@ class SkaldSpotifyPlayer implements Player {
             notifyPlayEvent(metadata);
           }
         } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
-          for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-            onPlaybackListener.onResumeEvent();
+          if (metadata.currentTrack != null) {
+            notifyResumeEvent();
           }
         } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
-          for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-            onPlaybackListener.onPauseEvent();
-          }
+          notifyPauseEvent();
         }
       }
 
@@ -173,12 +169,31 @@ class SkaldSpotifyPlayer implements Player {
     });
   }
 
+  private void notifyPlayEvent(Metadata metadata) {
+    TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
+        metadata.currentTrack.name);
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onPlayEvent(trackMetadata);
+    }
+  }
+
+  private void notifyResumeEvent() {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onResumeEvent();
+    }
+  }
+
+  private void notifyPauseEvent() {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onPauseEvent();
+    }
+  }
+
   private void addConnectionStateCallback(final SpotifyPlayer spotifyPlayer, final String clientId,
       final String clientSecret, final SpotifyAuthData spotifyAuthData, final Context context) {
     spotifyPlayer.addConnectionStateCallback(new ConnectionStateCallback() {
       @Override
       public void onLoggedIn() {
-        Log.d(TAG, "onLoggedIn");
         for (OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
           onPlayerReadyListener.onPlayerReady(SkaldSpotifyPlayer.this);
         }
@@ -200,15 +215,7 @@ class SkaldSpotifyPlayer implements Player {
               @Override
               public void onSuccess(Tokens tokens) {
                 spotifyPlayer.login(tokens.getAccessToken());
-
-                SpotifyAuthData spotifyAuthDataRefreshed = new SpotifyAuthData(
-                    tokens.getAccessToken(), spotifyAuthData.getRefreshToken(),
-                    tokens.getExpiresIn());
-                Intent intent = new Intent(INTENT_ACTION);
-                intent.putExtra(EXTRA_AUTH_DATA, spotifyAuthDataRefreshed);
-                LocalBroadcastManager
-                    .getInstance(context)
-                    .sendBroadcast(intent);
+                saveTokens(context, tokens, spotifyAuthData);
               }
 
               @Override
@@ -230,11 +237,9 @@ class SkaldSpotifyPlayer implements Player {
     });
   }
 
-  private void notifyPlayEvent(Metadata metadata) {
-    TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
-        metadata.currentTrack.name);
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onPlayEvent(trackMetadata);
-    }
+  private void saveTokens(Context context, Tokens tokens, SpotifyAuthData spotifyAuthData) {
+    SpotifyAuthData spotifyAuthDataRefreshed = new SpotifyAuthData(tokens.getAccessToken(),
+        spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
+    new SpotifyAuthStore().save(context, spotifyAuthDataRefreshed);
   }
 }

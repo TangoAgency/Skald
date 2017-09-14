@@ -1,6 +1,7 @@
 package agency.tango.skald.spotify;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,16 +75,31 @@ class SpotifySearchService implements SearchService {
   }
 
   @Override
-  public Single<List<SkaldTrack>> searchForTracks(String query) {
+  public Single<List<SkaldTrack>> searchForTracks(final String query) {
     return spotifyApi.getTracksForQuery(query, "track")
+        .onErrorResumeNext(new Function<Throwable, SingleSource<? extends TrackSearch>>() {
+          @Override
+          public SingleSource<? extends TrackSearch> apply(Throwable throwable) throws Exception {
+            if (isTokenExpired(throwable)) {
+              return refreshToken()
+                  .flatMap(new Function<Tokens, SingleSource<TrackSearch>>() {
+                    @Override
+                    public SingleSource<TrackSearch> apply(Tokens tokens) throws Exception {
+                      token = tokens.getAccessToken();
+                      saveTokens(tokens);
+
+                      return spotifyApi.getTracksForQuery(query, "track");
+                    }
+                  });
+            }
+
+            return Single.just(new TrackSearch());
+          }
+        })
         .map(new Function<TrackSearch, List<SkaldTrack>>() {
           @Override
           public List<SkaldTrack> apply(TrackSearch searchTrack) throws Exception {
-            List<SkaldTrack> skaldTracks = new ArrayList<>();
-            for (Track track : searchTrack.getTracks().getItems()) {
-              skaldTracks.add(new SpotifyTrack(track));
-            }
-            return skaldTracks;
+            return mapSpotifyTracksToSkaldTracks(searchTrack);
           }
         });
   }
@@ -95,33 +111,61 @@ class SpotifySearchService implements SearchService {
           @Override
           public SingleSource<? extends BrowsePlaylists> apply(Throwable throwable)
               throws Exception {
-            if (throwable instanceof HttpException
-                && ((HttpException) throwable).code() == UNAUTHORIZED_ERROR_CODE) {
-              return new TokenService()
-                  .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
+            if (isTokenExpired(throwable)) {
+              return refreshToken()
                   .flatMap(new Function<Tokens, SingleSource<BrowsePlaylists>>() {
                     @Override
                     public SingleSource<BrowsePlaylists> apply(Tokens tokens) throws Exception {
                       token = tokens.getAccessToken();
-                      SpotifyAuthData spotifyAuthDataRestored = new SpotifyAuthData(token,
-                          spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
-                      new SpotifyAuthStore().save(context, spotifyAuthDataRestored);
+                      saveTokens(tokens);
 
                       return spotifyApi.getPlaylistsForQuery(query, "playlist");
                     }
                   });
             }
+
             return Single.just(new BrowsePlaylists());
           }
-        }).map(new Function<BrowsePlaylists, List<SkaldPlaylist>>() {
+        })
+        .map(new Function<BrowsePlaylists, List<SkaldPlaylist>>() {
           @Override
           public List<SkaldPlaylist> apply(BrowsePlaylists browsePlaylists) throws Exception {
-            List<SkaldPlaylist> skaldPlaylists = new ArrayList<>();
-            for (Playlist playlist : browsePlaylists.getPlaylists().getItems()) {
-              skaldPlaylists.add(new SpotifyPlaylist(playlist));
-            }
-            return skaldPlaylists;
+            return mapSpotifyPlaylistsToSkaldPlaylists(browsePlaylists);
           }
         });
+  }
+
+  private boolean isTokenExpired(Throwable throwable) {
+    return throwable instanceof HttpException
+        && ((HttpException) throwable).code() == UNAUTHORIZED_ERROR_CODE;
+  }
+
+  private Single<Tokens> refreshToken() {
+    return new TokenService()
+        .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken());
+  }
+
+  private void saveTokens(Tokens tokens) {
+    SpotifyAuthData spotifyAuthDataRestored = new SpotifyAuthData(token,
+        spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
+    new SpotifyAuthStore().save(context, spotifyAuthDataRestored);
+  }
+
+  @NonNull
+  private List<SkaldTrack> mapSpotifyTracksToSkaldTracks(TrackSearch searchTrack) {
+    List<SkaldTrack> skaldTracks = new ArrayList<>();
+    for (Track track : searchTrack.getTracks().getItems()) {
+      skaldTracks.add(new SpotifyTrack(track));
+    }
+    return skaldTracks;
+  }
+
+  @NonNull
+  private List<SkaldPlaylist> mapSpotifyPlaylistsToSkaldPlaylists(BrowsePlaylists browsePlaylists) {
+    List<SkaldPlaylist> skaldPlaylists = new ArrayList<>();
+    for (Playlist playlist : browsePlaylists.getPlaylists().getItems()) {
+      skaldPlaylists.add(new SpotifyPlaylist(playlist));
+    }
+    return skaldPlaylists;
   }
 }

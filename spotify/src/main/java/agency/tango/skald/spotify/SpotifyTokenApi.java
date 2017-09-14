@@ -25,7 +25,7 @@ public interface SpotifyTokenApi {
       @Field("refresh_token") String refreshToken);
 
   class Builder {
-    public SpotifyTokenApi build() {
+    SpotifyTokenApi build() {
       Retrofit retrofit = new Retrofit.Builder()
           .baseUrl(SpotifyTokenApi.BASE_URL)
           .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
