@@ -33,20 +33,18 @@ class SpotifySearchService implements SearchService {
   private static final String TAG = SpotifySearchService.class.getSimpleName();
   private static final int UNAUTHORIZED_ERROR_CODE = 401;
   private final SpotifyApi spotifyApi;
-  private final String clientId;
-  private final String clientSecret;
-  private final Context context;
+  private final SpotifyProvider spotifyProvider;
   private final SpotifyAuthData spotifyAuthData;
+  private final Context context;
 
   private String token;
 
-  SpotifySearchService(Context context, SpotifyAuthData spotifyAuthData, String clientId,
-      String clientSecret) {
+  SpotifySearchService(Context context, SpotifyAuthData spotifyAuthData,
+      SpotifyProvider spotifyProvider) {
     token = spotifyAuthData.getOauthToken();
     this.context = context;
     this.spotifyAuthData = spotifyAuthData;
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
+    this.spotifyProvider = spotifyProvider;
     this.spotifyApi = resolveApi();
   }
 
@@ -85,7 +83,6 @@ class SpotifySearchService implements SearchService {
                   .flatMap(new Function<Tokens, SingleSource<TrackSearch>>() {
                     @Override
                     public SingleSource<TrackSearch> apply(Tokens tokens) throws Exception {
-                      token = tokens.getAccessToken();
                       saveTokens(tokens);
 
                       return spotifyApi.getTracksForQuery(query, "track");
@@ -116,7 +113,6 @@ class SpotifySearchService implements SearchService {
                   .flatMap(new Function<Tokens, SingleSource<BrowsePlaylists>>() {
                     @Override
                     public SingleSource<BrowsePlaylists> apply(Tokens tokens) throws Exception {
-                      token = tokens.getAccessToken();
                       saveTokens(tokens);
 
                       return spotifyApi.getPlaylistsForQuery(query, "playlist");
@@ -142,13 +138,16 @@ class SpotifySearchService implements SearchService {
 
   private Single<Tokens> refreshToken() {
     return new TokenService()
-        .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken());
+        .getRefreshToken(spotifyProvider.getClientId(), spotifyProvider.getClientSecret(),
+            spotifyAuthData.getRefreshToken());
   }
 
   private void saveTokens(Tokens tokens) {
+    token = tokens.getAccessToken();
+
     SpotifyAuthData spotifyAuthDataRestored = new SpotifyAuthData(token,
         spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
-    new SpotifyAuthStore().save(context, spotifyAuthDataRestored);
+    new SpotifyAuthStore(spotifyProvider).save(context, spotifyAuthDataRestored);
   }
 
   @NonNull

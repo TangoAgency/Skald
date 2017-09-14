@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 
 import agency.tango.skald.core.AuthException;
-import agency.tango.skald.core.Provider;
 import agency.tango.skald.core.SkaldAuthData;
 import agency.tango.skald.core.SkaldAuthStore;
 
@@ -14,6 +13,11 @@ class SpotifyAuthStore implements SkaldAuthStore {
   private static final String SPOTIFY_JSON_KEY = "spotify_json";
   private static final String SPOTIFY_FILE_KEY = "agency.tango.skald.spotify.SPOTIFY_FILE_KEY";
   private static final String EMPTY = "";
+  private final SpotifyProvider spotifyProvider;
+
+  public SpotifyAuthStore(SpotifyProvider spotifyProvider) {
+    this.spotifyProvider = spotifyProvider;
+  }
 
   @Override
   public void save(Context context, SkaldAuthData skaldAuthData) {
@@ -30,12 +34,11 @@ class SpotifyAuthStore implements SkaldAuthStore {
   }
 
   @Override
-  public SkaldAuthData restore(Context context, Provider provider) throws AuthException {
+  public SkaldAuthData restore(Context context) throws AuthException {
     SharedPreferences sharedPreferences = getSharedPreferences(context);
 
     String json = sharedPreferences.getString(SPOTIFY_JSON_KEY, EMPTY);
     if(json.equals(EMPTY)) {
-      SpotifyProvider spotifyProvider = (SpotifyProvider) provider;
       throw new SpotifyAuthException("Cannot restore token", new SpotifyAuthError(context,
           spotifyProvider.getClientId(), spotifyProvider.getRedirectUri(),
           spotifyProvider.getClientSecret()));

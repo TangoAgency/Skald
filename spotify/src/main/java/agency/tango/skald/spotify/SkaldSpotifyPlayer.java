@@ -40,20 +40,24 @@ class SkaldSpotifyPlayer implements Player {
   };
 
   private final Context context;
+  private final SpotifyProvider spotifyProvider;
   private SpotifyPlayer spotifyPlayer;
 
   SkaldSpotifyPlayer(final Context context, final SpotifyAuthData spotifyAuthData,
-      final String clientId, final String clientSecret) {
+      final SpotifyProvider spotifyProvider) {
     this.context = context;
-    final Config playerConfig = new Config(context, spotifyAuthData.getOauthToken(), clientId);
+    this.spotifyProvider = spotifyProvider;
+
+    final Config playerConfig = new Config(context, spotifyAuthData.getOauthToken(),
+        spotifyProvider.getClientId());
 
     spotifyPlayer = Spotify.getPlayer(playerConfig, this,
         new SpotifyPlayer.InitializationObserver() {
           @Override
           public void onInitialized(final SpotifyPlayer spotifyPlayer) {
             addNotificationCallback(spotifyPlayer);
-            addConnectionStateCallback(spotifyPlayer, clientId, clientSecret, spotifyAuthData,
-                context);
+            addConnectionStateCallback(context, spotifyPlayer, spotifyProvider.getClientId(),
+                spotifyProvider.getClientSecret(), spotifyAuthData);
           }
 
           @Override
@@ -153,9 +157,9 @@ class SkaldSpotifyPlayer implements Player {
         } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
           if (metadata.currentTrack != null) {
             notifyResumeEvent();
+          } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
+            notifyPauseEvent();
           }
-        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
-          notifyPauseEvent();
         }
       }
 
@@ -189,8 +193,8 @@ class SkaldSpotifyPlayer implements Player {
     }
   }
 
-  private void addConnectionStateCallback(final SpotifyPlayer spotifyPlayer, final String clientId,
-      final String clientSecret, final SpotifyAuthData spotifyAuthData, final Context context) {
+  private void addConnectionStateCallback(final Context context, final SpotifyPlayer spotifyPlayer,
+      final String clientId, final String clientSecret, final SpotifyAuthData spotifyAuthData) {
     spotifyPlayer.addConnectionStateCallback(new ConnectionStateCallback() {
       @Override
       public void onLoggedIn() {
@@ -240,6 +244,6 @@ class SkaldSpotifyPlayer implements Player {
   private void saveTokens(Context context, Tokens tokens, SpotifyAuthData spotifyAuthData) {
     SpotifyAuthData spotifyAuthDataRefreshed = new SpotifyAuthData(tokens.getAccessToken(),
         spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
-    new SpotifyAuthStore().save(context, spotifyAuthDataRefreshed);
+    new SpotifyAuthStore(spotifyProvider).save(context, spotifyAuthDataRefreshed);
   }
 }
