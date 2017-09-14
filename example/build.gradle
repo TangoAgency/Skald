@@ -41,6 +41,8 @@ dependencies {
   compile project(":spotify")
   compile project(":deezer")
 
+  compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
   compile deps.rxJava
   compile deps.rxAndroid
   compile deps.dagger

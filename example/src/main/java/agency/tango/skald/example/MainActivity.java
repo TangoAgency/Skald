@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
   private ListView listView;
   private Button pauseButton;
   private Button resumeButton;
+  private Button stopButton;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,9 +45,11 @@ public class MainActivity extends Activity {
     listView = (ListView) findViewById(R.id.list_view_playlists);
     pauseButton = (Button) findViewById(R.id.button_pause);
     resumeButton = (Button) findViewById(R.id.button_resume);
+    stopButton = (Button) findViewById(R.id.button_stop);
 
     pauseButton.setEnabled(false);
     resumeButton.setEnabled(false);
+    stopButton.setEnabled(false);
 
     SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
@@ -85,7 +88,7 @@ public class MainActivity extends Activity {
 
           @Override
           public void onStopEvent() {
-
+            Log.d(TAG, "Stop event");
           }
 
           @Override
@@ -104,15 +107,17 @@ public class MainActivity extends Activity {
         skaldMusicService.playPlaylist();
         resumeButton.setEnabled(false);
         pauseButton.setEnabled(true);
+        stopButton.setEnabled(true);
       }
     });
 
     pauseButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        skaldMusicService.stop();
+        skaldMusicService.pause();
         resumeButton.setEnabled(true);
         pauseButton.setEnabled(false);
+        stopButton.setEnabled(true);
       }
     });
 
@@ -122,6 +127,17 @@ public class MainActivity extends Activity {
         skaldMusicService.resume();
         pauseButton.setEnabled(true);
         resumeButton.setEnabled(false);
+        stopButton.setEnabled(true);
+      }
+    });
+
+    stopButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        skaldMusicService.stop();
+        pauseButton.setEnabled(false);
+        resumeButton.setEnabled(false);
+        stopButton.setEnabled(false);
       }
     });
   }
