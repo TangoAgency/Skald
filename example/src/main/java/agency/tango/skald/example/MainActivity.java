@@ -16,7 +16,6 @@ import java.util.List;
 
 import agency.tango.skald.R;
 import agency.tango.skald.core.AuthException;
-import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
@@ -42,7 +41,6 @@ public class MainActivity extends Activity {
   private Button pauseButton;
   private Button resumeButton;
   private Button stopButton;
-  private SearchService spotifySearchService;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {

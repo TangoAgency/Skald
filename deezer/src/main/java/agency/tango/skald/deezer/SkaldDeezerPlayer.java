@@ -1,12 +1,19 @@
 package agency.tango.skald.deezer;
 
+import android.content.Context;
+
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
-public class DeezerPlayer implements Player {
+public class SkaldDeezerPlayer implements Player {
+
+  public SkaldDeezerPlayer(Context context, DeezerAuthData deezerAuthData) {
+
+  }
+
   @Override
   public void play(SkaldTrack track) {
 

@@ -24,4 +24,8 @@ public class DeezerAuthData extends SkaldAuthData {
   public void writeToParcel(Parcel dest, int flags) {
 
   }
+
+  public DeezerConnect getDeezerConnect() {
+    return deezerConnect;
+  }
 }
