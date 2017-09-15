@@ -55,6 +55,7 @@ public class SpotifyAuthActivity extends Activity {
           break;
         case ERROR:
           notifyError(response.getError());
+          setResult(RESULT_CANCELED);
       }
     }
     this.finish();
@@ -81,11 +82,14 @@ public class SpotifyAuthActivity extends Activity {
             LocalBroadcastManager
                 .getInstance(SpotifyAuthActivity.this)
                 .sendBroadcast(intent);
+
+            setResult(RESULT_OK);
           }
 
           @Override
           public void onError(Throwable error) {
             Log.e(TAG, "Tokens observer error", error);
+            setResult(RESULT_CANCELED);
           }
         });
   }

@@ -36,8 +36,9 @@ public class MainActivity extends Activity {
   public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
   public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
   private static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
+  private static final int REQUEST_CODE = 1334;
   private SkaldMusicService skaldMusicService;
-  private ListView listView;
+  private ArrayAdapter<SkaldTrack> arrayAdapter;
   private Button pauseButton;
   private Button resumeButton;
   private Button stopButton;
@@ -47,7 +48,7 @@ public class MainActivity extends Activity {
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    listView = (ListView) findViewById(R.id.list_view_playlists);
+    ListView listView = (ListView) findViewById(R.id.list_view_playlists);
     pauseButton = (Button) findViewById(R.id.button_pause);
     resumeButton = (Button) findViewById(R.id.button_resume);
     stopButton = (Button) findViewById(R.id.button_stop);
@@ -69,7 +70,7 @@ public class MainActivity extends Activity {
       AuthError authError = authException.getAuthError();
       if (authError.hasResolution()) {
         Intent intent = authError.getResolution();
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CODE);
       }
     }
 
@@ -124,6 +125,9 @@ public class MainActivity extends Activity {
       }
     });
 
+    arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+    listView.setAdapter(arrayAdapter);
+
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -142,7 +146,7 @@ public class MainActivity extends Activity {
         skaldMusicService.pause();
         resumeButton.setEnabled(true);
         pauseButton.setEnabled(false);
-        stopButton.setEnabled(true);
+        stopButton.setEnabled(false);
       }
     });
 
@@ -177,18 +181,27 @@ public class MainActivity extends Activity {
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
           @Override
           public void onSuccess(List<SkaldTrack> skaldTracks) {
-            //refactor
-            listView.setAdapter(new ArrayAdapter<>(MainActivity.this,
-                android.R.layout.simple_list_item_1, skaldTracks));
-            //ArrayAdapter arrayAdapter;
+            arrayAdapter.addAll(skaldTracks);
           }
 
           @Override
           public void onError(Throwable error) {
-            //wiecej wypisac
-            Log.e(TAG, "Observer error", error);
+            Log.e(TAG, "Error occurred in observer during searching for tracks", error);
           }
         });
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    if (requestCode == REQUEST_CODE) {
+      if (resultCode == RESULT_OK) {
+        Log.d(TAG, "Authentication completed");
+      } else {
+        Log.e(TAG, "Authentication went wrong");
+      }
+    }
   }
 
   @Override

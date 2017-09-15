@@ -113,7 +113,7 @@ public class SkaldMusicService {
   }
 
   private void notifyError() {
-    for(OnErrorListener onErrorListener : onErrorListeners) {
+    for (OnErrorListener onErrorListener : onErrorListeners) {
       onErrorListener.onError();
     }
   }
@@ -167,7 +167,6 @@ public class SkaldMusicService {
     throw new IllegalStateException();
   }
 
-
   private SkaldAuthStore getSkaldAuthStore() {
     return providers.get(0)
         .getSkaldAuthStoreFactory()
@@ -178,29 +177,29 @@ public class SkaldMusicService {
     return null;
   }
 
-private class PlayerCache {
-  private Map<String, Player> playerMap = new HashMap<>();
+  private class PlayerCache {
+    private Map<String, Player> playerMap = new HashMap<>();
 
-  private Player getForProvider(Provider provider) throws AuthException {
-    if (playerMap.containsKey(provider.getProviderName())) {
-      return playerMap.get(provider.getProviderName());
-    } else {
-      Player player = provider.getPlayerFactory().getPlayer();
-      addPlayerReadyListner(player);
-      playerMap.put(provider.getProviderName(), player);
-      return player;
+    private Player getForProvider(Provider provider) throws AuthException {
+      if (playerMap.containsKey(provider.getProviderName())) {
+        return playerMap.get(provider.getProviderName());
+      } else {
+        Player player = provider.getPlayerFactory().getPlayer();
+        addPlayerReadyListener(player);
+        playerMap.put(provider.getProviderName(), player);
+        return player;
+      }
+    }
+
+    private void addPlayerReadyListener(Player player) {
+      player.addPlayerReadyListener(new OnPlayerReadyListener() {
+        @Override
+        public void onPlayerReady(Player player) {
+          for (OnPreparedListener onPreparedListener : onPreparedListeners) {
+            onPreparedListener.onPrepared(SkaldMusicService.this);
+          }
+        }
+      });
     }
   }
-
-  private void addPlayerReadyListner(Player player) {
-    player.addPlayerReadyListener(new OnPlayerReadyListener() {
-      @Override
-      public void onPlayerReady(Player player) {
-        for (OnPreparedListener onPreparedListener : onPreparedListeners) {
-          onPreparedListener.onPrepared(SkaldMusicService.this);
-        }
-      }
-    });
-  }
-}
 }

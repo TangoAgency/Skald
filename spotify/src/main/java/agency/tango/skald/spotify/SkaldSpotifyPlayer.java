@@ -157,9 +157,9 @@ class SkaldSpotifyPlayer implements Player {
         } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
           if (metadata.currentTrack != null) {
             notifyResumeEvent();
-          } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
-            notifyPauseEvent();
           }
+        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
+          notifyPauseEvent();
         }
       }
 
@@ -210,8 +210,6 @@ class SkaldSpotifyPlayer implements Player {
 
       @Override
       public void onLoginFailed(Error error) {
-        Log.e(TAG, String.format("onLoginFailed %s", error.toString()));
-
         new TokenService()
             .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
             .subscribeOn(Schedulers.io())
@@ -224,7 +222,7 @@ class SkaldSpotifyPlayer implements Player {
 
               @Override
               public void onError(Throwable error) {
-                Log.e(TAG, "RefreshToken Observer error", error);
+                Log.e(TAG, "RefreshToken observer error", error);
               }
             });
       }
