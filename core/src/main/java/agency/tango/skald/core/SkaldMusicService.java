@@ -19,10 +19,13 @@ import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import io.reactivex.Single;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Function;
 
 public class SkaldMusicService {
   public static final String INTENT_ACTION = "auth_action";
   public static final String EXTRA_AUTH_DATA = "auth_data";
+  public static final String EXTRA_PROVIDER_NAME = "provider_name";
 
   private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
@@ -42,7 +45,12 @@ public class SkaldMusicService {
       @Override
       public void onReceive(Context context, Intent intent) {
         SkaldAuthData skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
-        getSkaldAuthStore().save(context, skaldAuthData);
+        String providerName = intent.getStringExtra(EXTRA_PROVIDER_NAME);
+        for(Provider provider : providers) {
+          if(provider.getProviderName().equals(providerName)) {
+            getSkaldAuthStore(provider).save(context, skaldAuthData);
+          }
+        }
       }
     };
 
@@ -109,7 +117,6 @@ public class SkaldMusicService {
     } catch (AuthException authException) {
       notifyError();
     }
-
   }
 
   private void notifyError() {
@@ -150,12 +157,36 @@ public class SkaldMusicService {
     }
   }
 
-  public Single<List<SkaldTrack>> searchTrack(String query) throws AuthException {
-    return getSearchService().searchForTracks(query);
+  public Single<List<SkaldTrack>> searchTrack(String query) {
+    List<Single<List<SkaldTrack>>> singles = new ArrayList<>();
+    for (Provider provider : providers) {
+      try {
+        singles.add(getSearchService(provider).searchForTracks(query));
+      } catch (AuthException e) {
+        notifyError();
+      }
+    }
+    return mergeLists(singles);
+  }
+
+  private <T> Single<List<T>> mergeLists(List<Single<List<T>>> singlesList) {
+    return Single.merge(singlesList)
+        .toList()
+        .map(new Function<List<List<T>>, List<T>>() {
+          @Override
+          public List<T> apply(@NonNull List<List<T>> lists) throws Exception {
+            List<T> mergedList = new ArrayList<>();
+            for(List<T> list : lists) {
+              mergedList.addAll(list);
+            }
+            return mergedList;
+          }
+        });
   }
 
   public Single<List<SkaldPlaylist>> searchPlayList(String query) throws AuthException {
-    return getSearchService().searchForPlaylists(query);
+    //return getSearchService().searchForPlaylists(query);
+    return null;
   }
 
   private Player getPlayer(SkaldTrack skaldTrack) throws AuthException {
@@ -167,14 +198,12 @@ public class SkaldMusicService {
     throw new IllegalStateException();
   }
 
-  private SkaldAuthStore getSkaldAuthStore() {
-    return providers.get(0)
-        .getSkaldAuthStoreFactory()
-        .getSkaldAuthStore();
+  private SkaldAuthStore getSkaldAuthStore(Provider provider) {
+    return provider.getSkaldAuthStoreFactory().getSkaldAuthStore();
   }
 
-  private SearchService getSearchService() throws AuthException {
-    return null;
+  private SearchService getSearchService(Provider provider) throws AuthException {
+    return provider.getSearchServiceFactory().getSearchService();
   }
 
   private class PlayerCache {

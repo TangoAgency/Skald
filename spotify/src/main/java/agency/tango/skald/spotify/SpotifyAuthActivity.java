@@ -17,10 +17,12 @@ import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_AUTH_DATA;
+import static agency.tango.skald.core.SkaldMusicService.EXTRA_PROVIDER_NAME;
 import static agency.tango.skald.core.SkaldMusicService.INTENT_ACTION;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_ID;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_CLIENT_SECRET;
 import static agency.tango.skald.spotify.SpotifyProvider.EXTRA_REDIRECT_URI;
+import static agency.tango.skald.spotify.SpotifyProvider.SPOTIFY_PROVIDER;
 import static com.spotify.sdk.android.authentication.AuthenticationResponse.Type.CODE;
 
 public class SpotifyAuthActivity extends Activity {
@@ -78,6 +80,7 @@ public class SpotifyAuthActivity extends Activity {
                 tokens.getRefreshToken(), tokens.getExpiresIn());
 
             Intent intent = new Intent(INTENT_ACTION);
+            intent.putExtra(EXTRA_PROVIDER_NAME, SPOTIFY_PROVIDER);
             intent.putExtra(EXTRA_AUTH_DATA, spotifyAuthData);
             LocalBroadcastManager
                 .getInstance(SpotifyAuthActivity.this)

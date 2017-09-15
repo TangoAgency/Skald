@@ -62,18 +62,6 @@ public class MainActivity extends Activity {
 
     skaldMusicService = new SkaldMusicService(this, spotifyProvider);
 
-    try {
-      spotifySearchService = spotifyProvider
-          .getSearchServiceFactory()
-          .getSearchService();
-    } catch (AuthException authException) {
-      AuthError authError = authException.getAuthError();
-      if (authError.hasResolution()) {
-        Intent intent = authError.getResolution();
-        startActivityForResult(intent, REQUEST_CODE);
-      }
-    }
-
     skaldMusicService.setSource(new SpotifyTrack(Uri.parse("skald://spotify/track/123"), "A", "B"));
     try {
       skaldMusicService.prepare();
@@ -175,7 +163,7 @@ public class MainActivity extends Activity {
   protected void onStart() {
     super.onStart();
 
-    spotifySearchService.searchForTracks("hip-hop")
+    skaldMusicService.searchTrack("hip-hop")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
