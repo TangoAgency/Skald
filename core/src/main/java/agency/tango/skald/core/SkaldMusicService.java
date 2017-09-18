@@ -61,10 +61,12 @@ public class SkaldMusicService {
 
   public void setSource(SkaldTrack skaldTrack) {
     currentTrack = skaldTrack;
+    currentPlaylist = null;
   }
 
   public void setSource(SkaldPlaylist skaldPlaylist) {
     currentPlaylist = skaldPlaylist;
+    currentTrack = null;
   }
 
   public void prepare() throws AuthException {
@@ -76,13 +78,17 @@ public class SkaldMusicService {
   }
 
   public void play() {
-    if (currentPlaylist != null) {
-      //getPlayer(currentPlaylist).play(currentPlaylist);
-    } else if (currentTrack != null) {
+    if (currentTrack != null) {
       try {
         getPlayer().play(currentTrack);
       } catch (AuthException authException) {
         notifyError();
+      }
+    } else if (currentPlaylist != null) {
+      try {
+        getPlayer().play(currentPlaylist);
+      } catch (AuthException authException) {
+        authException.printStackTrace();
       }
     }
   }
@@ -191,7 +197,7 @@ public class SkaldMusicService {
 
   private Player getPlayer() throws AuthException {
     for (Provider provider : providers) {
-      if (provider.canHandle(currentTrack)) {
+      if (provider.canHandle(currentTrack) || provider.canHandle(currentPlaylist)) {
         return playerCache.getForProvider(provider);
       }
     }
