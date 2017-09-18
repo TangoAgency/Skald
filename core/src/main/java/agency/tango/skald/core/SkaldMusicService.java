@@ -46,8 +46,8 @@ public class SkaldMusicService {
       public void onReceive(Context context, Intent intent) {
         SkaldAuthData skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
         String providerName = intent.getStringExtra(EXTRA_PROVIDER_NAME);
-        for(Provider provider : providers) {
-          if(provider.getProviderName().equals(providerName)) {
+        for (Provider provider : providers) {
+          if (provider.getProviderName().equals(providerName)) {
             getSkaldAuthStore(provider).save(context, skaldAuthData);
           }
         }
@@ -68,7 +68,7 @@ public class SkaldMusicService {
   }
 
   public void prepare() throws AuthException {
-    getPlayer(currentTrack);
+    getPlayer();
   }
 
   public void prepareAsync() {
@@ -80,7 +80,7 @@ public class SkaldMusicService {
       //getPlayer(currentPlaylist).play(currentPlaylist);
     } else if (currentTrack != null) {
       try {
-        getPlayer(currentTrack).play(currentTrack);
+        getPlayer().play(currentTrack);
       } catch (AuthException authException) {
         notifyError();
       }
@@ -89,7 +89,7 @@ public class SkaldMusicService {
 
   public void pause() {
     try {
-      getPlayer(currentTrack).pause();
+      getPlayer().pause();
     } catch (AuthException authException) {
       notifyError();
     }
@@ -97,7 +97,7 @@ public class SkaldMusicService {
 
   public void resume() {
     try {
-      getPlayer(currentTrack).resume();
+      getPlayer().resume();
     } catch (AuthException authException) {
       notifyError();
     }
@@ -105,7 +105,7 @@ public class SkaldMusicService {
 
   public void stop() {
     try {
-      getPlayer(currentTrack).stop();
+      getPlayer().stop();
     } catch (AuthException authException) {
       notifyError();
     }
@@ -113,15 +113,9 @@ public class SkaldMusicService {
 
   public void release() {
     try {
-      getPlayer(currentTrack).release();
+      getPlayer().release();
     } catch (AuthException authException) {
       notifyError();
-    }
-  }
-
-  private void notifyError() {
-    for (OnErrorListener onErrorListener : onErrorListeners) {
-      onErrorListener.onError();
     }
   }
 
@@ -143,7 +137,7 @@ public class SkaldMusicService {
 
   public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
     try {
-      getPlayer(currentTrack).addOnPlaybackListener(onPlaybackListener);
+      getPlayer().addOnPlaybackListener(onPlaybackListener);
     } catch (AuthException e) {
       notifyError();
     }
@@ -151,7 +145,7 @@ public class SkaldMusicService {
 
   public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
     try {
-      getPlayer(currentTrack).removeOnPlaybackListener(onPlaybackListener);
+      getPlayer().removeOnPlaybackListener(onPlaybackListener);
     } catch (AuthException e) {
       notifyError();
     }
@@ -176,7 +170,7 @@ public class SkaldMusicService {
           @Override
           public List<T> apply(@NonNull List<List<T>> lists) throws Exception {
             List<T> mergedList = new ArrayList<>();
-            for(List<T> list : lists) {
+            for (List<T> list : lists) {
               mergedList.addAll(list);
             }
             return mergedList;
@@ -189,9 +183,15 @@ public class SkaldMusicService {
     return null;
   }
 
-  private Player getPlayer(SkaldTrack skaldTrack) throws AuthException {
+  private void notifyError() {
+    for (OnErrorListener onErrorListener : onErrorListeners) {
+      onErrorListener.onError();
+    }
+  }
+
+  private Player getPlayer() throws AuthException {
     for (Provider provider : providers) {
-      if (provider.canHandle(skaldTrack)) {
+      if (provider.canHandle(currentTrack)) {
         return playerCache.getForProvider(provider);
       }
     }
@@ -214,8 +214,8 @@ public class SkaldMusicService {
         return playerMap.get(provider.getProviderName());
       } else {
         Player player = provider.getPlayerFactory().getPlayer();
-        addPlayerReadyListener(player);
         playerMap.put(provider.getProviderName(), player);
+        addPlayerReadyListener(player);
         return player;
       }
     }

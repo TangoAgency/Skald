@@ -1,4 +1,4 @@
-package agency.tango.skald.deezer;
+package agency.tango.skald.deezer.models;
 
 import android.net.Uri;
 

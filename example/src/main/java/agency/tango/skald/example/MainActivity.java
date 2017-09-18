@@ -12,30 +12,25 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-import java.util.List;
-
 import agency.tango.skald.R;
 import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
-import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnErrorListener;
-import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.core.models.TrackMetadata;
+import agency.tango.skald.deezer.DeezerProvider;
+import agency.tango.skald.deezer.models.DeezerTrack;
 import agency.tango.skald.spotify.SpotifyProvider;
-import agency.tango.skald.spotify.models.SpotifyTrack;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableSingleObserver;
-import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends Activity {
   private static final String TAG = MainActivity.class.getSimpleName();
   public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
   public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
   private static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
+  private static final String DEEZER_CLIENT_ID = "250322";
   private static final int REQUEST_CODE = 1334;
+
   private SkaldMusicService skaldMusicService;
   private ArrayAdapter<SkaldTrack> arrayAdapter;
   private Button pauseButton;
@@ -57,59 +52,76 @@ public class MainActivity extends Activity {
 
     SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
+    DeezerProvider deezerProvider = new DeezerProvider(this, DEEZER_CLIENT_ID);
 
-    skaldMusicService = new SkaldMusicService(this, spotifyProvider);
+    skaldMusicService = new SkaldMusicService(this, spotifyProvider, deezerProvider);
 
-    skaldMusicService.setSource(new SpotifyTrack(Uri.parse("skald://spotify/track/123"), "A", "B"));
-    try {
-      skaldMusicService.prepare();
-    } catch (AuthException authException) {
-      AuthError authError = authException.getAuthError();
-      if (authError.hasResolution()) {
-        Intent intent = authError.getResolution();
-        startActivity(intent);
-      }
-    }
-
-    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
-      @Override
-      public void onPrepared(SkaldMusicService skaldMusicService) {
-        skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
-          @Override
-          public void onPlayEvent(TrackMetadata trackMetadata) {
-            Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
-                trackMetadata.getTitle()));
-          }
-
-          @Override
-          public void onPauseEvent() {
-            Log.d(TAG, "Pause Event");
-          }
-
-          @Override
-          public void onResumeEvent() {
-            Log.d(TAG, "Resume Event");
-          }
-
-          @Override
-          public void onStopEvent() {
-            Log.d(TAG, "Stop event");
-          }
-
-          @Override
-          public void onError(PlaybackError playbackError) {
-            Log.e(TAG, "Playback error occurred");
-          }
-        });
-      }
-    });
+    //skaldMusicService.addOnErrorListener(new OnErrorListener() {
+    //  @Override
+    //  public void onError() {
+    //    Log.e(TAG, "Error in Spotify");
+    //  }
+    //});
+    //skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
+    //  @Override
+    //  public void onPrepared(SkaldMusicService skaldMusicService) {
+    //    skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
+    //      @Override
+    //      public void onPlayEvent(TrackMetadata trackMetadata) {
+    //        Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
+    //            trackMetadata.getTitle()));
+    //      }
+    //
+    //      @Override
+    //      public void onPauseEvent() {
+    //        Log.d(TAG, "Pause Event");
+    //      }
+    //
+    //      @Override
+    //      public void onResumeEvent() {
+    //        Log.d(TAG, "Resume Event");
+    //      }
+    //
+    //      @Override
+    //      public void onStopEvent() {
+    //        Log.d(TAG, "Stop event");
+    //      }
+    //
+    //      @Override
+    //      public void onError(PlaybackError playbackError) {
+    //        Log.e(TAG, "Playback error occurred");
+    //      }
+    //    });
+    //  }
+    //});
+    //
+    //skaldMusicService.setSource(new SpotifyTrack(Uri.parse("skald://spotify/track/123"), "A", "B"));
+    //try {
+    //  skaldMusicService.prepare();
+    //} catch (AuthException authException) {
+    //  startAuthActivity(authException);
+    //}
 
     skaldMusicService.addOnErrorListener(new OnErrorListener() {
       @Override
       public void onError() {
-        Log.e(TAG, "Error occurred");
+        Log.e(TAG, "Error in Deezer");
       }
     });
+    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
+      @Override
+      public void onPrepared(SkaldMusicService skaldMusicService) {
+        skaldMusicService.play();
+      }
+    });
+
+    skaldMusicService.setSource(
+        new DeezerTrack(Uri.parse("skald://deezer/track/389296451"), "T", "C"));
+    try {
+      skaldMusicService.prepare();
+    } catch (AuthException authException) {
+      startAuthActivity(authException);
+    }
 
     arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
     listView.setAdapter(arrayAdapter);
@@ -157,24 +169,32 @@ public class MainActivity extends Activity {
     });
   }
 
+  private void startAuthActivity(AuthException authException) {
+    AuthError authError = authException.getAuthError();
+    if (authError.hasResolution()) {
+      Intent intent = authError.getResolution();
+      startActivityForResult(intent, REQUEST_CODE);
+    }
+  }
+
   @Override
   protected void onStart() {
     super.onStart();
 
-    skaldMusicService.searchTrack("hip-hop")
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
-          @Override
-          public void onSuccess(List<SkaldTrack> skaldTracks) {
-            arrayAdapter.addAll(skaldTracks);
-          }
-
-          @Override
-          public void onError(Throwable error) {
-            Log.e(TAG, "Error occurred in observer during searching for tracks", error);
-          }
-        });
+    //skaldMusicService.searchTrack("hip-hop")
+    //    .subscribeOn(Schedulers.io())
+    //    .observeOn(AndroidSchedulers.mainThread())
+    //    .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
+    //      @Override
+    //      public void onSuccess(List<SkaldTrack> skaldTracks) {
+    //        arrayAdapter.addAll(skaldTracks);
+    //      }
+    //
+    //      @Override
+    //      public void onError(Throwable error) {
+    //        Log.e(TAG, "Error occurred in observer during searching for tracks", error);
+    //      }
+    //    });
   }
 
   @Override
@@ -184,6 +204,11 @@ public class MainActivity extends Activity {
     if (requestCode == REQUEST_CODE) {
       if (resultCode == RESULT_OK) {
         Log.d(TAG, "Authentication completed");
+        try {
+          skaldMusicService.prepare();
+        } catch (AuthException authException) {
+          authException.printStackTrace();
+        }
       } else {
         Log.e(TAG, "Authentication went wrong");
       }

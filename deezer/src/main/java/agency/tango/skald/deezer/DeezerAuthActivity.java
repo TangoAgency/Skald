@@ -47,11 +47,13 @@ public class DeezerAuthActivity extends Activity {
                 .sendBroadcast(intent);
 
             setResult(RESULT_OK);
+
+            finish();
           }
 
           @Override
           public void onCancel() {
-            Log.e(TAG, "Login cancelled");
+            Log.e(TAG, "Login canceled");
             setResult(RESULT_CANCELED);
           }
 
