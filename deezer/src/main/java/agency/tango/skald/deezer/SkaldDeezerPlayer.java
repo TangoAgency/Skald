@@ -1,14 +1,6 @@
 package agency.tango.skald.deezer;
 
-import android.app.Application;
 import android.content.Context;
-import android.net.Uri;
-import android.util.Log;
-
-import com.deezer.sdk.network.request.event.DeezerError;
-import com.deezer.sdk.player.TrackPlayer;
-import com.deezer.sdk.player.exception.TooManyPlayersExceptions;
-import com.deezer.sdk.player.networkcheck.WifiAndMobileNetworkStateChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,59 +12,48 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public class SkaldDeezerPlayer implements Player {
-  private static final String TAG = SkaldDeezerPlayer.class.getSimpleName();
-
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
-  private TrackPlayer player;
+  private DeezerPlayer deezerPlayer;
 
   public SkaldDeezerPlayer(Context context, DeezerAuthData deezerAuthData) {
-    try {
-      player = new TrackPlayer((Application) context.getApplicationContext(),
-          deezerAuthData.getDeezerConnect(), new WifiAndMobileNetworkStateChecker());
-    } catch (TooManyPlayersExceptions | DeezerError tooManyPlayersExceptions) {
-      tooManyPlayersExceptions.printStackTrace();
-    }
-    Log.d(TAG, "DeezerPlayer initialized");
+    deezerPlayer = new DeezerPlayer(context, deezerAuthData.getDeezerConnect());
   }
 
   @Override
   public void play(SkaldTrack track) {
-    Uri uri = track.getUri();
-    String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
-    long trackId = Long.parseLong(stringUri);
-    player.playTrack(trackId);
+    deezerPlayer.play(track);
   }
 
   @Override
   public void play(SkaldPlaylist playlist) {
-
+    deezerPlayer.play(playlist);
   }
 
   @Override
   public void stop() {
-
+    deezerPlayer.stop();
   }
 
   @Override
   public void pause() {
-
+    deezerPlayer.pause();
   }
 
   @Override
   public void resume() {
-
+    deezerPlayer.resume();
   }
 
   @Override
   public void release() {
-
+    deezerPlayer.release();
   }
 
   @Override
   public void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
 
-    for(OnPlayerReadyListener onPlayerReadyExistingListener : onPlayerReadyListeners) {
+    for (OnPlayerReadyListener onPlayerReadyExistingListener : onPlayerReadyListeners) {
       onPlayerReadyExistingListener.onPlayerReady(this);
     }
   }
