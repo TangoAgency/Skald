@@ -88,14 +88,6 @@ public class DeezerActivity extends Activity {
     }
   }
 
-  private void startAuthActivity(AuthException authException) {
-    AuthError authError = authException.getAuthError();
-    if (authError.hasResolution()) {
-      Intent intent = authError.getResolution();
-      startActivityForResult(intent, REQUEST_CODE);
-    }
-  }
-
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
@@ -111,6 +103,14 @@ public class DeezerActivity extends Activity {
       } else {
         Log.e(TAG, "Authentication went wrong");
       }
+    }
+  }
+
+  private void startAuthActivity(AuthException authException) {
+    AuthError authError = authException.getAuthError();
+    if (authError.hasResolution()) {
+      Intent intent = authError.getResolution();
+      startActivityForResult(intent, REQUEST_CODE);
     }
   }
 
