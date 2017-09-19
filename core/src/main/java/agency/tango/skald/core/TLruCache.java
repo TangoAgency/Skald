@@ -84,6 +84,10 @@ public class TLruCache<K, V> {
     return cache.snapshot();
   }
 
+  public TreeMap<Long, K> getTimestamps() {
+    return timestamps;
+  }
+
   public void setCacheItemRemovedListener(CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
     this.cacheItemRemovedListener = cacheItemRemovedListener;
   }

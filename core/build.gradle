@@ -27,5 +27,9 @@ dependencies {
   compile deps.appCompat
   compile deps.rxJava
 
+  androidTestCompile deps.supportAnnotations
+  androidTestCompile deps.supportTestRunner
+  androidTestCompile deps.supportTestRules
+
   testCompile 'junit:junit:4.12'
 }
