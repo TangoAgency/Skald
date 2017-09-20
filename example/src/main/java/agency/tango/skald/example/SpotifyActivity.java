@@ -2,7 +2,6 @@ package agency.tango.skald.example;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -15,23 +14,22 @@ import android.widget.ListView;
 import java.util.List;
 
 import agency.tango.skald.R;
-import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
+import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.spotify.SpotifyProvider;
-import agency.tango.skald.spotify.models.SpotifyTrack;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends Activity {
-  private static final String TAG = MainActivity.class.getSimpleName();
+public class SpotifyActivity extends Activity {
+  private static final String TAG = SpotifyActivity.class.getSimpleName();
   public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
   public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
   private static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
@@ -56,9 +54,8 @@ public class MainActivity extends Activity {
     resumeButton.setEnabled(false);
     stopButton.setEnabled(false);
 
-    SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
+    final SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
-
 
     skaldMusicService = new SkaldMusicService(this, spotifyProvider);
 
@@ -68,10 +65,16 @@ public class MainActivity extends Activity {
         Log.e(TAG, "Error in Spotify");
       }
     });
-    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
+    skaldMusicService.addOnAuthErrorListener(spotifyProvider, new OnAuthErrorListener() {
+      @Override
+      public void onAuthError(AuthError authError) {
+        startAuthActivity(authError);
+      }
+    });
+    skaldMusicService.addOnPreparedListener(spotifyProvider, new OnPreparedListener() {
       @Override
       public void onPrepared(SkaldMusicService skaldMusicService) {
-        skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
+        skaldMusicService.addOnPlaybackListener(spotifyProvider, new OnPlaybackListener() {
           @Override
           public void onPlayEvent(TrackMetadata trackMetadata) {
             Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
@@ -100,13 +103,7 @@ public class MainActivity extends Activity {
         });
       }
     });
-
-    skaldMusicService.setSource(new SpotifyTrack(Uri.parse("skald://spotify/track/123"), "A", "B"));
-    try {
-      skaldMusicService.prepare();
-    } catch (AuthException authException) {
-      startAuthActivity(authException);
-    }
+    skaldMusicService.prepare();
 
     arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
     listView.setAdapter(arrayAdapter);
@@ -181,19 +178,14 @@ public class MainActivity extends Activity {
     if (requestCode == REQUEST_CODE) {
       if (resultCode == RESULT_OK) {
         Log.d(TAG, "Authentication completed");
-        try {
-          skaldMusicService.prepare();
-        } catch (AuthException authException) {
-          startAuthActivity(authException);
-        }
+        skaldMusicService.prepare();
       } else {
         Log.e(TAG, "Authentication went wrong");
       }
     }
   }
 
-  private void startAuthActivity(AuthException authException) {
-    AuthError authError = authException.getAuthError();
+  private void startAuthActivity(AuthError authError) {
     if (authError.hasResolution()) {
       Intent intent = authError.getResolution();
       startActivityForResult(intent, REQUEST_CODE);

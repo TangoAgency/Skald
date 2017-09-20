@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -27,7 +28,8 @@ public class SkaldMusicService {
   public static final String EXTRA_AUTH_DATA = "auth_data";
   public static final String EXTRA_PROVIDER_NAME = "provider_name";
 
-  private final List<OnPreparedListener> onPreparedListeners = new ArrayList<>();
+  private final Map<String, OnPreparedListener> onPreparedListeners = new HashMap<>();
+  private final Map<String, OnAuthErrorListener> onAuthErrorListeners = new HashMap<>();
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Context context;
@@ -69,8 +71,18 @@ public class SkaldMusicService {
     currentTrack = null;
   }
 
-  public void prepare() throws AuthException {
-    getPlayer();
+  public void prepare() {
+    for(Provider provider : providers) {
+      try {
+        playerCache.getForProvider(provider);
+      } catch (AuthException authException) {
+        for (String providerName : onAuthErrorListeners.keySet()) {
+          if(provider.getProviderName().equals(providerName)) {
+            onAuthErrorListeners.get(providerName).onAuthError(authException.getAuthError());
+          }
+        }
+      }
+    }
   }
 
   public void prepareAsync() {
@@ -118,10 +130,12 @@ public class SkaldMusicService {
   }
 
   public void release() {
-    try {
-      getPlayer().release();
-    } catch (AuthException authException) {
-      notifyError();
+    for(Provider provider : providers) {
+      try {
+        playerCache.getForProvider(provider).release();
+      } catch (AuthException authException) {
+        notifyError();
+      }
     }
   }
 
@@ -133,25 +147,33 @@ public class SkaldMusicService {
     onErrorListeners.remove(onErrorListener);
   }
 
-  public void addOnPreparedListener(OnPreparedListener onPreparedListener) {
-    onPreparedListeners.add(onPreparedListener);
+  public void addOnPreparedListener(Provider provider, OnPreparedListener onPreparedListener) {
+    onPreparedListeners.put(provider.getProviderName(), onPreparedListener);
   }
 
-  public void removeOnPreparedListener(OnPreparedListener onPreparedListener) {
-    onPreparedListeners.remove(onPreparedListener);
+  public void removeOnPreparedListener(Provider provider) {
+    onPreparedListeners.remove(provider.getProviderName());
   }
 
-  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void addOnAuthErrorListener(Provider provider, OnAuthErrorListener onAuthErrorListener) {
+    onAuthErrorListeners.put(provider.getProviderName(), onAuthErrorListener);
+  }
+
+  public void removeOnAuthErrorListener(Provider provider) {
+    onAuthErrorListeners.remove(provider.getProviderName());
+  }
+
+  public void addOnPlaybackListener(Provider provider, OnPlaybackListener onPlaybackListener) {
     try {
-      getPlayer().addOnPlaybackListener(onPlaybackListener);
+      playerCache.getForProvider(provider).addOnPlaybackListener(onPlaybackListener);
     } catch (AuthException e) {
       notifyError();
     }
   }
 
-  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void removeOnPlaybackListener(Provider provider, OnPlaybackListener onPlaybackListener) {
     try {
-      getPlayer().removeOnPlaybackListener(onPlaybackListener);
+      playerCache.getForProvider(provider).removeOnPlaybackListener(onPlaybackListener);
     } catch (AuthException e) {
       notifyError();
     }
@@ -221,17 +243,19 @@ public class SkaldMusicService {
       } else {
         Player player = provider.getPlayerFactory().getPlayer();
         playerMap.put(provider.getProviderName(), player);
-        addPlayerReadyListener(player);
+        addPlayerReadyListener(player, provider);
         return player;
       }
     }
 
-    private void addPlayerReadyListener(Player player) {
+    private void addPlayerReadyListener(final Player player, final Provider provider) {
       player.addPlayerReadyListener(new OnPlayerReadyListener() {
         @Override
-        public void onPlayerReady(Player player) {
-          for (OnPreparedListener onPreparedListener : onPreparedListeners) {
-            onPreparedListener.onPrepared(SkaldMusicService.this);
+        public void onPlayerReady(Player playerReady) {
+          for (String providerName : onPreparedListeners.keySet()) {
+            if(provider.getProviderName().equals(providerName)) {
+              onPreparedListeners.get(providerName).onPrepared(SkaldMusicService.this);
+            }
           }
         }
       });

@@ -9,9 +9,9 @@ import android.util.Log;
 import android.view.View;
 
 import agency.tango.skald.R;
-import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
+import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.deezer.DeezerProvider;
@@ -39,7 +39,13 @@ public class DeezerActivity extends Activity {
         Log.e(TAG, "Error in Deezer");
       }
     });
-    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
+    skaldMusicService.addOnAuthErrorListener(deezerProvider, new OnAuthErrorListener() {
+      @Override
+      public void onAuthError(AuthError authError) {
+        startAuthActivity(authError);
+      }
+    });
+    skaldMusicService.addOnPreparedListener(deezerProvider, new OnPreparedListener() {
       @Override
       public void onPrepared(final SkaldMusicService skaldMusicService) {
         findViewById(R.id.button_play_track).setOnClickListener(new View.OnClickListener() {
@@ -79,13 +85,7 @@ public class DeezerActivity extends Activity {
       }
     });
 
-    skaldMusicService.setSource(
-        new DeezerPlaylist(Uri.parse("skald://deezer/playlist/3188520162"), "Playlist"));
-    try {
-      skaldMusicService.prepare();
-    } catch (AuthException authException) {
-      startAuthActivity(authException);
-    }
+    skaldMusicService.prepare();
   }
 
   @Override
@@ -95,19 +95,14 @@ public class DeezerActivity extends Activity {
     if (requestCode == REQUEST_CODE) {
       if (resultCode == RESULT_OK) {
         Log.d(TAG, "Authentication completed");
-        try {
-          skaldMusicService.prepare();
-        } catch (AuthException authException) {
-          startAuthActivity(authException);
-        }
+        skaldMusicService.prepare();
       } else {
         Log.e(TAG, "Authentication went wrong");
       }
     }
   }
 
-  private void startAuthActivity(AuthException authException) {
-    AuthError authError = authException.getAuthError();
+  private void startAuthActivity(AuthError authError) {
     if (authError.hasResolution()) {
       Intent intent = authError.getResolution();
       startActivityForResult(intent, REQUEST_CODE);
