@@ -18,7 +18,7 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 class DeezerPlayer {
-  private static int MAX_PLAYERS_IN_CACHE = 2;
+  private static final int MAX_PLAYERS_IN_CACHE = 2;
   private final Context context;
   private final DeezerConnect deezerConnect;
 

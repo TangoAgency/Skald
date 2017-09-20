@@ -91,8 +91,31 @@ public class TLruCacheInstrumentedTest {
   }
 
   @Test
-  public void evictTo() {
+  public void evictTo_itemTooLongInCache_shouldEvict() {
+    TLruCache<Object, Object> cache = new TLruCache<>(3);
+    cache.put(new Object(), new Object());
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException exception) {
+      exception.printStackTrace();
+    }
+    cache.put(new Object(), new Object());
 
+    cache.evictTo(0, 1);
+
+    assertEquals(1, cache.getTimestamps().size());
+    assertEquals(1, cache.size());
+  }
+
+  @Test
+  public void evictTo_itemNotTooLongInCache_shouldNotEvict() {
+    TLruCache<Object, Object> cache = new TLruCache<>(3);
+    cache.put(new Object(), new Object());
+    cache.put(new Object(), new Object());
+
+    cache.evictTo(0, 1);
+
+    assertEquals(2, cache.size());
   }
 
   @Test

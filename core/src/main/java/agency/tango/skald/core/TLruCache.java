@@ -10,7 +10,6 @@ public class TLruCache<K, V> {
   private TreeMap<Long, K> timestamps = new TreeMap<>();
   private CacheItemRemovedListener<K, V> cacheItemRemovedListener;
 
-
   public TLruCache(int size) {
     this.cache = new LruCache<>(size);
   }
@@ -32,9 +31,11 @@ public class TLruCache<K, V> {
     cache.trimToSize(maxSize);
   }
 
-  public void evictTo(Long timestamp) {
+  public void evictTo(int minutes, int seconds) {
+    Long timestamp = System.currentTimeMillis() - (minutes * 60 + seconds) * 1000;
     for (Long key : timestamps.headMap(timestamp).keySet()) {
-      remove(timestamps.get(key));
+      cache.remove(timestamps.get(key));
+      timestamps.remove(key);
     }
   }
 
@@ -93,7 +94,7 @@ public class TLruCache<K, V> {
   }
 
   protected void entryRemoved(boolean evicted, K key, V oldValue, V newValue) {
-    if(cacheItemRemovedListener != null) {
+    if (cacheItemRemovedListener != null) {
       cacheItemRemovedListener.release(key, oldValue);
     }
   }
