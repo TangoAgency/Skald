@@ -154,14 +154,6 @@ public class MainActivity extends Activity {
     });
   }
 
-  private void startAuthActivity(AuthException authException) {
-    AuthError authError = authException.getAuthError();
-    if (authError.hasResolution()) {
-      Intent intent = authError.getResolution();
-      startActivityForResult(intent, REQUEST_CODE);
-    }
-  }
-
   @Override
   protected void onStart() {
     super.onStart();
@@ -197,6 +189,14 @@ public class MainActivity extends Activity {
       } else {
         Log.e(TAG, "Authentication went wrong");
       }
+    }
+  }
+
+  private void startAuthActivity(AuthException authException) {
+    AuthError authError = authException.getAuthError();
+    if (authError.hasResolution()) {
+      Intent intent = authError.getResolution();
+      startActivityForResult(intent, REQUEST_CODE);
     }
   }
 

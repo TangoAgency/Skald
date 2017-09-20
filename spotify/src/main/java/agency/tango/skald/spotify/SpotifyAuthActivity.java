@@ -60,7 +60,6 @@ public class SpotifyAuthActivity extends Activity {
           setResult(RESULT_CANCELED);
       }
     }
-    this.finish();
   }
 
   private void notifyError(String error) {
@@ -87,12 +86,14 @@ public class SpotifyAuthActivity extends Activity {
                 .sendBroadcast(intent);
 
             setResult(RESULT_OK);
+            SpotifyAuthActivity.this.finish();
           }
 
           @Override
           public void onError(Throwable error) {
             Log.e(TAG, "Tokens observer error", error);
             setResult(RESULT_CANCELED);
+            SpotifyAuthActivity.this.finish();
           }
         });
   }

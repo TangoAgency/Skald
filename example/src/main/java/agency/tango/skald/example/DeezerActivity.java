@@ -58,19 +58,19 @@ public class DeezerActivity extends Activity {
             skaldMusicService.play();
           }
         });
-        findViewById(R.id.button_resume).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.button_deezer_resume).setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
             skaldMusicService.resume();
           }
         });
-        findViewById(R.id.button_pause).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.button_deezer_pause).setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
             skaldMusicService.pause();
           }
         });
-        findViewById((R.id.button_stop)).setOnClickListener(new View.OnClickListener() {
+        findViewById((R.id.button_deezer_stop)).setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
             skaldMusicService.stop();

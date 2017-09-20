@@ -33,6 +33,10 @@ public class DeezerAuthActivity extends Activity {
             Permissions.BASIC_ACCESS,
             Permissions.MANAGE_LIBRARY,
             Permissions.LISTENING_HISTORY
+            //Permissions.EMAIL,
+            //Permissions.OFFLINE_ACCESS,
+            //Permissions.MANAGE_COMMUNITY,
+            //Permissions.DELETE_LIBRARY
         },
         new DialogListener() {
           @Override
@@ -61,6 +65,7 @@ public class DeezerAuthActivity extends Activity {
           public void onException(Exception exception) {
             Log.e(TAG, "Login failed", exception);
             setResult(RESULT_CANCELED);
+            finish();
           }
         });
   }

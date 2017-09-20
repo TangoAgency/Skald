@@ -17,30 +17,30 @@
     />
 
   <Button
-    android:id="@+id/button_pause"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:background="@android:color/holo_orange_dark"
-    android:text="@string/pause"
-    app:layout_constraintBottom_toTopOf="@+id/button_pause"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintRight_toLeftOf="@+id/button_resume"
-    app:layout_constraintTop_toBottomOf="@+id/list_view_playlists"
-    app:layout_constraintVertical_bias="1.0"
-    />
-  <Button
     android:id="@+id/button_resume"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:background="@android:color/holo_blue_light"
     android:text="@string/resume"
     app:layout_constraintBottom_toTopOf="@+id/button_pause"
-    app:layout_constraintLeft_toRightOf="@+id/button_pause"
+    app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/list_view_playlists"
     />
   <Button
     android:id="@+id/button_pause"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:background="@android:color/holo_orange_dark"
+    android:text="@string/pause"
+    app:layout_constraintBottom_toTopOf="@+id/button_stop"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/button_resume"
+    app:layout_constraintVertical_bias="1.0"
+    />
+  <Button
+    android:id="@+id/button_stop"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:background="@android:color/holo_red_light"
@@ -49,5 +49,7 @@
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/button_resume"
+    app:layout_constraintVertical_bias="1.0"
+    app:layout_constraintHorizontal_bias="0.0"
     />
 </android.support.constraint.ConstraintLayout>

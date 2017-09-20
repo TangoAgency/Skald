@@ -17,21 +17,21 @@
     android:text="Playlist"
     />
   <Button
-    android:id="@+id/button_resume"
+    android:id="@+id/button_deezer_resume"
     android:background="@android:color/holo_blue_light"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="Resume"
     />
   <Button
-    android:id="@+id/button_pause"
+    android:id="@+id/button_deezer_pause"
     android:background="@android:color/holo_orange_light"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="Pause"
     />
   <Button
-    android:id="@+id/button_stop"
+    android:id="@+id/button_deezer_stop"
     android:background="@android:color/holo_red_dark"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
