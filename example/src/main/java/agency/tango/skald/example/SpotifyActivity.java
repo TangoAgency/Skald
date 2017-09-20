@@ -44,7 +44,7 @@ public class SpotifyActivity extends Activity {
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
+    setContentView(R.layout.activity_spotify);
     ListView listView = (ListView) findViewById(R.id.list_view_playlists);
     pauseButton = (Button) findViewById(R.id.button_pause);
     resumeButton = (Button) findViewById(R.id.button_resume);
