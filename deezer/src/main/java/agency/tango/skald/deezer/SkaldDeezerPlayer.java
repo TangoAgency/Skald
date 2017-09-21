@@ -82,11 +82,11 @@ class SkaldDeezerPlayer implements Player {
 
   @Override
   public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
-
+    deezerPlayer.addOnPlayerReadyListener(onPlaybackListener);
   }
 
   @Override
   public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
-
+    deezerPlayer.removeOnPlayerReadyListener(onPlaybackListener);
   }
 }

@@ -231,7 +231,7 @@ public class SkaldMusicService {
     player.addPlayerReadyListener(new OnPlayerReadyListener() {
       @Override
       public void onPlayerReady(Player player) {
-        if(playerCache.size() == MAX_NUMBER_OF_PLAYERS) {
+        if (playerCache.size() == MAX_NUMBER_OF_PLAYERS) {
           for (OnPreparedListener onPreparedListener : onPreparedListeners) {
             onPreparedListener.onPrepared(SkaldMusicService.this);
           }

@@ -142,12 +142,6 @@ class SkaldSpotifyPlayer implements Player {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
-  private void notifyStopEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onStopEvent();
-    }
-  }
-
   private void addNotificationCallback(final SpotifyPlayer spotifyPlayer) {
     spotifyPlayer.addNotificationCallback(new NotificationCallback() {
       @Override
@@ -221,6 +215,12 @@ class SkaldSpotifyPlayer implements Player {
 
       }
     });
+  }
+
+  private void notifyStopEvent() {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onStopEvent();
+    }
   }
 
   private void notifyPlayEvent(Metadata metadata) {
