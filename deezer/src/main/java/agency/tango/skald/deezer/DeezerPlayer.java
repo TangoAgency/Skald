@@ -21,7 +21,7 @@ import com.deezer.sdk.player.networkcheck.WifiAndMobileNetworkStateChecker;
 import java.util.ArrayList;
 import java.util.List;
 
-import agency.tango.skald.core.LruCache;
+import agency.tango.skald.core.SkaldLruCache;
 import agency.tango.skald.core.TLruCache;
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
@@ -44,7 +44,7 @@ class DeezerPlayer {
     this.context = context;
     this.deezerConnect = deezerConnect;
     playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-        new LruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
+        new SkaldLruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
           @Override
           public void release(Class key, PlayerWrapper playerWrapper) {
             PlayerState playerState = playerWrapper.getPlayerState();
@@ -166,6 +166,7 @@ class DeezerPlayer {
             onPlaybackListener.onPlayEvent(trackMetadata);
           }
           notifyResumeEvent();
+          isMakingRequest = false;
         }
       }
 

@@ -75,6 +75,7 @@ ext.deps = [// Android
             supportFragment       : "com.android.support:support-fragment:$supportLibraryVersion",
             appCompat             : "com.android.support:appcompat-v7:$supportLibraryVersion",
             supportAnnotations    : "com.android.support:support-annotations:$supportLibraryVersion",
+            supportUtils          : "com.android.support:support-core-utils:$supportLibraryVersion",
             supportTestRunner     : 'com.android.support.test:runner:0.5',
             supportTestRules      : 'com.android.support.test:rules:0.5',
             androidGradle         : 'com.android.tools.build:gradle:2.2.0',

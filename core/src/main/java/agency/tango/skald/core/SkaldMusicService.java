@@ -42,7 +42,7 @@ public class SkaldMusicService {
     this.providers.addAll(Arrays.asList(providers));
     this.context = context.getApplicationContext();
     this.playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-        new LruCache.CacheItemRemovedListener<String, Player>() {
+        new SkaldLruCache.CacheItemRemovedListener<String, Player>() {
           @Override
           public void release(String key, Player player) {
             player.release();

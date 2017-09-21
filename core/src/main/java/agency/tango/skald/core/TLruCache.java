@@ -5,14 +5,14 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class TLruCache<K, V> {
-  private LruCache<K, V> cache;
+  private SkaldLruCache<K, V> cache;
   private TreeMap<Long, K> timestamps = new TreeMap<>();
 
   public TLruCache(int size) {
-    this.cache = new LruCache<>(size);
+    this.cache = new SkaldLruCache<>(size);
   }
 
-  public TLruCache(int size, LruCache.CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
+  public TLruCache(int size, SkaldLruCache.CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
     this(size);
     cache.addCacheItemRemovedListener(cacheItemRemovedListener);
   }

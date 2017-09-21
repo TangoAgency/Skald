@@ -1,14 +1,15 @@
 package agency.tango.skald.core;
 
 import android.support.annotation.CallSuper;
+import android.support.v4.util.LruCache;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LruCache<K, V> extends android.util.LruCache<K, V> {
+public class SkaldLruCache<K, V> extends LruCache<K, V> {
   private final List<CacheItemRemovedListener<K, V>> cacheItemRemovedListeners = new ArrayList<>();
 
-  public LruCache(int maxSize) {
+  public SkaldLruCache(int maxSize) {
     super(maxSize);
   }
 

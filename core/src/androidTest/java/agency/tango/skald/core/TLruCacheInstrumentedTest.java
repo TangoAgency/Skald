@@ -148,8 +148,8 @@ public class TLruCacheInstrumentedTest {
   public void remove_shouldInvokeReleaseMethodInsideItemRemovedListener() {
     final Object key = new Object();
     final Object value = new Object();
-    LruCache.CacheItemRemovedListener<Object, Object> cacheItemRemovedListener =
-        new LruCache.CacheItemRemovedListener<Object, Object>() {
+    SkaldLruCache.CacheItemRemovedListener<Object, Object> cacheItemRemovedListener =
+        new SkaldLruCache.CacheItemRemovedListener<Object, Object>() {
           @Override
           public void release(Object keyToRelease, Object valueToRelease) {
             assertSame(keyToRelease, key);

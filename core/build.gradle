@@ -26,6 +26,7 @@ dependencies {
 
   compile deps.appCompat
   compile deps.rxJava
+  compile deps.supportUtils
 
   androidTestCompile deps.supportAnnotations
   androidTestCompile deps.supportTestRunner
