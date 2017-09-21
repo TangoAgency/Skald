@@ -41,9 +41,8 @@ public class SkaldMusicService {
   public SkaldMusicService(Context context, final Provider... providers) {
     this.providers.addAll(Arrays.asList(providers));
     this.context = context.getApplicationContext();
-    this.playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS);
-    playerCache.setCacheItemRemovedListener(
-        new TLruCache.CacheItemRemovedListener<String, Player>() {
+    this.playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
+        new LruCache.CacheItemRemovedListener<String, Player>() {
           @Override
           public void release(String key, Player player) {
             player.release();
@@ -177,7 +176,7 @@ public class SkaldMusicService {
   public Single<List<SkaldTrack>> searchTrack(String query) {
     List<Single<List<SkaldTrack>>> singles = new ArrayList<>();
     for (Provider provider : providers) {
-      if(playerCache.snapshot().containsKey(provider.getProviderName())) {
+      if (playerCache.snapshot().containsKey(provider.getProviderName())) {
         try {
           singles.add(getSearchService(provider).searchForTracks(query));
         } catch (AuthException e) {
@@ -222,8 +221,8 @@ public class SkaldMusicService {
       return player;
     } else {
       player = provider.getPlayerFactory().getPlayer();
-      playerCache.put(provider.getProviderName(), player);
       addPlayerReadyListener(player);
+      playerCache.put(provider.getProviderName(), player);
       return player;
     }
   }
@@ -232,8 +231,10 @@ public class SkaldMusicService {
     player.addPlayerReadyListener(new OnPlayerReadyListener() {
       @Override
       public void onPlayerReady(Player player) {
-        for (OnPreparedListener onPreparedListener : onPreparedListeners) {
-          onPreparedListener.onPrepared(SkaldMusicService.this);
+        if(playerCache.size() == MAX_NUMBER_OF_PLAYERS) {
+          for (OnPreparedListener onPreparedListener : onPreparedListeners) {
+            onPreparedListener.onPrepared(SkaldMusicService.this);
+          }
         }
       }
     });

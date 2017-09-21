@@ -13,6 +13,7 @@ import com.deezer.sdk.player.event.PlayerState;
 import com.deezer.sdk.player.exception.TooManyPlayersExceptions;
 import com.deezer.sdk.player.networkcheck.WifiAndMobileNetworkStateChecker;
 
+import agency.tango.skald.core.LruCache;
 import agency.tango.skald.core.TLruCache;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
@@ -28,20 +29,16 @@ class DeezerPlayer {
   DeezerPlayer(Context context, DeezerConnect deezerConnect) {
     this.context = context;
     this.deezerConnect = deezerConnect;
-    playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS);
-
-    playerCache.setCacheItemRemovedListener(
-        new TLruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
+    playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
+        new LruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
           @Override
           public void release(Class key, PlayerWrapper playerWrapper) {
-            if (playerWrapper != null) {
-              PlayerState playerState = playerWrapper.getPlayerState();
-              if (playerState == PlayerState.PLAYING) {
-                playerWrapper.stop();
-              }
-              if (playerState != PlayerState.RELEASED) {
-                playerWrapper.release();
-              }
+            PlayerState playerState = playerWrapper.getPlayerState();
+            if (playerState == PlayerState.PLAYING) {
+              playerWrapper.stop();
+            }
+            if (playerState != PlayerState.RELEASED) {
+              playerWrapper.release();
             }
           }
         });
@@ -114,7 +111,7 @@ class DeezerPlayer {
 
   private <T> T getPlayer(Class<T> a) {
     for (PlayerWrapper playerWrapper : playerCache.snapshot().values()) {
-      if (a.isAssignableFrom(playerWrapper.getClass()) ) {
+      if (a.isAssignableFrom(playerWrapper.getClass())) {
         currentPlayer = playerWrapper;
         return (T) playerWrapper;
       }

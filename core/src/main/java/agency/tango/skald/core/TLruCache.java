@@ -1,17 +1,20 @@
 package agency.tango.skald.core;
 
-import android.util.LruCache;
-
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 public class TLruCache<K, V> {
   private LruCache<K, V> cache;
   private TreeMap<Long, K> timestamps = new TreeMap<>();
-  private CacheItemRemovedListener<K, V> cacheItemRemovedListener;
 
   public TLruCache(int size) {
     this.cache = new LruCache<>(size);
+  }
+
+  public TLruCache(int size, LruCache.CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
+    this(size);
+    cache.addCacheItemRemovedListener(cacheItemRemovedListener);
   }
 
   public void resize(int maxSize) {
@@ -24,15 +27,20 @@ public class TLruCache<K, V> {
   }
 
   public V get(K key) {
-    return cache.get(key);
+    V value = cache.get(key);
+    if(value != null) {
+      removeTimestamp(key);
+      timestamps.put(System.currentTimeMillis(), key);
+    }
+    return value;
   }
 
   public void trimToSize(int maxSize) {
     cache.trimToSize(maxSize);
   }
 
-  public void evictTo(int minutes, int seconds) {
-    Long timestamp = System.currentTimeMillis() - (minutes * 60 + seconds) * 1000;
+  public void evictTo(long value, TimeUnit unit) {
+    Long timestamp = System.currentTimeMillis() - unit.toMillis(value);
     for (Long key : timestamps.headMap(timestamp).keySet()) {
       cache.remove(timestamps.get(key));
       timestamps.remove(key);
@@ -40,11 +48,7 @@ public class TLruCache<K, V> {
   }
 
   public V remove(K key) {
-    for (Long timestamp : timestamps.keySet()) {
-      if (timestamps.get(timestamp).equals(key)) {
-        timestamps.remove(timestamp);
-      }
-    }
+    removeTimestamp(key);
     return cache.remove(key);
   }
 
@@ -89,25 +93,13 @@ public class TLruCache<K, V> {
     return timestamps;
   }
 
-  public void setCacheItemRemovedListener(CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
-    this.cacheItemRemovedListener = cacheItemRemovedListener;
-  }
-
-  protected void entryRemoved(boolean evicted, K key, V oldValue, V newValue) {
-    if (cacheItemRemovedListener != null) {
-      cacheItemRemovedListener.release(key, oldValue);
+  private void removeTimestamp(K key) {
+    Long timestampToRemove = 0L;
+    for (Long timestamp : timestamps.keySet()) {
+      if (timestamps.get(timestamp).equals(key)) {
+        timestampToRemove = timestamp;
+      }
     }
-  }
-
-  protected V create(K key) {
-    return null;
-  }
-
-  protected int sizeOf(K key, V value) {
-    return 1;
-  }
-
-  public interface CacheItemRemovedListener<K, V> {
-    void release(K key, V value);
+    timestamps.remove(timestampToRemove);
   }
 }

@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -101,7 +102,7 @@ public class TLruCacheInstrumentedTest {
     }
     cache.put(new Object(), new Object());
 
-    cache.evictTo(0, 1);
+    cache.evictTo(1, TimeUnit.SECONDS);
 
     assertEquals(1, cache.getTimestamps().size());
     assertEquals(1, cache.size());
@@ -113,7 +114,7 @@ public class TLruCacheInstrumentedTest {
     cache.put(new Object(), new Object());
     cache.put(new Object(), new Object());
 
-    cache.evictTo(0, 1);
+    cache.evictTo(1, TimeUnit.SECONDS);
 
     assertEquals(2, cache.size());
   }
@@ -144,17 +145,19 @@ public class TLruCacheInstrumentedTest {
   }
 
   @Test
-  public void remove_cacheItemRemovedListenerIsSet_shouldInvokeRelease() {
-    TLruCache<Object, Object> cache = new TLruCache<>(2);
-    Object key = new Object();
+  public void remove_shouldInvokeReleaseMethodInsideItemRemovedListener() {
+    final Object key = new Object();
     final Object value = new Object();
+    LruCache.CacheItemRemovedListener<Object, Object> cacheItemRemovedListener =
+        new LruCache.CacheItemRemovedListener<Object, Object>() {
+          @Override
+          public void release(Object keyToRelease, Object valueToRelease) {
+            assertSame(keyToRelease, key);
+            assertSame(valueToRelease, value);
+          }
+        };
+    TLruCache<Object, Object> cache = new TLruCache<>(2, cacheItemRemovedListener);
     cache.put(key, value);
-    cache.setCacheItemRemovedListener(new TLruCache.CacheItemRemovedListener<Object, Object>() {
-      @Override
-      public void release(Object key, Object valueToRelease) {
-        assertSame(value, valueToRelease);
-      }
-    });
 
     cache.remove(key);
   }
