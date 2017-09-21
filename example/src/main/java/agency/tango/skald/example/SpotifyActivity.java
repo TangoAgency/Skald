@@ -65,16 +65,16 @@ public class SpotifyActivity extends Activity {
         Log.e(TAG, "Error in Spotify");
       }
     });
-    skaldMusicService.addOnAuthErrorListener(spotifyProvider, new OnAuthErrorListener() {
+    skaldMusicService.addOnAuthErrorListener( new OnAuthErrorListener() {
       @Override
       public void onAuthError(AuthError authError) {
         startAuthActivity(authError);
       }
     });
-    skaldMusicService.addOnPreparedListener(spotifyProvider, new OnPreparedListener() {
+    skaldMusicService.addOnPreparedListener( new OnPreparedListener() {
       @Override
       public void onPrepared(SkaldMusicService skaldMusicService) {
-        skaldMusicService.addOnPlaybackListener(spotifyProvider, new OnPlaybackListener() {
+        skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
           @Override
           public void onPlayEvent(TrackMetadata trackMetadata) {
             Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),

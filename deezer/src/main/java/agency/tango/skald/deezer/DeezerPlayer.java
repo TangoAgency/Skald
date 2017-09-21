@@ -18,7 +18,7 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 class DeezerPlayer {
-  private static final int MAX_PLAYERS_IN_CACHE = 2;
+  private static final int MAX_NUMBER_OF_PLAYERS = 2;
   private final Context context;
   private final DeezerConnect deezerConnect;
 
@@ -28,7 +28,7 @@ class DeezerPlayer {
   DeezerPlayer(Context context, DeezerConnect deezerConnect) {
     this.context = context;
     this.deezerConnect = deezerConnect;
-    playerCache = new TLruCache<>(MAX_PLAYERS_IN_CACHE);
+    playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS);
 
     playerCache.setCacheItemRemovedListener(
         new TLruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
@@ -49,7 +49,7 @@ class DeezerPlayer {
 
   void play(SkaldTrack skaldTrack) throws DeezerError {
     long trackId = getId(skaldTrack.getUri());
-    TrackPlayer trackPlayer = getTrackPlayer();
+    TrackPlayer trackPlayer = getPlayer(TrackPlayer.class);
     if (trackPlayer == null) {
       try {
         trackPlayer = new TrackPlayer((Application) context.getApplicationContext(),
@@ -66,19 +66,9 @@ class DeezerPlayer {
     }
   }
 
-  private TrackPlayer getTrackPlayer() {
-    for (PlayerWrapper playerWrapper : playerCache.snapshot().values()) {
-      if (playerWrapper instanceof TrackPlayer) {
-        currentPlayer = playerWrapper;
-        return (TrackPlayer) playerWrapper;
-      }
-    }
-    return null;
-  }
-
   void play(SkaldPlaylist skaldPlaylist) throws DeezerError {
     long playlistId = getId(skaldPlaylist.getUri());
-    PlaylistPlayer playlistPlayer = getPlaylistPlayer();
+    PlaylistPlayer playlistPlayer = getPlayer(PlaylistPlayer.class);
     if (playlistPlayer == null) {
       try {
         playlistPlayer = new PlaylistPlayer(
@@ -96,11 +86,37 @@ class DeezerPlayer {
     }
   }
 
-  private PlaylistPlayer getPlaylistPlayer() {
+  void stop() {
+    if (isPlaying()) {
+      currentPlayer.stop();
+    }
+  }
+
+  void pause() {
+    if (isPlaying()) {
+      currentPlayer.pause();
+    }
+  }
+
+  void resume() {
+    if (!isPlaying()) {
+      currentPlayer.play();
+    }
+  }
+
+  void release() {
+    playerCache.evictAll();
+  }
+
+  boolean isPlaying() {
+    return currentPlayer.getPlayerState() == PlayerState.PLAYING;
+  }
+
+  private <T> T getPlayer(Class<T> a) {
     for (PlayerWrapper playerWrapper : playerCache.snapshot().values()) {
-      if (playerWrapper instanceof PlaylistPlayer) {
+      if (a.isAssignableFrom(playerWrapper.getClass()) ) {
         currentPlayer = playerWrapper;
-        return (PlaylistPlayer) playerWrapper;
+        return (T) playerWrapper;
       }
     }
     return null;
@@ -115,27 +131,5 @@ class DeezerPlayer {
   private long getId(Uri uri) {
     String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
     return Long.parseLong(stringUri);
-  }
-
-  void stop() {
-    if (currentPlayer.getPlayerState() == PlayerState.PLAYING) {
-      currentPlayer.stop();
-    }
-  }
-
-  void pause() {
-    if (currentPlayer.getPlayerState() == PlayerState.PLAYING) {
-      currentPlayer.pause();
-    }
-  }
-
-  void resume() {
-    if (currentPlayer.getPlayerState() != PlayerState.PLAYING) {
-      currentPlayer.play();
-    }
-  }
-
-  void release() {
-    playerCache.evictAll();
   }
 }

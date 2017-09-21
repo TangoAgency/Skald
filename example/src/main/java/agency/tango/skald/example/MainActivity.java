@@ -24,7 +24,7 @@ import agency.tango.skald.spotify.SpotifyProvider;
 import agency.tango.skald.spotify.models.SpotifyTrack;
 
 public class MainActivity extends Activity {
-  private static final String TAG = SpotifyActivity.class.getSimpleName();
+  private static final String TAG = MainActivity.class.getSimpleName();
   public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
   public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
   private static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
@@ -33,51 +33,43 @@ public class MainActivity extends Activity {
 
   private SkaldMusicService skaldMusicService;
   private Button playSpotifyButton;
-  private Button resumeSpotifyButton;
-  private Button pauseSpotifyButton;
-  private Button stopSpotifyButton;
-
   private Button playDeezerButton;
-  private Button resumeDeezerButton;
-  private Button pauseDeezerButton;
-  private Button stopDeezerButton;
+  private Button resumeButton;
+  private Button pauseSpotifyButton;
+  private Button stopButton;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     playSpotifyButton = (Button) findViewById(R.id.button_spotify_main_play);
-    resumeSpotifyButton = (Button) findViewById(R.id.button_spotify_main_resume);
-    pauseSpotifyButton = (Button) findViewById(R.id.button_spotify_main_pause);
-    stopSpotifyButton = (Button) findViewById(R.id.button_spotify_main_stop);
-
     playDeezerButton = (Button) findViewById(R.id.button_deezer_main_play);
-    resumeDeezerButton = (Button) findViewById(R.id.button_deezer_main_resume);
-    pauseDeezerButton = (Button) findViewById(R.id.button_deezer_main_pause);
-    stopDeezerButton = (Button) findViewById(R.id.button_deezer_main_stop);
+    resumeButton = (Button) findViewById(R.id.button_main_resume);
+    pauseSpotifyButton = (Button) findViewById(R.id.button_main_pause);
+    stopButton = (Button) findViewById(R.id.button_main_stop);
 
     final SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
-    DeezerProvider deezerProvider = new DeezerProvider(this, DEEZER_CLIENT_ID);
+    final DeezerProvider deezerProvider = new DeezerProvider(this, DEEZER_CLIENT_ID);
 
     skaldMusicService = new SkaldMusicService(this, spotifyProvider, deezerProvider);
 
     skaldMusicService.addOnErrorListener(new OnErrorListener() {
       @Override
       public void onError() {
-        Log.e(TAG, "Error in Spotify");
+        Log.e(TAG, "Error in SkaldMusicService occurred");
       }
     });
-    skaldMusicService.addOnAuthErrorListener(spotifyProvider, new OnAuthErrorListener() {
+    skaldMusicService.addOnAuthErrorListener(new OnAuthErrorListener() {
       @Override
       public void onAuthError(AuthError authError) {
         startAuthActivity(authError);
       }
     });
-    skaldMusicService.addOnPreparedListener(spotifyProvider, new OnPreparedListener() {
+    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
       @Override
       public void onPrepared(final SkaldMusicService skaldMusicService) {
-        skaldMusicService.addOnPlaybackListener(spotifyProvider, new OnPlaybackListener() {
+        skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
           @Override
           public void onPlayEvent(TrackMetadata trackMetadata) {
             Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
@@ -114,7 +106,15 @@ public class MainActivity extends Activity {
             skaldMusicService.play();
           }
         });
-        resumeSpotifyButton.setOnClickListener(new View.OnClickListener() {
+        playDeezerButton.setOnClickListener(new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+            skaldMusicService.setSource(
+                new DeezerTrack(Uri.parse("skald://deezer/track/389296451"), "Taco", "Tlen"));
+            skaldMusicService.play();
+          }
+        });
+        resumeButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
             skaldMusicService.resume();
@@ -126,46 +126,7 @@ public class MainActivity extends Activity {
             skaldMusicService.pause();
           }
         });
-        stopSpotifyButton.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            skaldMusicService.stop();
-          }
-        });
-      }
-    });
-
-    skaldMusicService.addOnAuthErrorListener(deezerProvider, new OnAuthErrorListener() {
-      @Override
-      public void onAuthError(AuthError authError) {
-        startAuthActivity(authError);
-      }
-    });
-    skaldMusicService.addOnPreparedListener(deezerProvider, new OnPreparedListener() {
-      @Override
-      public void onPrepared(final SkaldMusicService skaldMusicService) {
-        playDeezerButton.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            skaldMusicService.setSource(
-                new DeezerTrack(Uri.parse("skald://deezer/track/389296451"), "Taco", "Tlen"));
-            skaldMusicService.play();
-          }
-        });
-        resumeDeezerButton.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            skaldMusicService.resume();
-          }
-        });
-        pauseDeezerButton.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            skaldMusicService.pause();
-
-          }
-        });
-        stopDeezerButton.setOnClickListener(new View.OnClickListener() {
+        stopButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
             skaldMusicService.stop();
@@ -175,13 +136,6 @@ public class MainActivity extends Activity {
     });
 
     skaldMusicService.prepare();
-  }
-
-  private void startAuthActivity(AuthError authError) {
-    if (authError.hasResolution()) {
-      Intent intent = authError.getResolution();
-      startActivityForResult(intent, REQUEST_CODE);
-    }
   }
 
   @Override
@@ -202,5 +156,12 @@ public class MainActivity extends Activity {
   protected void onDestroy() {
     skaldMusicService.release();
     super.onDestroy();
+  }
+
+  private void startAuthActivity(AuthError authError) {
+    if (authError.hasResolution()) {
+      Intent intent = authError.getResolution();
+      startActivityForResult(intent, REQUEST_CODE);
+    }
   }
 }

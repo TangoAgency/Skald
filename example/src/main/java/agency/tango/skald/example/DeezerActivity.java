@@ -39,13 +39,13 @@ public class DeezerActivity extends Activity {
         Log.e(TAG, "Error in Deezer");
       }
     });
-    skaldMusicService.addOnAuthErrorListener(deezerProvider, new OnAuthErrorListener() {
+    skaldMusicService.addOnAuthErrorListener(new OnAuthErrorListener() {
       @Override
       public void onAuthError(AuthError authError) {
         startAuthActivity(authError);
       }
     });
-    skaldMusicService.addOnPreparedListener(deezerProvider, new OnPreparedListener() {
+    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
       @Override
       public void onPrepared(final SkaldMusicService skaldMusicService) {
         findViewById(R.id.button_play_track).setOnClickListener(new View.OnClickListener() {

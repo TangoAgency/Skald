@@ -18,6 +18,8 @@ public interface Player {
 
   void release();
 
+  boolean isPlaying();
+
   void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
 
   void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);

@@ -98,12 +98,6 @@ class SkaldSpotifyPlayer implements Player {
     }
   }
 
-  private void notifyStopEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onStopEvent();
-    }
-  }
-
   @Override
   public void pause() {
     if (spotifyPlayer.getPlaybackState().isPlaying) {
@@ -121,6 +115,11 @@ class SkaldSpotifyPlayer implements Player {
   @Override
   public void release() {
     Spotify.destroyPlayer(context);
+  }
+
+  @Override
+  public boolean isPlaying() {
+    return spotifyPlayer.getPlaybackState().isPlaying;
   }
 
   @Override
@@ -143,11 +142,16 @@ class SkaldSpotifyPlayer implements Player {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
+  private void notifyStopEvent() {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onStopEvent();
+    }
+  }
+
   private void addNotificationCallback(final SpotifyPlayer spotifyPlayer) {
     spotifyPlayer.addNotificationCallback(new NotificationCallback() {
       @Override
       public void onPlaybackEvent(PlayerEvent playerEvent) {
-        Log.d(TAG, playerEvent.toString());
         Metadata metadata = spotifyPlayer.getMetadata();
 
         if (playerEvent == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
@@ -171,26 +175,6 @@ class SkaldSpotifyPlayer implements Player {
         }
       }
     });
-  }
-
-  private void notifyPlayEvent(Metadata metadata) {
-    TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
-        metadata.currentTrack.name);
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onPlayEvent(trackMetadata);
-    }
-  }
-
-  private void notifyResumeEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onResumeEvent();
-    }
-  }
-
-  private void notifyPauseEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onPauseEvent();
-    }
   }
 
   private void addConnectionStateCallback(final Context context, final SpotifyPlayer spotifyPlayer,
@@ -237,6 +221,26 @@ class SkaldSpotifyPlayer implements Player {
 
       }
     });
+  }
+
+  private void notifyPlayEvent(Metadata metadata) {
+    TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
+        metadata.currentTrack.name);
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onPlayEvent(trackMetadata);
+    }
+  }
+
+  private void notifyResumeEvent() {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onResumeEvent();
+    }
+  }
+
+  private void notifyPauseEvent() {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onPauseEvent();
+    }
   }
 
   private void saveTokens(Context context, Tokens tokens, SpotifyAuthData spotifyAuthData) {
