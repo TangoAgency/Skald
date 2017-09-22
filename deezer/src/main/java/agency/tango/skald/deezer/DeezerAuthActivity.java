@@ -32,11 +32,11 @@ public class DeezerAuthActivity extends Activity {
         new String[] {
             Permissions.BASIC_ACCESS,
             Permissions.MANAGE_LIBRARY,
-            Permissions.LISTENING_HISTORY
-            //Permissions.EMAIL,
-            //Permissions.OFFLINE_ACCESS,
-            //Permissions.MANAGE_COMMUNITY,
-            //Permissions.DELETE_LIBRARY
+            Permissions.LISTENING_HISTORY,
+            Permissions.EMAIL,
+            Permissions.OFFLINE_ACCESS,
+            Permissions.MANAGE_COMMUNITY,
+            Permissions.DELETE_LIBRARY
         },
         new DialogListener() {
           @Override
@@ -59,6 +59,7 @@ public class DeezerAuthActivity extends Activity {
           public void onCancel() {
             Log.e(TAG, "Login canceled");
             setResult(RESULT_CANCELED);
+            finish();
           }
 
           @Override

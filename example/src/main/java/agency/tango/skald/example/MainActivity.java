@@ -66,37 +66,36 @@ public class MainActivity extends Activity {
         startAuthActivity(authError);
       }
     });
+    skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
+      @Override
+      public void onPlayEvent(TrackMetadata trackMetadata) {
+        Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
+            trackMetadata.getTitle()));
+      }
+
+      @Override
+      public void onPauseEvent() {
+        Log.d(TAG, "Pause Event");
+      }
+
+      @Override
+      public void onResumeEvent() {
+        Log.d(TAG, "Resume Event");
+      }
+
+      @Override
+      public void onStopEvent() {
+        Log.d(TAG, "Stop event");
+      }
+
+      @Override
+      public void onError(PlaybackError playbackError) {
+        Log.e(TAG, "Playback error occurred");
+      }
+    });
     skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
       @Override
       public void onPrepared(final SkaldMusicService skaldMusicService) {
-        skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
-          @Override
-          public void onPlayEvent(TrackMetadata trackMetadata) {
-            Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
-                trackMetadata.getTitle()));
-          }
-
-          @Override
-          public void onPauseEvent() {
-            Log.d(TAG, "Pause Event");
-          }
-
-          @Override
-          public void onResumeEvent() {
-            Log.d(TAG, "Resume Event");
-          }
-
-          @Override
-          public void onStopEvent() {
-            Log.d(TAG, "Stop event");
-          }
-
-          @Override
-          public void onError(PlaybackError playbackError) {
-            Log.e(TAG, "Playback error occurred");
-          }
-        });
-
         playSpotifyButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {

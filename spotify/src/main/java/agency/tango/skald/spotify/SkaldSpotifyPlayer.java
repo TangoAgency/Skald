@@ -114,6 +114,8 @@ class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void release() {
+    removeOnPlaybackListener();
+    removeOnPlayerReadyListener();
     Spotify.destroyPlayer(context);
   }
 
@@ -123,13 +125,13 @@ class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+  public void addOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
   }
 
   @Override
-  public void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
-    onPlayerReadyListeners.remove(onPlayerReadyListener);
+  public void removeOnPlayerReadyListener() {
+    onPlayerReadyListeners.remove(0);
   }
 
   @Override
@@ -138,8 +140,8 @@ class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
-    onPlaybackListeners.remove(onPlaybackListener);
+  public void removeOnPlaybackListener() {
+    onPlaybackListeners.remove(0);
   }
 
   private void addNotificationCallback(final SpotifyPlayer spotifyPlayer) {

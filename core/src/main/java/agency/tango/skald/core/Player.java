@@ -20,11 +20,11 @@ public interface Player {
 
   boolean isPlaying();
 
-  void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
+  void addOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
 
-  void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
+  void removeOnPlayerReadyListener();
 
   void addOnPlaybackListener(OnPlaybackListener onPlaybackListener);
 
-  void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener);
+  void removeOnPlaybackListener();
 }

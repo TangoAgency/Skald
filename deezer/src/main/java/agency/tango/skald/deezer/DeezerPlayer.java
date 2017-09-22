@@ -120,6 +120,7 @@ class DeezerPlayer {
   }
 
   void release() {
+    removeOnPlayerReadyListener();
     playerCache.evictAll();
   }
 
@@ -131,8 +132,8 @@ class DeezerPlayer {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  void removeOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
-    onPlaybackListeners.remove(onPlaybackListener);
+  void removeOnPlayerReadyListener() {
+    onPlaybackListeners.remove(0);
   }
 
   private void addOnPlayerStateChangeListener(final SkaldTrack skaldTrack) {

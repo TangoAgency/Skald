@@ -58,6 +58,7 @@ class SkaldDeezerPlayer implements Player {
 
   @Override
   public void release() {
+    removeOnPlayerReadyListener();
     deezerPlayer.release();
   }
 
@@ -67,7 +68,7 @@ class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void addPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+  public void addOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
 
     for (OnPlayerReadyListener onPlayerReadyExistingListener : onPlayerReadyListeners) {
@@ -76,8 +77,8 @@ class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void removePlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
-    onPlayerReadyListeners.remove(onPlayerReadyListener);
+  public void removeOnPlayerReadyListener() {
+    onPlayerReadyListeners.remove(0);
   }
 
   @Override
@@ -86,7 +87,7 @@ class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
-    deezerPlayer.removeOnPlayerReadyListener(onPlaybackListener);
+  public void removeOnPlaybackListener() {
+    deezerPlayer.removeOnPlayerReadyListener();
   }
 }
