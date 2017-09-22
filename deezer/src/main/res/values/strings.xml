@@ -1,3 +1,4 @@
 <resources>
   <string name="app_name">Deezer</string>
+  <string name="login_to_deezer">Login to Deezer</string>
 </resources>

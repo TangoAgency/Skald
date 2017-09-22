@@ -11,6 +11,6 @@
     android:padding="8dp"
     android:background="@android:color/holo_orange_light"
     android:textColor="@android:color/white"
-    android:text="Login to Deezer"/>
+    android:text="@string/login_to_deezer"/>
 
 </LinearLayout>

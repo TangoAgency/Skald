@@ -31,14 +31,15 @@ import agency.tango.skald.core.models.TrackMetadata;
 
 class DeezerPlayer {
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
+  private static final int MAX_NUMBER_OF_TRACKS = 5;
   private static final String TRACK_REQUEST = "TRACK_REQUEST";
   private final Context context;
   private final DeezerConnect deezerConnect;
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
 
   private TLruCache<Class, PlayerWrapper> playerCache;
+  private TLruCache<SkaldTrack, TrackMetadata> trackCache;
   private PlayerWrapper currentPlayer;
-  private boolean isMakingRequest = false;
 
   DeezerPlayer(Context context, DeezerConnect deezerConnect) {
     this.context = context;
@@ -56,6 +57,7 @@ class DeezerPlayer {
             }
           }
         });
+    trackCache = new TLruCache<>(MAX_NUMBER_OF_TRACKS);
   }
 
   void play(SkaldTrack skaldTrack) throws DeezerError {
@@ -138,9 +140,14 @@ class DeezerPlayer {
       @Override
       public void onPlayerStateChange(PlayerState playerState, long timePosition) {
         if (playerState == PlayerState.READY) {
-          notifyPlayEvent(skaldTrack);
-          isMakingRequest = true;
-        } else if (playerState == PlayerState.PLAYING && !isMakingRequest) {
+          TrackMetadata trackMetadata = getTrackMetadata(skaldTrack);
+          if (trackMetadata != null) {
+            notifyPlayEvent(trackMetadata);
+          } else {
+            makeTrackRequest(skaldTrack);
+            notifyPlayEvent(getTrackMetadata(skaldTrack));
+          }
+        } else if (playerState == PlayerState.PLAYING) {
           notifyResumeEvent();
         } else if (playerState == PlayerState.PAUSED) {
           notifyPauseEvent();
@@ -152,7 +159,11 @@ class DeezerPlayer {
     });
   }
 
-  private void notifyPlayEvent(SkaldTrack skaldTrack) {
+  private TrackMetadata getTrackMetadata(SkaldTrack skaldTrack) {
+    return trackCache.get(skaldTrack);
+  }
+
+  private void makeTrackRequest(final SkaldTrack skaldTrack) {
     DeezerRequest deezerRequest = DeezerRequestFactory.requestTrack(getId(skaldTrack.getUri()));
     deezerRequest.setId(TRACK_REQUEST);
     deezerConnect.requestAsync(deezerRequest, new JsonRequestListener() {
@@ -162,11 +173,7 @@ class DeezerPlayer {
           Track track = (Track) result;
           TrackMetadata trackMetadata = new TrackMetadata(track.getArtist().getName(),
               track.getTitle());
-          for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-            onPlaybackListener.onPlayEvent(trackMetadata);
-          }
-          notifyResumeEvent();
-          isMakingRequest = false;
+          trackCache.put(skaldTrack, trackMetadata);
         }
       }
 
@@ -184,6 +191,12 @@ class DeezerPlayer {
         }
       }
     });
+  }
+
+  private void notifyPlayEvent(TrackMetadata trackMetadata) {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onPlayEvent(trackMetadata);
+    }
   }
 
   private void notifyResumeEvent() {
