@@ -191,23 +191,28 @@ public class SkaldMusicService {
     onPlaybackListeners.remove(0);
   }
 
-  public Single<List<SkaldTrack>> searchTrack(String query) {
+  public Single<List<SkaldTrack>> searchTracks(String query) {
     List<Single<List<SkaldTrack>>> singles = new ArrayList<>();
     for (Provider provider : providers) {
-      if (playerCache.snapshot().containsKey(provider.getProviderName())) {
-        try {
-          singles.add(getSearchService(provider).searchForTracks(query));
-        } catch (AuthException e) {
-          notifyError();
-        }
+      try {
+        singles.add(getSearchService(provider).searchForTracks(query));
+      } catch (AuthException e) {
+        notifyError();
       }
     }
     return mergeLists(singles);
   }
 
-  public Single<List<SkaldPlaylist>> searchPlayList(String query) throws AuthException {
-    //return getSearchService().searchForPlaylists(query);
-    return null;
+  public Single<List<SkaldPlaylist>> searchPlayLists(String query) {
+    List<Single<List<SkaldPlaylist>>> singles = new ArrayList<>();
+    for (Provider provider : providers) {
+      try {
+        singles.add(getSearchService(provider).searchForPlaylists(query));
+      } catch (AuthException e) {
+        notifyError();
+      }
+    }
+    return mergeLists(singles);
   }
 
   private void notifyError() {

@@ -155,7 +155,7 @@ public class SpotifyActivity extends Activity {
   protected void onStart() {
     super.onStart();
 
-    skaldMusicService.searchTrack("hip-hop")
+    skaldMusicService.searchTracks("hip-hop")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {

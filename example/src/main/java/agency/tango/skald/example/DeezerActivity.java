@@ -8,15 +8,21 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 
+import java.util.List;
+
 import agency.tango.skald.R;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPreparedListener;
+import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.deezer.DeezerProvider;
 import agency.tango.skald.deezer.models.DeezerPlaylist;
 import agency.tango.skald.deezer.models.DeezerTrack;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.spotify.sdk.android.authentication.LoginActivity.REQUEST_CODE;
 
@@ -82,6 +88,23 @@ public class DeezerActivity extends Activity {
             skaldMusicService.stop();
           }
         });
+
+        skaldMusicService.searchTracks("hip-hop")
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
+              @Override
+              public void onSuccess(List<SkaldTrack> skaldTracks) {
+                for(SkaldTrack skaldTrack : skaldTracks) {
+                  Log.d(TAG, skaldTrack.toString());
+                }
+              }
+
+              @Override
+              public void onError(Throwable error) {
+                Log.e(TAG, "Error occurred in observer during searching for tracks", error);
+              }
+            });
       }
     });
 

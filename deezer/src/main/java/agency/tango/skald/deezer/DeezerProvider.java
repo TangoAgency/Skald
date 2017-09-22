@@ -5,6 +5,7 @@ import android.content.Context;
 import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.Provider;
+import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.SkaldAuthStore;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
@@ -43,7 +44,7 @@ public class DeezerProvider extends Provider {
 
   @Override
   public SearchServiceFactory getSearchServiceFactory() {
-    return null;
+    return new DeezerSearchServiceFactory(context, this);
   }
 
   @Override
@@ -86,6 +87,22 @@ public class DeezerProvider extends Provider {
     @Override
     public SkaldAuthStore getSkaldAuthStore() {
       return new DeezerAuthStore(deezerProvider);
+    }
+  }
+
+  private static class DeezerSearchServiceFactory extends SearchServiceFactory {
+    private final Context context;
+    private final SkaldAuthStore skaldAuthStore;
+
+    private DeezerSearchServiceFactory(Context context, DeezerProvider deezerProvider) {
+      this.context = context;
+      skaldAuthStore = new DeezerAuthStore(deezerProvider);
+    }
+
+    @Override
+    public SearchService getSearchService() throws AuthException {
+      DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
+      return new DeezerSearchService(deezerAuthData.getDeezerConnect());
     }
   }
 }
