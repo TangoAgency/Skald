@@ -58,7 +58,7 @@ public class DeezerActivity extends Activity {
           @Override
           public void onClick(View view) {
             skaldMusicService.setSource(
-                new DeezerTrack(Uri.parse("skald://deezer/track/389296451"), "Taco", "Tlen"));
+                new DeezerTrack(Uri.parse("skald://deezer/track/389296451"), "Taco", "Tlen", null));
             skaldMusicService.play();
           }
         });

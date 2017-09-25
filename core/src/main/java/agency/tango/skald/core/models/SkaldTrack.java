@@ -6,11 +6,13 @@ public class SkaldTrack {
   private final Uri uri;
   private final String artistName;
   private final String title;
+  private final String imageUrl;
 
-  public SkaldTrack(Uri uri, String artistName, String title) {
+  public SkaldTrack(Uri uri, String artistName, String title, String imageUrl) {
     this.uri = uri;
     this.artistName = artistName;
     this.title = title;
+    this.imageUrl = imageUrl;
   }
 
   public Uri getUri() {
@@ -23,6 +25,10 @@ public class SkaldTrack {
 
   public String getTitle() {
     return title;
+  }
+
+  public String getImageUrl() {
+    return imageUrl;
   }
 
   @Override

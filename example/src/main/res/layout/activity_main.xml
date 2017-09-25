@@ -85,7 +85,6 @@
     android:id="@+id/image_cover"
     android:layout_width="128dp"
     android:layout_height="0dp"
-    app:srcCompat="@android:color/background_dark"
     tools:layout_constraintTop_creator="1"
     tools:layout_constraintBottom_creator="1"
     android:layout_marginStart="15dp"
