@@ -31,15 +31,14 @@ import agency.tango.skald.core.models.TrackMetadata;
 
 class DeezerPlayer {
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
-  private static final int MAX_NUMBER_OF_TRACKS = 5;
   private static final String TRACK_REQUEST = "TRACK_REQUEST";
   private final Context context;
   private final DeezerConnect deezerConnect;
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
 
   private TLruCache<Class, PlayerWrapper> playerCache;
-  private TLruCache<SkaldTrack, TrackMetadata> trackCache;
   private PlayerWrapper currentPlayer;
+  private SkaldTrack skaldTrack;
 
   DeezerPlayer(Context context, DeezerConnect deezerConnect) {
     this.context = context;
@@ -57,10 +56,10 @@ class DeezerPlayer {
             }
           }
         });
-    trackCache = new TLruCache<>(MAX_NUMBER_OF_TRACKS);
   }
 
   void play(SkaldTrack skaldTrack) throws DeezerError {
+    this.skaldTrack = skaldTrack;
     long trackId = getId(skaldTrack.getUri());
     TrackPlayer trackPlayer = getPlayer(TrackPlayer.class);
     if (trackPlayer == null) {
@@ -69,7 +68,7 @@ class DeezerPlayer {
             deezerConnect, new WifiAndMobileNetworkStateChecker());
         playerCache.put(TrackPlayer.class, trackPlayer);
         currentPlayer = trackPlayer;
-        addOnPlayerStateChangeListener(skaldTrack);
+        addOnPlayerStateChangeListener();
         trackPlayer.playTrack(trackId);
       } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
         handleTooManyPlayerException(tooManyPlayersExceptions);
@@ -136,18 +135,12 @@ class DeezerPlayer {
     onPlaybackListeners.remove(0);
   }
 
-  private void addOnPlayerStateChangeListener(final SkaldTrack skaldTrack) {
+  private void addOnPlayerStateChangeListener() {
     currentPlayer.addOnPlayerStateChangeListener(new OnPlayerStateChangeListener() {
       @Override
       public void onPlayerStateChange(PlayerState playerState, long timePosition) {
         if (playerState == PlayerState.READY) {
-          TrackMetadata trackMetadata = getTrackMetadata(skaldTrack);
-          if (trackMetadata != null) {
-            notifyPlayEvent(trackMetadata);
-          } else {
-            makeTrackRequest(skaldTrack);
-            notifyPlayEvent(getTrackMetadata(skaldTrack));
-          }
+          makeTrackRequestAndNotifyPlayEvent(skaldTrack);
         } else if (playerState == PlayerState.PLAYING) {
           notifyResumeEvent();
         } else if (playerState == PlayerState.PAUSED) {
@@ -160,11 +153,7 @@ class DeezerPlayer {
     });
   }
 
-  private TrackMetadata getTrackMetadata(SkaldTrack skaldTrack) {
-    return trackCache.get(skaldTrack);
-  }
-
-  private void makeTrackRequest(final SkaldTrack skaldTrack) {
+  private void makeTrackRequestAndNotifyPlayEvent(final SkaldTrack skaldTrack) {
     DeezerRequest deezerRequest = DeezerRequestFactory.requestTrack(getId(skaldTrack.getUri()));
     deezerRequest.setId(TRACK_REQUEST);
     deezerConnect.requestAsync(deezerRequest, new JsonRequestListener() {
@@ -173,8 +162,8 @@ class DeezerPlayer {
         if (requestId.equals(TRACK_REQUEST)) {
           Track track = (Track) result;
           TrackMetadata trackMetadata = new TrackMetadata(track.getArtist().getName(),
-              track.getTitle());
-          trackCache.put(skaldTrack, trackMetadata);
+              track.getTitle(), track.getAlbum().getImageUrl());
+          notifyPlayEvent(trackMetadata);
         }
       }
 

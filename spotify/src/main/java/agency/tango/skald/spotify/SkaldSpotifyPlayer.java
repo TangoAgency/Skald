@@ -56,8 +56,7 @@ class SkaldSpotifyPlayer implements Player {
           @Override
           public void onInitialized(final SpotifyPlayer spotifyPlayer) {
             addNotificationCallback(spotifyPlayer);
-            addConnectionStateCallback(context, spotifyPlayer, spotifyProvider.getClientId(),
-                spotifyProvider.getClientSecret(), spotifyAuthData);
+            addConnectionStateCallback(context, spotifyPlayer, spotifyProvider, spotifyAuthData);
           }
 
           @Override
@@ -174,7 +173,7 @@ class SkaldSpotifyPlayer implements Player {
   }
 
   private void addConnectionStateCallback(final Context context, final SpotifyPlayer spotifyPlayer,
-      final String clientId, final String clientSecret, final SpotifyAuthData spotifyAuthData) {
+      final SpotifyProvider spotifyProvider, final SpotifyAuthData spotifyAuthData) {
     spotifyPlayer.addConnectionStateCallback(new ConnectionStateCallback() {
       @Override
       public void onLoggedIn() {
@@ -191,7 +190,8 @@ class SkaldSpotifyPlayer implements Player {
       @Override
       public void onLoginFailed(Error error) {
         new TokenService()
-            .getRefreshToken(clientId, clientSecret, spotifyAuthData.getRefreshToken())
+            .getRefreshToken(spotifyProvider.getClientId(), spotifyProvider.getClientSecret(),
+                spotifyAuthData.getRefreshToken())
             .subscribeOn(Schedulers.io())
             .subscribe(new DisposableSingleObserver<Tokens>() {
               @Override
@@ -227,7 +227,7 @@ class SkaldSpotifyPlayer implements Player {
 
   private void notifyPlayEvent(Metadata metadata) {
     TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
-        metadata.currentTrack.name);
+        metadata.currentTrack.name, metadata.currentTrack.albumCoverWebUrl);
     for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
       onPlaybackListener.onPlayEvent(trackMetadata);
     }

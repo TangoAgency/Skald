@@ -8,8 +8,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -33,24 +37,29 @@ public class MainActivity extends Activity {
   private static final String TAG = MainActivity.class.getSimpleName();
   public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
   public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
-  private static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
+  public static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
   private static final String DEEZER_CLIENT_ID = "250322";
   private static final int REQUEST_CODE = 1334;
 
   private SkaldMusicService skaldMusicService;
-  private Button resumeButton;
-  private Button pauseSpotifyButton;
-  private Button stopButton;
+  private ImageButton resumePauseButton;
+  private ImageButton stopButton;
+  private ImageView trackImage;
+  private TextView artistName;
+  private TextView title;
   private ArrayAdapter<SkaldTrack> arrayAdapter;
+  private boolean isPlaying = false;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     final ListView listView = (ListView) findViewById(R.id.list_view_tracks);
-    resumeButton = (Button) findViewById(R.id.button_main_resume);
-    pauseSpotifyButton = (Button) findViewById(R.id.button_main_pause);
-    stopButton = (Button) findViewById(R.id.button_main_stop);
+    resumePauseButton = (ImageButton) findViewById(R.id.imageButton_play);
+    stopButton = (ImageButton) findViewById(R.id.imageButton_stop);
+    trackImage = (ImageView) findViewById(R.id.image_cover);
+    artistName = (TextView) findViewById(R.id.text_artist);
+    title = (TextView) findViewById(R.id.text_title);
 
     arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
     listView.setAdapter(arrayAdapter);
@@ -78,21 +87,28 @@ public class MainActivity extends Activity {
       public void onPlayEvent(TrackMetadata trackMetadata) {
         Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
             trackMetadata.getTitle()));
+        isPlaying = true;
+        notifyViews(trackMetadata);
       }
 
       @Override
       public void onPauseEvent() {
         Log.d(TAG, "Pause Event");
+        isPlaying = false;
+        notifyResumePauseButton();
       }
 
       @Override
       public void onResumeEvent() {
         Log.d(TAG, "Resume Event");
+        isPlaying = true;
+        notifyResumePauseButton();
       }
 
       @Override
       public void onStopEvent() {
         Log.d(TAG, "Stop event");
+        isPlaying = false;
       }
 
       @Override
@@ -103,16 +119,14 @@ public class MainActivity extends Activity {
     skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
       @Override
       public void onPrepared(final SkaldMusicService skaldMusicService) {
-        resumeButton.setOnClickListener(new View.OnClickListener() {
+        resumePauseButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            skaldMusicService.resume();
-          }
-        });
-        pauseSpotifyButton.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            skaldMusicService.pause();
+            if (isPlaying) {
+              skaldMusicService.pause();
+            } else {
+              skaldMusicService.resume();
+            }
           }
         });
         stopButton.setOnClickListener(new View.OnClickListener() {
@@ -181,5 +195,29 @@ public class MainActivity extends Activity {
       Intent intent = authError.getResolution();
       startActivityForResult(intent, REQUEST_CODE);
     }
+  }
+
+  private void notifyViews(TrackMetadata trackMetadata) {
+    if (isPlaying) {
+      Picasso
+          .with(this)
+          .load(trackMetadata.getImageUrl())
+          .into(trackImage);
+      artistName.setText(trackMetadata.getArtistsName());
+      title.setText(trackMetadata.getTitle());
+    }
+  }
+
+  private void notifyResumePauseButton() {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        if (isPlaying) {
+          resumePauseButton.setImageResource(R.drawable.ic_action_pause);
+        } else {
+          resumePauseButton.setImageResource(R.drawable.ic_action_play);
+        }
+      }
+    });
   }
 }
