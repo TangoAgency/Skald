@@ -39,6 +39,7 @@ class DeezerPlayer {
   private TLruCache<Class, PlayerWrapper> playerCache;
   private PlayerWrapper currentPlayer;
   private SkaldTrack skaldTrack;
+  private boolean isTrackBeingPlaying = false;
 
   DeezerPlayer(Context context, DeezerConnect deezerConnect) {
     this.context = context;
@@ -139,10 +140,12 @@ class DeezerPlayer {
     currentPlayer.addOnPlayerStateChangeListener(new OnPlayerStateChangeListener() {
       @Override
       public void onPlayerStateChange(PlayerState playerState, long timePosition) {
-        if (playerState == PlayerState.READY) {
-          makeTrackRequestAndNotifyPlayEvent(skaldTrack);
-        } else if (playerState == PlayerState.PLAYING) {
-          notifyResumeEvent();
+        if (playerState == PlayerState.PLAYING) {
+          if (isTrackBeingPlaying) {
+            notifyResumeEvent();
+          } else {
+            makeTrackRequestAndNotifyPlayResumeEvent(skaldTrack);
+          }
         } else if (playerState == PlayerState.PAUSED) {
           notifyPauseEvent();
         } else if (playerState == PlayerState.STOPPED) {
@@ -153,7 +156,7 @@ class DeezerPlayer {
     });
   }
 
-  private void makeTrackRequestAndNotifyPlayEvent(final SkaldTrack skaldTrack) {
+  private void makeTrackRequestAndNotifyPlayResumeEvent(final SkaldTrack skaldTrack) {
     DeezerRequest deezerRequest = DeezerRequestFactory.requestTrack(getId(skaldTrack.getUri()));
     deezerRequest.setId(TRACK_REQUEST);
     deezerConnect.requestAsync(deezerRequest, new JsonRequestListener() {
@@ -164,6 +167,7 @@ class DeezerPlayer {
           TrackMetadata trackMetadata = new TrackMetadata(track.getArtist().getName(),
               track.getTitle(), track.getAlbum().getImageUrl());
           notifyPlayEvent(trackMetadata);
+          notifyResumeEvent();
         }
       }
 
@@ -183,7 +187,7 @@ class DeezerPlayer {
     });
   }
 
-  private void notifyPlayEvent(TrackMetadata trackMetadata) {
+  private void notifyPlayEvent(final TrackMetadata trackMetadata) {
     for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
       onPlaybackListener.onPlayEvent(trackMetadata);
     }
@@ -205,6 +209,7 @@ class DeezerPlayer {
     for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
       onPlaybackListener.onStopEvent();
     }
+    isTrackBeingPlaying = false;
   }
 
   private <T> T getPlayer(Class<T> a) {

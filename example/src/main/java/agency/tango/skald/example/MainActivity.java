@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
   public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
   private static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
   private static final String DEEZER_CLIENT_ID = "250322";
-  private static final int REQUEST_CODE = 1334;
+  private static final int AUTHORIZATION_REQUEST_CODE = 1334;
 
   private SkaldMusicService skaldMusicService;
   private ImageButton resumePauseButton;
@@ -61,8 +61,8 @@ public class MainActivity extends Activity {
     artistName = (TextView) findViewById(R.id.text_artist);
     title = (TextView) findViewById(R.id.text_title);
 
-    //tracksAdapter = new TracksAdapter(getApplicationContext(), R.layout.row_layout);
-    //listView.setAdapter(tracksAdapter);
+    tracksAdapter = new TracksAdapter(getApplicationContext(), R.layout.row_layout);
+    listView.setAdapter(tracksAdapter);
 
     final SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
@@ -154,15 +154,13 @@ public class MainActivity extends Activity {
   protected void onStart() {
     super.onStart();
 
-    skaldMusicService.searchTracks("hip-hop")
+    skaldMusicService.searchTracks("rap")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
           @Override
           public void onSuccess(List<SkaldTrack> skaldTracks) {
-            tracksAdapter = new TracksAdapter(getApplicationContext(), R.layout.row_layout,
-                skaldTracks);
-            listView.setAdapter(tracksAdapter);
+            tracksAdapter.addAll(skaldTracks);
           }
 
           @Override
@@ -182,7 +180,7 @@ public class MainActivity extends Activity {
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    if (requestCode == REQUEST_CODE) {
+    if (requestCode == AUTHORIZATION_REQUEST_CODE) {
       if (resultCode == RESULT_OK) {
         Log.d(TAG, "Authentication completed");
         skaldMusicService.prepare();
@@ -195,7 +193,7 @@ public class MainActivity extends Activity {
   private void startAuthActivity(AuthError authError) {
     if (authError.hasResolution()) {
       Intent intent = authError.getResolution();
-      startActivityForResult(intent, REQUEST_CODE);
+      startActivityForResult(intent, AUTHORIZATION_REQUEST_CODE);
     }
   }
 
@@ -211,15 +209,10 @@ public class MainActivity extends Activity {
   }
 
   private void notifyResumePauseButton() {
-    runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        if (isPlaying) {
-          resumePauseButton.setImageResource(R.drawable.ic_action_pause);
-        } else {
-          resumePauseButton.setImageResource(R.drawable.ic_action_play);
-        }
-      }
-    });
+    if (isPlaying) {
+      resumePauseButton.setImageResource(R.drawable.ic_action_pause);
+    } else {
+      resumePauseButton.setImageResource(R.drawable.ic_action_play);
+    }
   }
 }
