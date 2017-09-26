@@ -17,18 +17,19 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import agency.tango.skald.R;
+import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
-import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
-import agency.tango.skald.core.listeners.OnPreparedListener;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.deezer.DeezerProvider;
 import agency.tango.skald.spotify.SpotifyProvider;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -76,12 +77,6 @@ public class MainActivity extends Activity {
         Log.e(TAG, "Error in SkaldMusicService occurred");
       }
     });
-    skaldMusicService.addOnAuthErrorListener(new OnAuthErrorListener() {
-      @Override
-      public void onAuthError(AuthError authError) {
-        startAuthActivity(authError);
-      }
-    });
     skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
       @Override
       public void onPlayEvent(TrackMetadata trackMetadata) {
@@ -116,38 +111,58 @@ public class MainActivity extends Activity {
         Log.e(TAG, "Playback error occurred");
       }
     });
-    skaldMusicService.addOnPreparedListener(new OnPreparedListener() {
-      @Override
-      public void onPrepared(final SkaldMusicService skaldMusicService) {
-        resumePauseButton.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            if (isPlaying) {
-              skaldMusicService.pause();
-            } else {
-              skaldMusicService.resume();
-            }
-          }
-        });
-        stopButton.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            skaldMusicService.stop();
-          }
-        });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-          @Override
-          public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final SkaldTrack item = (SkaldTrack) parent.getItemAtPosition(position);
-            skaldMusicService.setSource(item);
-            skaldMusicService.play();
-          }
-        });
+    resumePauseButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        if (isPlaying) {
+          skaldMusicService.pause()
+              .subscribeOn(Schedulers.io())
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribe(new PlaybackEventCompletableObserver());
+        } else {
+          skaldMusicService.resume()
+              .subscribeOn(Schedulers.io())
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribe(new PlaybackEventCompletableObserver());
+        }
+      }
+    });
+    stopButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        skaldMusicService.stop()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new PlaybackEventCompletableObserver());
       }
     });
 
-    skaldMusicService.prepare();
+    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        final SkaldTrack item = (SkaldTrack) parent.getItemAtPosition(position);
+        skaldMusicService.play(item)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new DisposableSingleObserver<Object>() {
+              @Override
+              public void onSuccess(Object object) {
+                Log.d(TAG, object.toString());
+              }
+
+              @Override
+              public void onError(Throwable error) {
+                if (error instanceof AuthException) {
+                  AuthError authError = ((AuthException) error).getAuthError();
+                  if (authError.hasResolution()) {
+                    startActivityForResult(authError.getResolution(), AUTHORIZATION_REQUEST_CODE);
+                  }
+                }
+              }
+            });
+      }
+    });
   }
 
   @Override
@@ -183,17 +198,9 @@ public class MainActivity extends Activity {
     if (requestCode == AUTHORIZATION_REQUEST_CODE) {
       if (resultCode == RESULT_OK) {
         Log.d(TAG, "Authentication completed");
-        skaldMusicService.prepare();
       } else {
         Log.e(TAG, "Authentication went wrong");
       }
-    }
-  }
-
-  private void startAuthActivity(AuthError authError) {
-    if (authError.hasResolution()) {
-      Intent intent = authError.getResolution();
-      startActivityForResult(intent, AUTHORIZATION_REQUEST_CODE);
     }
   }
 
@@ -213,6 +220,18 @@ public class MainActivity extends Activity {
       resumePauseButton.setImageResource(R.drawable.ic_action_pause);
     } else {
       resumePauseButton.setImageResource(R.drawable.ic_action_play);
+    }
+  }
+
+  private class PlaybackEventCompletableObserver extends DisposableCompletableObserver {
+    @Override
+    public void onComplete() {
+
+    }
+
+    @Override
+    public void onError(@NonNull Throwable e) {
+
     }
   }
 }

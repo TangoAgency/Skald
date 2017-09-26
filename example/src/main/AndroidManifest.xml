@@ -24,8 +24,6 @@
 
     <activity android:name=".spotify.SpotifyAuthActivity"/>
     <activity android:name=".deezer.DeezerAuthActivity"/>
-    <activity android:name=".example.SpotifyActivity"/>
-    <activity android:name=".example.DeezerActivity"/>
 
   </application>
 
