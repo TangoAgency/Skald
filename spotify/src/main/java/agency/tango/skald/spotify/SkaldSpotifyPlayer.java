@@ -39,6 +39,8 @@ class SkaldSpotifyPlayer implements Player {
       Log.i(TAG, "Operation succeed");
     }
   };
+  private final ConnectionStateCallback connectionStateCallback;
+  private final NotificationCallback notificationCallback;
   private final Context context;
   private final SpotifyProvider spotifyProvider;
   private final Handler mainHandler;
@@ -50,16 +52,19 @@ class SkaldSpotifyPlayer implements Player {
     this.context = context;
     this.spotifyProvider = spotifyProvider;
     mainHandler = new Handler(context.getMainLooper());
+    connectionStateCallback = initializeConnectionStateCallback(spotifyAuthData);
+    notificationCallback = initializeNotificationCallback();
 
     final Config playerConfig = new Config(context, spotifyAuthData.getOauthToken(),
         spotifyProvider.getClientId());
+
 
     spotifyPlayer = Spotify.getPlayer(playerConfig, this,
         new SpotifyPlayer.InitializationObserver() {
           @Override
           public void onInitialized(final SpotifyPlayer spotifyPlayer) {
-            addNotificationCallback(spotifyPlayer);
-            addConnectionStateCallback(context, spotifyPlayer, spotifyProvider, spotifyAuthData);
+            spotifyPlayer.addConnectionStateCallback(connectionStateCallback);
+            spotifyPlayer.addNotificationCallback(notificationCallback);
           }
 
           @Override
@@ -67,6 +72,8 @@ class SkaldSpotifyPlayer implements Player {
             Log.e(TAG, "Could not initialize player", throwable);
           }
         });
+
+    spotifyPlayer.login(spotifyAuthData.getOauthToken());
   }
 
   @Override
@@ -116,8 +123,11 @@ class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void release() {
-    removeOnPlaybackListener();
     removeOnPlayerReadyListener();
+    removeOnPlaybackListener();
+    spotifyPlayer.logout();
+    spotifyPlayer.removeNotificationCallback(notificationCallback);
+    spotifyPlayer.removeConnectionStateCallback(connectionStateCallback);
     Spotify.destroyPlayer(context);
   }
 
@@ -146,38 +156,9 @@ class SkaldSpotifyPlayer implements Player {
     onPlaybackListeners.remove(0);
   }
 
-  private void addNotificationCallback(final SpotifyPlayer spotifyPlayer) {
-    spotifyPlayer.addNotificationCallback(new NotificationCallback() {
-      @Override
-      public void onPlaybackEvent(PlayerEvent playerEvent) {
-        Metadata metadata = spotifyPlayer.getMetadata();
-
-        if (playerEvent == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
-          if (metadata.currentTrack != null) {
-            notifyPlayEvent(metadata);
-          }
-        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
-          if (metadata.currentTrack != null) {
-            notifyResumeEvent();
-          }
-        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
-          notifyPauseEvent();
-        }
-      }
-
-      @Override
-      public void onPlaybackError(Error error) {
-        Log.e(TAG, String.format("PlaybackError occurred %s", error.toString()));
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError());
-        }
-      }
-    });
-  }
-
-  private void addConnectionStateCallback(final Context context, final SpotifyPlayer spotifyPlayer,
-      final SpotifyProvider spotifyProvider, final SpotifyAuthData spotifyAuthData) {
-    spotifyPlayer.addConnectionStateCallback(new ConnectionStateCallback() {
+  private ConnectionStateCallback initializeConnectionStateCallback(
+      final SpotifyAuthData spotifyAuthData) {
+    return new ConnectionStateCallback() {
       @Override
       public void onLoggedIn() {
         for (OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
@@ -219,7 +200,36 @@ class SkaldSpotifyPlayer implements Player {
       public void onConnectionMessage(String s) {
 
       }
-    });
+    };
+  }
+
+  private NotificationCallback initializeNotificationCallback() {
+    return new NotificationCallback() {
+      @Override
+      public void onPlaybackEvent(PlayerEvent playerEvent) {
+        Metadata metadata = spotifyPlayer.getMetadata();
+
+        if (playerEvent == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
+          if (metadata.currentTrack != null) {
+            notifyPlayEvent(metadata);
+          }
+        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
+          if (metadata.currentTrack != null) {
+            notifyResumeEvent();
+          }
+        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
+          notifyPauseEvent();
+        }
+      }
+
+      @Override
+      public void onPlaybackError(Error error) {
+        Log.e(TAG, String.format("PlaybackError occurred %s", error.toString()));
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onError(new PlaybackError());
+        }
+      }
+    };
   }
 
   private void notifyStopEvent() {
