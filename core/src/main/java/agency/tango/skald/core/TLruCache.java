@@ -1,5 +1,6 @@
 package agency.tango.skald.core;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +13,8 @@ public class TLruCache<K, V> {
     this.cache = new SkaldLruCache<>(size);
   }
 
-  public TLruCache(int size, SkaldLruCache.CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
+  public TLruCache(int size,
+      SkaldLruCache.CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
     this(size);
     cache.addCacheItemRemovedListener(cacheItemRemovedListener);
   }
@@ -28,7 +30,7 @@ public class TLruCache<K, V> {
 
   public V get(K key) {
     V value = cache.get(key);
-    if(value != null) {
+    if (value != null) {
       removeTimestamp(key);
       timestamps.put(System.currentTimeMillis(), key);
     }
@@ -41,10 +43,13 @@ public class TLruCache<K, V> {
 
   public void evictTo(long value, TimeUnit unit) {
     Long timestamp = System.currentTimeMillis() - unit.toMillis(value);
-    for (Long key : timestamps.headMap(timestamp).keySet()) {
-      if(cache.size() > 1) {
-        cache.remove(timestamps.get(key));
-        timestamps.remove(key);
+    Map<Long, K> timestampsToRemove = timestamps.headMap(timestamp);
+    for (Iterator<Map.Entry<Long, K>> it = timestampsToRemove.entrySet().iterator();
+        it.hasNext(); ) {
+      K key = it.next().getValue();
+      if (cache.size() > 1) {
+        cache.remove(key);
+        it.remove();
       }
     }
   }

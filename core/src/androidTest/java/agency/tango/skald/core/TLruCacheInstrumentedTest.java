@@ -96,13 +96,19 @@ public class TLruCacheInstrumentedTest {
     TLruCache<Object, Object> cache = new TLruCache<>(3);
     cache.put(new Object(), new Object());
     try {
-      Thread.sleep(2000);
+      Thread.sleep(100);
+    } catch (InterruptedException exception) {
+      exception.printStackTrace();
+    }
+    cache.put(new Object(), new Object());
+    try {
+      Thread.sleep(100);
     } catch (InterruptedException exception) {
       exception.printStackTrace();
     }
     cache.put(new Object(), new Object());
 
-    cache.evictTo(1, TimeUnit.SECONDS);
+    cache.evictTo(90, TimeUnit.MILLISECONDS);
 
     assertEquals(1, cache.getTimestamps().size());
     assertEquals(1, cache.size());
