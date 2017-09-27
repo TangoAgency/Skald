@@ -3,6 +3,7 @@ package agency.tango.skald.deezer;
 import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
 
 import com.deezer.sdk.model.Track;
 import com.deezer.sdk.network.connect.DeezerConnect;
@@ -35,6 +36,7 @@ class DeezerPlayer {
   private final Context context;
   private final DeezerConnect deezerConnect;
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
+  private final Handler mainHandler;
 
   private TLruCache<Class, PlayerWrapper> playerCache;
   private PlayerWrapper currentPlayer;
@@ -57,6 +59,7 @@ class DeezerPlayer {
             }
           }
         });
+    mainHandler = new Handler(context.getMainLooper());
   }
 
   void play(SkaldTrack skaldTrack) throws DeezerError {
@@ -188,27 +191,48 @@ class DeezerPlayer {
   }
 
   private void notifyPlayEvent(final TrackMetadata trackMetadata) {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onPlayEvent(trackMetadata);
-    }
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onPlayEvent(trackMetadata);
+        }
+      }
+    });
+    isTrackBeingPlaying = true;
   }
 
   private void notifyResumeEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onResumeEvent();
-    }
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onResumeEvent();
+        }
+      }
+    });
   }
 
   private void notifyPauseEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onPauseEvent();
-    }
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onPauseEvent();
+        }
+      }
+    });
   }
 
   private void notifyStopEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onStopEvent();
-    }
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onStopEvent();
+        }
+      }
+    });
     isTrackBeingPlaying = false;
   }
 

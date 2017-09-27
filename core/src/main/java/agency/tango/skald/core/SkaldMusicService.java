@@ -27,7 +27,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Cancellable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 
 public class SkaldMusicService {
@@ -76,7 +76,7 @@ public class SkaldMusicService {
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
-        playerCache.evictTo(15, TimeUnit.SECONDS);
+        playerCache.evictTo(1, TimeUnit.MINUTES);
       }
     }, 10000, 10000);
   }
@@ -114,12 +114,15 @@ public class SkaldMusicService {
             }
           }
         }
-        emitter.setCancellable(new Cancellable() {
+        emitter.setDisposable(new Disposable() {
           @Override
-          public void cancel() throws Exception {
-            for (Player player : playerCache.snapshot().values()) {
-              player.stop();
-            }
+          public void dispose() {
+            //todo
+          }
+
+          @Override
+          public boolean isDisposed() {
+            return false;
           }
         });
       }
@@ -188,7 +191,7 @@ public class SkaldMusicService {
     for (Provider provider : providers) {
       try {
         singles.add(getSearchService(provider).searchForTracks(query));
-      } catch (AuthException emitter) {
+      } catch (AuthException authException) {
         notifyError();
         //todo
       }

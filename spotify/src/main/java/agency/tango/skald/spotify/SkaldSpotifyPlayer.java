@@ -2,6 +2,7 @@ package agency.tango.skald.spotify;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 
 import com.spotify.sdk.android.player.Config;
@@ -38,15 +39,17 @@ class SkaldSpotifyPlayer implements Player {
       Log.i(TAG, "Operation succeed");
     }
   };
-
   private final Context context;
   private final SpotifyProvider spotifyProvider;
+  private final Handler mainHandler;
+
   private SpotifyPlayer spotifyPlayer;
 
   SkaldSpotifyPlayer(final Context context, final SpotifyAuthData spotifyAuthData,
       final SpotifyProvider spotifyProvider) {
     this.context = context;
     this.spotifyProvider = spotifyProvider;
+    mainHandler = new Handler(context.getMainLooper());
 
     final Config playerConfig = new Config(context, spotifyAuthData.getOauthToken(),
         spotifyProvider.getClientId());
@@ -220,29 +223,49 @@ class SkaldSpotifyPlayer implements Player {
   }
 
   private void notifyStopEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onStopEvent();
-    }
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onStopEvent();
+        }
+      }
+    });
   }
 
-  private void notifyPlayEvent(Metadata metadata) {
-    TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
-        metadata.currentTrack.name, metadata.currentTrack.albumCoverWebUrl);
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onPlayEvent(trackMetadata);
-    }
+  private void notifyPlayEvent(final Metadata metadata) {
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
+            metadata.currentTrack.name, metadata.currentTrack.albumCoverWebUrl);
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onPlayEvent(trackMetadata);
+        }
+      }
+    });
   }
 
   private void notifyResumeEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onResumeEvent();
-    }
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onResumeEvent();
+        }
+      }
+    });
   }
 
   private void notifyPauseEvent() {
-    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onPauseEvent();
-    }
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onPauseEvent();
+        }
+      }
+    });
   }
 
   private void saveTokens(Context context, Tokens tokens, SpotifyAuthData spotifyAuthData) {

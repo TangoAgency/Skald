@@ -42,8 +42,10 @@ public class TLruCache<K, V> {
   public void evictTo(long value, TimeUnit unit) {
     Long timestamp = System.currentTimeMillis() - unit.toMillis(value);
     for (Long key : timestamps.headMap(timestamp).keySet()) {
-      cache.remove(timestamps.get(key));
-      timestamps.remove(key);
+      if(cache.size() > 1) {
+        cache.remove(timestamps.get(key));
+        timestamps.remove(key);
+      }
     }
   }
 
