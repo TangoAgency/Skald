@@ -123,8 +123,6 @@ class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void release() {
-    removeOnPlayerReadyListener();
-    removeOnPlaybackListener();
     spotifyPlayer.logout();
     spotifyPlayer.removeNotificationCallback(notificationCallback);
     spotifyPlayer.removeConnectionStateCallback(connectionStateCallback);
