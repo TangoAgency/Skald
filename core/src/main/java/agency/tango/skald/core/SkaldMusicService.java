@@ -13,7 +13,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
+import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -36,17 +38,22 @@ public class SkaldMusicService {
   public static final String EXTRA_PROVIDER_NAME = "provider_name";
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
 
+  private final List<OnAuthErrorListener> onAuthErrorListeners = new ArrayList<>();
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Timer timer = new Timer();
-  private final Context context;
 
+  private final Context context;
   private TLruCache<String, Player> playerCache;
   private Player currentPlayer;
 
-  public SkaldMusicService(Context context, final Provider... providers) {
+  public SkaldMusicService(Context context, Provider... providers) {
+    this(context);
     this.providers.addAll(Arrays.asList(providers));
+  }
+
+  public SkaldMusicService(Context context) {
     this.context = context.getApplicationContext();
     this.playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
         new SkaldLruCache.CacheItemRemovedListener<String, Player>() {
@@ -61,7 +68,7 @@ public class SkaldMusicService {
       public void onReceive(Context context, Intent intent) {
         SkaldAuthData skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
         String providerName = intent.getStringExtra(EXTRA_PROVIDER_NAME);
-        for (Provider provider : providers) {
+        for (Provider provider : SkaldMusicService.this.providers) {
           if (provider.getProviderName().equals(providerName)) {
             getSkaldAuthStore(provider).save(context, skaldAuthData);
           }
@@ -81,43 +88,69 @@ public class SkaldMusicService {
     }, 10000, 10000);
   }
 
+  public Intent login(Provider provider) {
+    try {
+      getSkaldAuthStore(provider).restore(context);
+    } catch (AuthException authException) {
+      if (authException.getAuthError().hasResolution()) {
+        return authException.getAuthError().getResolution();
+      }
+    }
+    addProvider(provider);
+    return null;
+  }
+
+  public void logout(Provider provider) {
+    try {
+      provider.getPlayerFactory().getPlayer().release();
+      //todo should clear auth cache
+    } catch (AuthException authException) {
+      for (OnErrorListener onErrorListener : onErrorListeners) {
+        onErrorListener.onError();
+      }
+    }
+  }
+
+  public void addProvider(Provider provider) {
+    if(!providers.contains(provider)) {
+      providers.add(provider);
+    }
+  }
+
+  public void removeProvider(Provider provider) {
+    providers.remove(provider);
+  }
+
   public Single<Object> play(final SkaldTrack skaldTrack) {
     return Single.create(new SingleOnSubscribe<Object>() {
+      boolean playerInitialized = false;
+      Provider currentProvider;
+      Player previousPlayer;
+
       @Override
       public void subscribe(@NonNull final SingleEmitter<Object> emitter) throws Exception {
-        if(currentPlayer != null) {
+        if (currentPlayer != null) {
           currentPlayer.stop();
         }
         for (Provider provider : providers) {
           if (provider.canHandle(skaldTrack)) {
+            currentProvider = provider;
             Player player = playerCache.get(provider.getProviderName());
             if (player != null) {
-              player.play(skaldTrack);
-              currentPlayer = player;
-              emitter.onSuccess(player);
+              playTrack(emitter, player);
             } else {
-              try {
-                player = provider.getPlayerFactory().getPlayer();
-                currentPlayer = player;
-                playerCache.put(provider.getProviderName(), player);
-                player.addOnPlaybackListener(new OnPlayerPlaybackListener());
-                player.addOnPlayerReadyListener(new OnPlayerReadyListener() {
-                  @Override
-                  public void onPlayerReady(Player player) {
-                    player.play(skaldTrack);
-                    emitter.onSuccess(player);
-                  }
-                });
-              } catch (AuthException authException) {
-                emitter.onError(authException);
-              }
+              initializePlayerAndPlay(emitter, provider);
             }
           }
         }
+
         emitter.setDisposable(new Disposable() {
           @Override
           public void dispose() {
-            //todo
+            if (!playerInitialized && currentProvider != null) {
+              playerCache.remove(currentProvider.getProviderName());
+              currentPlayer = previousPlayer;
+            }
           }
 
           @Override
@@ -125,6 +158,34 @@ public class SkaldMusicService {
             return false;
           }
         });
+      }
+
+      private void playTrack(@NonNull SingleEmitter<Object> emitter, Player player) {
+        player.play(skaldTrack);
+        playerInitialized = true;
+        currentPlayer = player;
+        emitter.onSuccess(player);
+      }
+
+      private void initializePlayerAndPlay(@NonNull final SingleEmitter<Object> emitter,
+          Provider provider) {
+        try {
+          Player player = provider.getPlayerFactory().getPlayer();
+          previousPlayer = currentPlayer;
+          currentPlayer = player;
+          playerCache.put(provider.getProviderName(), player);
+          player.addOnPlaybackListener(new OnPlayerPlaybackListener());
+          player.addOnPlayerReadyListener(new OnPlayerReadyListener() {
+            @Override
+            public void onPlayerReady(Player player) {
+              player.play(skaldTrack);
+              playerInitialized = true;
+              emitter.onSuccess(player);
+            }
+          });
+        } catch (AuthException authException) {
+          emitter.onError(authException);
+        }
       }
     });
   }
@@ -170,12 +231,20 @@ public class SkaldMusicService {
     timer.cancel();
   }
 
-  public void addOnErrorListener(OnErrorListener onErrorListener) {
+  public void addOnErrorListner(OnErrorListener onErrorListener) {
     onErrorListeners.add(onErrorListener);
   }
 
   public void removeOnErrorListener() {
     onErrorListeners.remove(0);
+  }
+
+  public void addOnAuthErrorListener(OnAuthErrorListener onAuthErrorListener) {
+    onAuthErrorListeners.add(onAuthErrorListener);
+  }
+
+  public void removeOnAuthErrorListener() {
+    onAuthErrorListeners.remove(0);
   }
 
   public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
@@ -192,7 +261,7 @@ public class SkaldMusicService {
       try {
         singles.add(getSearchService(provider).searchForTracks(query));
       } catch (AuthException authException) {
-        notifyError();
+        notifyAuthError(authException.getAuthError());
         //todo
       }
     }
@@ -204,16 +273,16 @@ public class SkaldMusicService {
     for (Provider provider : providers) {
       try {
         singles.add(getSearchService(provider).searchForPlaylists(query));
-      } catch (AuthException e) {
-        notifyError();
+      } catch (AuthException authException) {
+        notifyAuthError(authException.getAuthError());
       }
     }
     return mergeLists(singles);
   }
 
-  private void notifyError() {
-    for (OnErrorListener onErrorListener : onErrorListeners) {
-      onErrorListener.onError();
+  private void notifyAuthError(AuthError authError) {
+    for (OnAuthErrorListener onAuthErrorListener : onAuthErrorListeners) {
+      onAuthErrorListener.onAuthError(authError);
     }
   }
 

@@ -19,7 +19,6 @@ import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Cancellable;
 
 public class DeezerSearchService implements SearchService {
   private static final String SEARCH_TRACK_REQUEST = "SEARCH_TRACK_REQUEST";
@@ -49,8 +48,6 @@ public class DeezerSearchService implements SearchService {
                 }
               }
             });
-
-        setCancellable(emitter);
       }
     });
   }
@@ -73,17 +70,6 @@ public class DeezerSearchService implements SearchService {
                 }
               }
             });
-
-        setCancellable(emitter);
-      }
-    });
-  }
-
-  private <T> void setCancellable(@NonNull SingleEmitter<T> emitter) {
-    emitter.setCancellable(new Cancellable() {
-      @Override
-      public void cancel() throws Exception {
-        //todo
       }
     });
   }

@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -18,9 +19,11 @@ import java.util.List;
 
 import agency.tango.skald.R;
 import agency.tango.skald.core.AuthException;
+import agency.tango.skald.core.Provider;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
+import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldTrack;
@@ -48,8 +51,12 @@ public class MainActivity extends Activity {
   private TextView artistName;
   private TextView title;
   private ListView listView;
+  private Button spotifyButton;
+  private Button deezerButton;
   private TracksAdapter tracksAdapter;
   private boolean isPlaying = false;
+
+  private Provider provider;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,20 +68,29 @@ public class MainActivity extends Activity {
     trackImage = (ImageView) findViewById(R.id.image_cover);
     artistName = (TextView) findViewById(R.id.text_artist);
     title = (TextView) findViewById(R.id.text_title);
+    spotifyButton = (Button) findViewById(R.id.button_login_spotify);
+    deezerButton = (Button) findViewById(R.id.button_login_deezer);
 
     tracksAdapter = new TracksAdapter(getApplicationContext(), R.layout.row_layout);
     listView.setAdapter(tracksAdapter);
 
     final SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
-        SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
+        SPOTIFY_REDIRECT_URI,
+        SPOTIFY_CLIENT_SECRET);
     final DeezerProvider deezerProvider = new DeezerProvider(this, DEEZER_CLIENT_ID);
 
-    skaldMusicService = new SkaldMusicService(this, spotifyProvider, deezerProvider);
+    skaldMusicService = new SkaldMusicService(this);
 
-    skaldMusicService.addOnErrorListener(new OnErrorListener() {
+    skaldMusicService.addOnErrorListner(new OnErrorListener() {
       @Override
       public void onError() {
         Log.e(TAG, "Error in SkaldMusicService occurred");
+      }
+    });
+    skaldMusicService.addOnAuthErrorListener(new OnAuthErrorListener() {
+      @Override
+      public void onAuthError(AuthError authError) {
+
       }
     });
     skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
@@ -109,6 +125,31 @@ public class MainActivity extends Activity {
       @Override
       public void onError(PlaybackError playbackError) {
         Log.e(TAG, "Playback error occurred");
+      }
+    });
+
+    spotifyButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent intent = skaldMusicService.login(spotifyProvider);
+        if (intent != null) {
+          provider = spotifyProvider;
+          startActivityForResult(intent, AUTHORIZATION_REQUEST_CODE);
+        }
+        tracksAdapter.clear();
+        searchTracks();
+      }
+    });
+    deezerButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent intent = skaldMusicService.login(deezerProvider);
+        if (intent != null) {
+          provider = deezerProvider;
+          startActivityForResult(intent, AUTHORIZATION_REQUEST_CODE);
+        }
+        tracksAdapter.clear();
+        searchTracks();
       }
     });
 
@@ -168,21 +209,8 @@ public class MainActivity extends Activity {
   @Override
   protected void onStart() {
     super.onStart();
-
-    skaldMusicService.searchTracks("rap")
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
-          @Override
-          public void onSuccess(List<SkaldTrack> skaldTracks) {
-            tracksAdapter.addAll(skaldTracks);
-          }
-
-          @Override
-          public void onError(Throwable error) {
-            Log.e(TAG, "Error occurred in observer during searching for tracks", error);
-          }
-        });
+    tracksAdapter.clear();
+    searchTracks();
   }
 
   @Override
@@ -198,10 +226,28 @@ public class MainActivity extends Activity {
     if (requestCode == AUTHORIZATION_REQUEST_CODE) {
       if (resultCode == RESULT_OK) {
         Log.d(TAG, "Authentication completed");
+        skaldMusicService.addProvider(provider);
       } else {
         Log.e(TAG, "Authentication went wrong");
       }
     }
+  }
+
+  private void searchTracks() {
+    skaldMusicService.searchTracks("rap")
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
+          @Override
+          public void onSuccess(List<SkaldTrack> skaldTracks) {
+            tracksAdapter.addAll(skaldTracks);
+          }
+
+          @Override
+          public void onError(Throwable error) {
+            Log.e(TAG, "Error occurred in observer during searching for tracks", error);
+          }
+        });
   }
 
   private void notifyViews(TrackMetadata trackMetadata) {
