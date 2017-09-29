@@ -34,13 +34,14 @@ public class TracksAdapter extends ArrayAdapter<SkaldTrack> {
     ImageView imageView = (ImageView) convertView.findViewById(R.id.image_list_cover);
     TextView textView = (TextView) convertView.findViewById(R.id.text_track_info);
     if (track != null) {
+      if(!track.getImageUrl().isEmpty()) {
       Picasso
           .with(context)
           .load(track.getImageUrl())
           .into(imageView);
+      }
       textView.setText(String.format("%s - %s", track.getArtistName(), track.getTitle()));
     }
-
     return convertView;
   }
 }

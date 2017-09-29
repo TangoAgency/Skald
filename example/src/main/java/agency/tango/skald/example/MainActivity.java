@@ -21,6 +21,7 @@ import agency.tango.skald.R;
 import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.Provider;
 import agency.tango.skald.core.SkaldMusicService;
+import agency.tango.skald.core.SkaldValidationService;
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnAuthErrorListener;
@@ -45,6 +46,7 @@ public class MainActivity extends Activity {
   private static final int AUTHORIZATION_REQUEST_CODE = 1334;
 
   private SkaldMusicService skaldMusicService;
+  private SkaldValidationService skaldValidationService;
   private ImageButton resumePauseButton;
   private ImageButton stopButton;
   private ImageView trackImage;
@@ -54,8 +56,8 @@ public class MainActivity extends Activity {
   private Button spotifyButton;
   private Button deezerButton;
   private TracksAdapter tracksAdapter;
-  private boolean isPlaying = false;
 
+  private boolean isPlaying = false;
   private Provider provider;
 
   @Override
@@ -75,11 +77,12 @@ public class MainActivity extends Activity {
     listView.setAdapter(tracksAdapter);
 
     final SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
-        SPOTIFY_REDIRECT_URI,
-        SPOTIFY_CLIENT_SECRET);
+        SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
     final DeezerProvider deezerProvider = new DeezerProvider(this, DEEZER_CLIENT_ID);
 
-    skaldMusicService = new SkaldMusicService(this);
+    skaldValidationService = new SkaldValidationService(getApplicationContext(), spotifyProvider,
+        deezerProvider);
+    skaldMusicService = new SkaldMusicService(getApplicationContext());
 
     skaldMusicService.addOnErrorListner(new OnErrorListener() {
       @Override
@@ -131,25 +134,13 @@ public class MainActivity extends Activity {
     spotifyButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Intent intent = skaldMusicService.login(spotifyProvider);
-        if (intent != null) {
-          provider = spotifyProvider;
-          startActivityForResult(intent, AUTHORIZATION_REQUEST_CODE);
-        }
-        tracksAdapter.clear();
-        searchTracks();
+        loginAndSearchTracks(spotifyProvider);
       }
     });
     deezerButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Intent intent = skaldMusicService.login(deezerProvider);
-        if (intent != null) {
-          provider = deezerProvider;
-          startActivityForResult(intent, AUTHORIZATION_REQUEST_CODE);
-        }
-        tracksAdapter.clear();
-        searchTracks();
+        loginAndSearchTracks(deezerProvider);
       }
     });
 
@@ -233,8 +224,20 @@ public class MainActivity extends Activity {
     }
   }
 
+  private void loginAndSearchTracks(Provider provider) {
+    if (!skaldValidationService.isProviderValid(provider)) {
+      startActivityForResult(skaldValidationService.login(provider),
+          AUTHORIZATION_REQUEST_CODE);
+      this.provider = provider;
+    } else {
+      skaldMusicService.addProvider(provider);
+    }
+    tracksAdapter.clear();
+    searchTracks();
+  }
+
   private void searchTracks() {
-    skaldMusicService.searchTracks("rap")
+    skaldMusicService.searchTracks("hip-hop")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
@@ -251,14 +254,12 @@ public class MainActivity extends Activity {
   }
 
   private void notifyViews(TrackMetadata trackMetadata) {
-    if (isPlaying) {
-      Picasso
-          .with(this)
-          .load(trackMetadata.getImageUrl())
-          .into(trackImage);
-      artistName.setText(trackMetadata.getArtistsName());
-      title.setText(trackMetadata.getTitle());
-    }
+    Picasso
+        .with(this)
+        .load(trackMetadata.getImageUrl())
+        .into(trackImage);
+    artistName.setText(trackMetadata.getArtistsName());
+    title.setText(trackMetadata.getTitle());
   }
 
   private void notifyResumePauseButton() {

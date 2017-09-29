@@ -1,10 +1,6 @@
 package agency.tango.skald.core;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,52 +59,12 @@ public class SkaldMusicService {
           }
         });
 
-    BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        SkaldAuthData skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
-        String providerName = intent.getStringExtra(EXTRA_PROVIDER_NAME);
-        for (Provider provider : SkaldMusicService.this.providers) {
-          if (provider.getProviderName().equals(providerName)) {
-            getSkaldAuthStore(provider).save(context, skaldAuthData);
-          }
-        }
-      }
-    };
-
-    LocalBroadcastManager
-        .getInstance(context.getApplicationContext())
-        .registerReceiver(messageReceiver, new IntentFilter(INTENT_ACTION));
-
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
         playerCache.evictTo(1, TimeUnit.MINUTES);
       }
     }, 10000, 10000);
-  }
-
-  public Intent login(Provider provider) {
-    try {
-      getSkaldAuthStore(provider).restore(context);
-    } catch (AuthException authException) {
-      if (authException.getAuthError().hasResolution()) {
-        return authException.getAuthError().getResolution();
-      }
-    }
-    addProvider(provider);
-    return null;
-  }
-
-  public void logout(Provider provider) {
-    try {
-      provider.getPlayerFactory().getPlayer().release();
-      //todo should clear auth cache
-    } catch (AuthException authException) {
-      for (OnErrorListener onErrorListener : onErrorListeners) {
-        onErrorListener.onError();
-      }
-    }
   }
 
   public void addProvider(Provider provider) {
