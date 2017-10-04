@@ -1,6 +1,8 @@
 package agency.tango.skald.core;
 
 import android.content.Context;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,15 +11,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import agency.tango.skald.core.errors.AuthError;
-import agency.tango.skald.core.errors.PlaybackError;
-import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
+import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.core.models.TrackMetadata;
 import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableOnSubscribe;
@@ -34,23 +33,16 @@ public class SkaldMusicService {
   public static final String EXTRA_PROVIDER_NAME = "provider_name";
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
 
-  private final List<OnAuthErrorListener> onAuthErrorListeners = new ArrayList<>();
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Timer timer = new Timer();
 
-  private final Context context;
   private TLruCache<String, Player> playerCache;
   private Player currentPlayer;
 
   public SkaldMusicService(Context context, Provider... providers) {
-    this(context);
     this.providers.addAll(Arrays.asList(providers));
-  }
-
-  public SkaldMusicService(Context context) {
-    this.context = context.getApplicationContext();
     this.playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
         new SkaldLruCache.CacheItemRemovedListener<String, Player>() {
           @Override
@@ -65,19 +57,13 @@ public class SkaldMusicService {
         playerCache.evictTo(1, TimeUnit.MINUTES);
       }
     }, 10000, 10000);
+
+    LocalBroadcastManager
+        .getInstance(context.getApplicationContext())
+        .registerReceiver(new AuthDataReceiver(providers), new IntentFilter(INTENT_ACTION));
   }
 
-  public void addProvider(Provider provider) {
-    if(!providers.contains(provider)) {
-      providers.add(provider);
-    }
-  }
-
-  public void removeProvider(Provider provider) {
-    providers.remove(provider);
-  }
-
-  public Single<Object> play(final SkaldTrack skaldTrack) {
+  public synchronized Single<Object> play(final SkaldTrack skaldTrack) {
     return Single.create(new SingleOnSubscribe<Object>() {
       boolean playerInitialized = false;
       Provider currentProvider;
@@ -130,7 +116,7 @@ public class SkaldMusicService {
           previousPlayer = currentPlayer;
           currentPlayer = player;
           playerCache.put(provider.getProviderName(), player);
-          player.addOnPlaybackListener(new OnPlayerPlaybackListener());
+          player.addOnPlaybackListener(new OnPlayerPlaybackListener(onPlaybackListeners));
           player.addOnPlayerReadyListener(new OnPlayerReadyListener() {
             @Override
             public void onPlayerReady(Player player) {
@@ -187,20 +173,12 @@ public class SkaldMusicService {
     timer.cancel();
   }
 
-  public void addOnErrorListner(OnErrorListener onErrorListener) {
+  public void addOnErrorListener(OnErrorListener onErrorListener) {
     onErrorListeners.add(onErrorListener);
   }
 
   public void removeOnErrorListener() {
     onErrorListeners.remove(0);
-  }
-
-  public void addOnAuthErrorListener(OnAuthErrorListener onAuthErrorListener) {
-    onAuthErrorListeners.add(onAuthErrorListener);
-  }
-
-  public void removeOnAuthErrorListener() {
-    onAuthErrorListeners.remove(0);
   }
 
   public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
@@ -217,8 +195,7 @@ public class SkaldMusicService {
       try {
         singles.add(getSearchService(provider).searchForTracks(query));
       } catch (AuthException authException) {
-        notifyAuthError(authException.getAuthError());
-        //todo
+        authException.printStackTrace();
       }
     }
     return mergeLists(singles);
@@ -230,20 +207,10 @@ public class SkaldMusicService {
       try {
         singles.add(getSearchService(provider).searchForPlaylists(query));
       } catch (AuthException authException) {
-        notifyAuthError(authException.getAuthError());
+        authException.printStackTrace();
       }
     }
     return mergeLists(singles);
-  }
-
-  private void notifyAuthError(AuthError authError) {
-    for (OnAuthErrorListener onAuthErrorListener : onAuthErrorListeners) {
-      onAuthErrorListener.onAuthError(authError);
-    }
-  }
-
-  private SkaldAuthStore getSkaldAuthStore(Provider provider) {
-    return provider.getSkaldAuthStoreFactory().getSkaldAuthStore();
   }
 
   private SearchService getSearchService(Provider provider) throws AuthException {
@@ -263,42 +230,5 @@ public class SkaldMusicService {
             return mergedList;
           }
         });
-  }
-
-  private class OnPlayerPlaybackListener implements OnPlaybackListener {
-    @Override
-    public void onPlayEvent(TrackMetadata trackMetadata) {
-      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-        onPlaybackListener.onPlayEvent(trackMetadata);
-      }
-    }
-
-    @Override
-    public void onPauseEvent() {
-      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-        onPlaybackListener.onPauseEvent();
-      }
-    }
-
-    @Override
-    public void onResumeEvent() {
-      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-        onPlaybackListener.onResumeEvent();
-      }
-    }
-
-    @Override
-    public void onStopEvent() {
-      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-        onPlaybackListener.onStopEvent();
-      }
-    }
-
-    @Override
-    public void onError(PlaybackError playbackError) {
-      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-        onPlaybackListener.onError(playbackError);
-      }
-    }
   }
 }
