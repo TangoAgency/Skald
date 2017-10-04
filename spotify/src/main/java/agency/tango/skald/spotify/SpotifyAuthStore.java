@@ -48,6 +48,13 @@ class SpotifyAuthStore implements SkaldAuthStore {
     return gson.fromJson(json, SpotifyAuthData.class);
   }
 
+  @Override
+  public void clear(Context context) {
+    SharedPreferences.Editor editor = getSharedPreferences(context).edit();
+    editor.remove(SPOTIFY_JSON_KEY);
+    editor.apply();
+  }
+
   private SharedPreferences getSharedPreferences(Context context) {
     return context.getSharedPreferences(SPOTIFY_FILE_KEY, Context.MODE_PRIVATE);
   }

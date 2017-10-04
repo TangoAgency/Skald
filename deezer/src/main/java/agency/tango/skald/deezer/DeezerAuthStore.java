@@ -32,4 +32,10 @@ public class DeezerAuthStore implements SkaldAuthStore {
     }
     return new DeezerAuthData(deezerConnect);
   }
+
+  @Override
+  public void clear(Context context) {
+    SessionStore sessionStore = new SessionStore();
+    sessionStore.clear(context);
+  }
 }

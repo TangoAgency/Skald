@@ -6,4 +6,6 @@ public interface SkaldAuthStore {
   void save(Context context, SkaldAuthData skaldAuthData);
 
   SkaldAuthData restore(Context context) throws AuthException;
+
+  void clear(Context context);
 }
