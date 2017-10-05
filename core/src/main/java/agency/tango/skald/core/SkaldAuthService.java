@@ -13,14 +13,16 @@ public class SkaldAuthService {
     this.onAuthErrorListener = onAuthErrorListener;
   }
 
-  public void login(Provider provider) {
+  public boolean login(Provider provider) {
     try {
       getSkaldAuthStore(provider).restore(context);
     } catch (AuthException authException) {
       if (authException.getAuthError().hasResolution()) {
         onAuthErrorListener.onAuthError(authException.getAuthError());
+        return true;
       }
     }
+    return false;
   }
 
   public void logout(Provider provider) {
@@ -32,6 +34,16 @@ public class SkaldAuthService {
         onAuthErrorListener.onAuthError(authException.getAuthError());
       }
     }
+  }
+
+  public boolean isLoggedIn(Provider provider) {
+    try {
+      getSkaldAuthStore(provider).restore(context);
+    } catch (AuthException authException) {
+      authException.printStackTrace();
+      return false;
+    }
+    return true;
   }
 
   private SkaldAuthStore getSkaldAuthStore(Provider provider) {
