@@ -123,7 +123,6 @@ class DeezerPlayer {
   }
 
   void release() {
-    removeOnPlayerReadyListener();
     playerCache.evictAll();
   }
 

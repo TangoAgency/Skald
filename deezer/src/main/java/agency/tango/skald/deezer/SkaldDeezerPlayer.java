@@ -58,7 +58,6 @@ class SkaldDeezerPlayer implements Player {
 
   @Override
   public void release() {
-    removeOnPlayerReadyListener();
     deezerPlayer.release();
   }
 

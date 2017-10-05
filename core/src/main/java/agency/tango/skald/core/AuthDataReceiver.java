@@ -4,18 +4,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_AUTH_DATA;
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_PROVIDER_NAME;
 
 public class AuthDataReceiver extends BroadcastReceiver {
-  private final List<Provider> providers = new ArrayList<>();
+  private final List<Provider> providers;
 
-  AuthDataReceiver(final Provider... providers) {
-    this.providers.addAll(Arrays.asList(providers));
+  AuthDataReceiver(final List<Provider> providers) {
+    this.providers = providers;
   }
 
   @Override

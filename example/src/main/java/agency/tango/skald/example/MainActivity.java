@@ -19,6 +19,7 @@ import java.util.List;
 
 import agency.tango.skald.R;
 import agency.tango.skald.core.AuthException;
+import agency.tango.skald.core.Skald;
 import agency.tango.skald.core.SkaldAuthService;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
@@ -40,10 +41,6 @@ import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends Activity {
   private static final String TAG = MainActivity.class.getSimpleName();
-  public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";
-  public static final String SPOTIFY_REDIRECT_URI = "spotify-example-marcin-first-app://callback";
-  private static final String SPOTIFY_CLIENT_SECRET = "f4becaa46ff247e0b9d90d4ab853b2a9";
-  private static final String DEEZER_CLIENT_ID = "250322";
   private static final int AUTH_SPOTIFY_REQUEST_CODE = 1334;
   private static final int AUTH_DEEZER_REQUEST_CODE = 1656;
 
@@ -79,9 +76,8 @@ public class MainActivity extends Activity {
     tracksAdapter = new TracksAdapter(getApplicationContext(), R.layout.row_layout);
     listView.setAdapter(tracksAdapter);
 
-    final SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
-        SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
-    final DeezerProvider deezerProvider = new DeezerProvider(this, DEEZER_CLIENT_ID);
+    final SpotifyProvider spotifyProvider = (SpotifyProvider) Skald.singleton().providers().get(0);
+    final DeezerProvider deezerProvider = (DeezerProvider) Skald.singleton().providers().get(1);
 
     skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
       @Override
@@ -90,22 +86,37 @@ public class MainActivity extends Activity {
       }
     });
 
-    skaldMusicService = new SkaldMusicService(getApplicationContext(), spotifyProvider,
-        deezerProvider);
+    skaldMusicService = new SkaldMusicService(getApplicationContext());
 
     addOnErrorListener();
     addOnPlaybackListener();
 
+    setSpotifyButtonText(spotifyProvider);
+    setDeezerButtonText(deezerProvider);
     spotifyButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        skaldAuthService.login(spotifyProvider);
+        if(!skaldAuthService.isLoggedIn(spotifyProvider)) {
+          skaldAuthService.login(spotifyProvider);
+          spotifyButton.setText(R.string.logout_from_spotify);
+        }
+        else {
+          skaldAuthService.logout(spotifyProvider);
+          spotifyButton.setText(R.string.login_to_spotify);
+        }
       }
     });
     deezerButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        skaldAuthService.login(deezerProvider);
+        if(!skaldAuthService.isLoggedIn(deezerProvider)) {
+          skaldAuthService.login(deezerProvider);
+          deezerButton.setText(R.string.logout_from_deezer);
+        }
+        else {
+          skaldAuthService.logout(deezerProvider);
+          deezerButton.setText(R.string.login_to_deezer);
+        }
       }
     });
     searchForTracksButton.setOnClickListener(new View.OnClickListener() {
@@ -182,6 +193,24 @@ public class MainActivity extends Activity {
       } else {
         Log.e(TAG, "Authentication went wrong");
       }
+    }
+  }
+
+  private void setSpotifyButtonText(SpotifyProvider spotifyProvider) {
+    if(skaldAuthService.isLoggedIn(spotifyProvider)) {
+      spotifyButton.setText(R.string.logout_from_spotify);
+    }
+    else {
+      spotifyButton.setText(R.string.login_to_spotify);
+    }
+  }
+
+  private void setDeezerButtonText(DeezerProvider deezerProvider) {
+    if(skaldAuthService.isLoggedIn(deezerProvider)) {
+      deezerButton.setText(R.string.logout_from_deezer);
+    }
+    else {
+      deezerButton.setText(R.string.login_to_deezer);
     }
   }
 

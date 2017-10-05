@@ -5,7 +5,6 @@ import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,14 +29,15 @@ public class SkaldMusicService {
 
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
-  private final List<Provider> providers = new ArrayList<>();
+  private final List<Provider> providers;
   private final Timer timer = new Timer();
 
   private TLruCache<String, Player> playerCache;
   private String currentPlayerKey;
 
-  public SkaldMusicService(Context context, Provider... providers) {
-    this.providers.addAll(Arrays.asList(providers));
+  public SkaldMusicService(Context context) {
+    this.providers = Skald.singleton().providers();
+
     this.playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
         new SkaldLruCache.CacheItemRemovedListener<String, Player>() {
           @Override
@@ -55,7 +55,7 @@ public class SkaldMusicService {
 
     LocalBroadcastManager
         .getInstance(context.getApplicationContext())
-        .registerReceiver(new AuthDataReceiver(providers), new IntentFilter(INTENT_ACTION));
+        .registerReceiver(new AuthDataReceiver(this.providers), new IntentFilter(INTENT_ACTION));
   }
 
   public synchronized Single<Object> play(final SkaldTrack skaldTrack) {
