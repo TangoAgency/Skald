@@ -19,9 +19,7 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 
 public class SkaldMusicService {
@@ -61,42 +59,8 @@ public class SkaldMusicService {
   }
 
   public synchronized Single<Object> play(final SkaldTrack skaldTrack) {
-    return Single.create(
-        new SingleOnPlaySubscribe<Object>(skaldTrack, onPlaybackListeners, playerCache, this) {
-          String initializedPlayerKey;
-
-          @Override
-          public void subscribe(@NonNull final SingleEmitter<Object> emitter) throws Exception {
-            if (currentPlayerKey != null) {
-              playerCache.get(currentPlayerKey).stop();
-            }
-            for (Provider provider : providers) {
-              if (provider.canHandle(skaldTrack)) {
-                initializedPlayerKey = provider.getProviderName();
-                Player player = playerCache.get(initializedPlayerKey);
-                if (player != null) {
-                  playTrack(emitter, player, initializedPlayerKey);
-                } else {
-                  initializePlayerAndPlay(emitter, provider, initializedPlayerKey);
-                }
-              }
-            }
-
-            emitter.setDisposable(new Disposable() {
-              @Override
-              public void dispose() {
-                if (!isPlayerInitialized()) {
-                  playerCache.remove(initializedPlayerKey);
-                }
-              }
-
-              @Override
-              public boolean isDisposed() {
-                return false;
-              }
-            });
-          }
-        });
+    return Single.create(new SingleOnPlaySubscribe(this, skaldTrack, onPlaybackListeners,
+        playerCache, providers));
   }
 
   public Completable pause() {
@@ -178,6 +142,10 @@ public class SkaldMusicService {
       }
     }
     return mergeLists(singles);
+  }
+
+  String getCurrentPlayerKey() {
+    return currentPlayerKey;
   }
 
   void setCurrentPlayerKey(String playerKey) {

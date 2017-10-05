@@ -9,24 +9,61 @@ import agency.tango.skald.core.models.SkaldTrack;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
 
-public abstract class SingleOnPlaySubscribe<T> implements SingleOnSubscribe<T> {
+public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
+  private final SkaldMusicService skaldMusicService;
   private final SkaldTrack skaldTrack;
   private final List<OnPlaybackListener> onPlaybackListeners;
   private final TLruCache<String, Player> playerCache;
-  private final SkaldMusicService skaldMusicService;
+  private final List<Provider> providers;
 
   private boolean playerInitialized = false;
+  private String initializedPlayerKey;
 
-  SingleOnPlaySubscribe(SkaldTrack skaldTrack, List<OnPlaybackListener> onPlaybackListeners,
-      TLruCache<String, Player> playerCache, SkaldMusicService skaldMusicService) {
+  SingleOnPlaySubscribe(SkaldMusicService skaldMusicService, SkaldTrack skaldTrack,
+      List<OnPlaybackListener> onPlaybackListeners, TLruCache<String, Player> playerCache,
+      List<Provider> providers) {
+    this.skaldMusicService = skaldMusicService;
     this.skaldTrack = skaldTrack;
     this.onPlaybackListeners = onPlaybackListeners;
     this.playerCache = playerCache;
-    this.skaldMusicService = skaldMusicService;
+    this.providers = providers;
   }
 
-  void playTrack(@NonNull SingleEmitter<Object> emitter, Player player,
+  @Override
+  public void subscribe(@NonNull final SingleEmitter<Object> emitter) throws Exception {
+    if (skaldMusicService.getCurrentPlayerKey() != null) {
+      playerCache.get(skaldMusicService.getCurrentPlayerKey()).stop();
+    }
+    for (Provider provider : providers) {
+      if (provider.canHandle(skaldTrack)) {
+        initializedPlayerKey = provider.getProviderName();
+        Player player = playerCache.get(initializedPlayerKey);
+        if (player != null) {
+          playTrack(emitter, player, initializedPlayerKey);
+        } else {
+          initializePlayerAndPlay(emitter, provider, initializedPlayerKey);
+        }
+      }
+    }
+
+    emitter.setDisposable(new Disposable() {
+      @Override
+      public void dispose() {
+        if (!playerInitialized) {
+          playerCache.remove(initializedPlayerKey);
+        }
+      }
+
+      @Override
+      public boolean isDisposed() {
+        return false;
+      }
+    });
+  }
+
+  private void playTrack(@NonNull SingleEmitter<Object> emitter, Player player,
       String initializedPlayerKey) {
     player.play(skaldTrack);
     skaldMusicService.setCurrentPlayerKey(initializedPlayerKey);
@@ -34,7 +71,7 @@ public abstract class SingleOnPlaySubscribe<T> implements SingleOnSubscribe<T> {
     emitter.onSuccess(player);
   }
 
-  void initializePlayerAndPlay(@NonNull final SingleEmitter<Object> emitter,
+  private void initializePlayerAndPlay(@NonNull final SingleEmitter<Object> emitter,
       final Provider provider, final String initializedPlayerKey) {
     try {
       Player player = provider.getPlayerFactory().getPlayer();
@@ -52,9 +89,5 @@ public abstract class SingleOnPlaySubscribe<T> implements SingleOnSubscribe<T> {
     } catch (AuthException authException) {
       emitter.onError(authException);
     }
-  }
-
-  boolean isPlayerInitialized() {
-    return playerInitialized;
   }
 }
