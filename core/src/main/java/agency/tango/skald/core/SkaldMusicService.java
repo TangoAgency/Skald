@@ -13,8 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
-import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
-import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import io.reactivex.Completable;
@@ -22,7 +20,6 @@ import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
@@ -39,7 +36,7 @@ public class SkaldMusicService {
   private final Timer timer = new Timer();
 
   private TLruCache<String, Player> playerCache;
-  private Player currentPlayer;
+  private String currentPlayerKey;
 
   public SkaldMusicService(Context context, Provider... providers) {
     this.providers.addAll(Arrays.asList(providers));
@@ -64,80 +61,50 @@ public class SkaldMusicService {
   }
 
   public synchronized Single<Object> play(final SkaldTrack skaldTrack) {
-    return Single.create(new SingleOnSubscribe<Object>() {
-      boolean playerInitialized = false;
-      Provider currentProvider;
-      Player previousPlayer;
-
-      @Override
-      public void subscribe(@NonNull final SingleEmitter<Object> emitter) throws Exception {
-        if (currentPlayer != null) {
-          currentPlayer.stop();
-        }
-        for (Provider provider : providers) {
-          if (provider.canHandle(skaldTrack)) {
-            currentProvider = provider;
-            Player player = playerCache.get(provider.getProviderName());
-            if (player != null) {
-              playTrack(emitter, player);
-            } else {
-              initializePlayerAndPlay(emitter, provider);
-            }
-          }
-        }
-
-        emitter.setDisposable(new Disposable() {
-          @Override
-          public void dispose() {
-            if (!playerInitialized && currentProvider != null) {
-              playerCache.remove(currentProvider.getProviderName());
-              currentPlayer = previousPlayer;
-            }
-          }
+    return Single.create(
+        new SingleOnPlaySubscribe<Object>(skaldTrack, onPlaybackListeners, playerCache, this) {
+          String initializedPlayerKey;
 
           @Override
-          public boolean isDisposed() {
-            return false;
+          public void subscribe(@NonNull final SingleEmitter<Object> emitter) throws Exception {
+            if (currentPlayerKey != null) {
+              playerCache.get(currentPlayerKey).stop();
+            }
+            for (Provider provider : providers) {
+              if (provider.canHandle(skaldTrack)) {
+                initializedPlayerKey = provider.getProviderName();
+                Player player = playerCache.get(initializedPlayerKey);
+                if (player != null) {
+                  playTrack(emitter, player, initializedPlayerKey);
+                } else {
+                  initializePlayerAndPlay(emitter, provider, initializedPlayerKey);
+                }
+              }
+            }
+
+            emitter.setDisposable(new Disposable() {
+              @Override
+              public void dispose() {
+                if (!isPlayerInitialized()) {
+                  playerCache.remove(initializedPlayerKey);
+                }
+              }
+
+              @Override
+              public boolean isDisposed() {
+                return false;
+              }
+            });
           }
         });
-      }
-
-      private void playTrack(@NonNull SingleEmitter<Object> emitter, Player player) {
-        player.play(skaldTrack);
-        playerInitialized = true;
-        currentPlayer = player;
-        emitter.onSuccess(player);
-      }
-
-      private void initializePlayerAndPlay(@NonNull final SingleEmitter<Object> emitter,
-          Provider provider) {
-        try {
-          Player player = provider.getPlayerFactory().getPlayer();
-          previousPlayer = currentPlayer;
-          currentPlayer = player;
-          playerCache.put(provider.getProviderName(), player);
-          player.addOnPlaybackListener(new OnPlayerPlaybackListener(onPlaybackListeners));
-          player.addOnPlayerReadyListener(new OnPlayerReadyListener() {
-            @Override
-            public void onPlayerReady(Player player) {
-              player.play(skaldTrack);
-              playerInitialized = true;
-              emitter.onSuccess(player);
-            }
-          });
-        } catch (AuthException authException) {
-          emitter.onError(authException);
-        }
-      }
-    });
   }
 
   public Completable pause() {
     return Completable.create(new CompletableOnSubscribe() {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentPlayer != null) {
-          currentPlayer.pause();
+        if (currentPlayerKey != null) {
+          playerCache.get(currentPlayerKey).pause();
         }
         emitter.onComplete();
       }
@@ -148,8 +115,8 @@ public class SkaldMusicService {
     return Completable.create(new CompletableOnSubscribe() {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentPlayer != null) {
-          currentPlayer.resume();
+        if (currentPlayerKey != null) {
+          playerCache.get(currentPlayerKey).resume();
         }
         emitter.onComplete();
       }
@@ -160,8 +127,8 @@ public class SkaldMusicService {
     return Completable.create(new CompletableOnSubscribe() {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentPlayer != null) {
-          currentPlayer.stop();
+        if (currentPlayerKey != null) {
+          playerCache.get(currentPlayerKey).stop();
         }
         emitter.onComplete();
       }
@@ -211,6 +178,10 @@ public class SkaldMusicService {
       }
     }
     return mergeLists(singles);
+  }
+
+  void setCurrentPlayerKey(String playerKey) {
+    this.currentPlayerKey = playerKey;
   }
 
   private SearchService getSearchService(Provider provider) throws AuthException {
