@@ -13,7 +13,7 @@ public class SkaldAuthService {
     this.onAuthErrorListener = onAuthErrorListener;
   }
 
-  public boolean login(@ProviderName String providerName) {
+  public boolean login(ProviderName providerName) {
     try {
       getSkaldAuthStore(getProviderByName(providerName)).restore(context);
     } catch (AuthException authException) {
@@ -25,7 +25,7 @@ public class SkaldAuthService {
     return false;
   }
 
-  public void logout(@ProviderName String providerName) {
+  public void logout(ProviderName providerName) {
     try {
       getProviderByName(providerName).getPlayerFactory().getPlayer().release();
       getSkaldAuthStore(getProviderByName(providerName)).clear(context);
@@ -36,7 +36,7 @@ public class SkaldAuthService {
     }
   }
 
-  public boolean isLoggedIn(@ProviderName String providerName) {
+  public boolean isLoggedIn(ProviderName providerName) {
     try {
       getSkaldAuthStore(getProviderByName(providerName)).restore(context);
     } catch (AuthException authException) {
@@ -46,7 +46,7 @@ public class SkaldAuthService {
     return true;
   }
 
-  private Provider getProviderByName(@ProviderName String providerName) {
+  private Provider getProviderByName(ProviderName providerName) {
     return Skald.singleton().getProviderByName(providerName);
   }
 

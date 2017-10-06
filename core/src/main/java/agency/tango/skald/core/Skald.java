@@ -26,7 +26,7 @@ public class Skald {
     return providers;
   }
 
-  public Provider getProviderByName(String name) {
+  public Provider getProviderByName(ProviderName name) {
     for (Provider provider : providers) {
       if (provider.getProviderName().equals(name)) {
         return provider;

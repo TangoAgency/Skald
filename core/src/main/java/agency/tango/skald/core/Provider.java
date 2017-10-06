@@ -7,7 +7,7 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public abstract class Provider {
-  public abstract String getProviderName();
+  public abstract ProviderName getProviderName();
 
   public abstract PlayerFactory getPlayerFactory();
 

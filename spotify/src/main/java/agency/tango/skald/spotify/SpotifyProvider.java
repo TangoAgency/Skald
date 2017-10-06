@@ -17,9 +17,7 @@ import agency.tango.skald.spotify.models.SpotifyPlaylist;
 import agency.tango.skald.spotify.models.SpotifyTrack;
 
 public class SpotifyProvider extends Provider {
-  @ProviderName
-  public static final String SPOTIFY_PROVIDER = "spotify";
-
+  public static final ProviderName NAME = new SpotifyProviderName();
   static final String EXTRA_CLIENT_ID = "SPOTIFY_CLIENT_ID";
   static final String EXTRA_REDIRECT_URI = "SPOTIFY_REDIRECT_URI";
   static final String EXTRA_CLIENT_SECRET = "SPOTIFY_CLIENT_SECRET";
@@ -38,8 +36,8 @@ public class SpotifyProvider extends Provider {
   }
 
   @Override
-  public String getProviderName() {
-    return SPOTIFY_PROVIDER;
+  public ProviderName getProviderName() {
+    return NAME;
   }
 
   @Override

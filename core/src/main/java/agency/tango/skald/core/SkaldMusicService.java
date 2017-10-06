@@ -32,16 +32,16 @@ public class SkaldMusicService {
   private final List<Provider> providers;
   private final Timer timer = new Timer();
 
-  private TLruCache<String, Player> playerCache;
-  private String currentPlayerKey;
+  private TLruCache<ProviderName, Player> playerCache;
+  private ProviderName currentPlayerKey;
 
   public SkaldMusicService(Context context) {
     this.providers = Skald.singleton().providers();
 
     this.playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-        new SkaldLruCache.CacheItemRemovedListener<String, Player>() {
+        new SkaldLruCache.CacheItemRemovedListener<ProviderName, Player>() {
           @Override
-          public void release(String key, Player player) {
+          public void release(ProviderName key, Player player) {
             player.release();
           }
         });
@@ -144,11 +144,11 @@ public class SkaldMusicService {
     return mergeLists(singles);
   }
 
-  String getCurrentPlayerKey() {
+  ProviderName getCurrentPlayerKey() {
     return currentPlayerKey;
   }
 
-  void setCurrentPlayerKey(String playerKey) {
+  void setCurrentPlayerKey(ProviderName playerKey) {
     this.currentPlayerKey = playerKey;
   }
 

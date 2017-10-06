@@ -92,12 +92,12 @@ public class MainActivity extends Activity {
     spotifyButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(!skaldAuthService.isLoggedIn(SpotifyProvider.SPOTIFY_PROVIDER)) {
-          skaldAuthService.login(SpotifyProvider.SPOTIFY_PROVIDER);
+        if(!skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
+          skaldAuthService.login(SpotifyProvider.NAME);
           spotifyButton.setText(R.string.logout_from_spotify);
         }
         else {
-          skaldAuthService.logout(SpotifyProvider.SPOTIFY_PROVIDER);
+          skaldAuthService.logout(SpotifyProvider.NAME);
           spotifyButton.setText(R.string.login_to_spotify);
         }
       }
@@ -105,12 +105,12 @@ public class MainActivity extends Activity {
     deezerButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(!skaldAuthService.isLoggedIn(DeezerProvider.DEEZER_PROVIDER)) {
-          skaldAuthService.login(DeezerProvider.DEEZER_PROVIDER);
+        if(!skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
+          skaldAuthService.login(DeezerProvider.NAME);
           deezerButton.setText(R.string.logout_from_deezer);
         }
         else {
-          skaldAuthService.logout(DeezerProvider.DEEZER_PROVIDER);
+          skaldAuthService.logout(DeezerProvider.NAME);
           deezerButton.setText(R.string.login_to_deezer);
         }
       }
@@ -193,7 +193,7 @@ public class MainActivity extends Activity {
   }
 
   private void setSpotifyButtonText() {
-    if(skaldAuthService.isLoggedIn(SpotifyProvider.SPOTIFY_PROVIDER)) {
+    if(skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
       spotifyButton.setText(R.string.logout_from_spotify);
     }
     else {
@@ -202,7 +202,7 @@ public class MainActivity extends Activity {
   }
 
   private void setDeezerButtonText() {
-    if(skaldAuthService.isLoggedIn(DeezerProvider.DEEZER_PROVIDER)) {
+    if(skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
       deezerButton.setText(R.string.logout_from_deezer);
     }
     else {

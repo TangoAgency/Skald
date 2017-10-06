@@ -21,7 +21,7 @@ public class AuthDataReceiver extends BroadcastReceiver {
     SkaldAuthData skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
     String providerName = intent.getStringExtra(EXTRA_PROVIDER_NAME);
     for (Provider provider : providers) {
-      if (provider.getProviderName().equals(providerName)) {
+      if (provider.getProviderName().getName().equals(providerName)) {
         getSkaldAuthStore(provider).save(context, skaldAuthData);
       }
     }

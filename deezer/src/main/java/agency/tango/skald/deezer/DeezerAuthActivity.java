@@ -14,8 +14,8 @@ import com.deezer.sdk.network.connect.event.DialogListener;
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_AUTH_DATA;
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_PROVIDER_NAME;
 import static agency.tango.skald.core.SkaldMusicService.INTENT_ACTION;
-import static agency.tango.skald.deezer.DeezerProvider.DEEZER_PROVIDER;
 import static agency.tango.skald.deezer.DeezerProvider.EXTRA_CLIENT_ID;
+import static agency.tango.skald.deezer.DeezerProvider.NAME;
 
 public class DeezerAuthActivity extends Activity {
   private static final String TAG = DeezerAuthActivity.class.getSimpleName();
@@ -44,7 +44,7 @@ public class DeezerAuthActivity extends Activity {
             DeezerAuthData deezerAuthData = new DeezerAuthData(deezerConnect);
 
             Intent intent = new Intent(INTENT_ACTION);
-            intent.putExtra(EXTRA_PROVIDER_NAME, DEEZER_PROVIDER);
+            intent.putExtra(EXTRA_PROVIDER_NAME, NAME.getName());
             intent.putExtra(EXTRA_AUTH_DATA, deezerAuthData);
             LocalBroadcastManager
                 .getInstance(DeezerAuthActivity.this)

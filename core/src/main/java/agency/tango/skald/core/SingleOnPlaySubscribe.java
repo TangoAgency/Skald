@@ -15,14 +15,14 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   private final SkaldMusicService skaldMusicService;
   private final SkaldTrack skaldTrack;
   private final List<OnPlaybackListener> onPlaybackListeners;
-  private final TLruCache<String, Player> playerCache;
+  private final TLruCache<ProviderName, Player> playerCache;
   private final List<Provider> providers;
 
   private boolean playerInitialized = false;
-  private String initializedPlayerKey;
+  private ProviderName initializedPlayerKey;
 
   SingleOnPlaySubscribe(SkaldMusicService skaldMusicService, SkaldTrack skaldTrack,
-      List<OnPlaybackListener> onPlaybackListeners, TLruCache<String, Player> playerCache,
+      List<OnPlaybackListener> onPlaybackListeners, TLruCache<ProviderName, Player> playerCache,
       List<Provider> providers) {
     this.skaldMusicService = skaldMusicService;
     this.skaldTrack = skaldTrack;
@@ -64,7 +64,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   }
 
   private void playTrack(@NonNull SingleEmitter<Object> emitter, Player player,
-      String initializedPlayerKey) {
+      ProviderName initializedPlayerKey) {
     player.play(skaldTrack);
     skaldMusicService.setCurrentPlayerKey(initializedPlayerKey);
     playerInitialized = true;
@@ -72,7 +72,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   }
 
   private void initializePlayerAndPlay(@NonNull final SingleEmitter<Object> emitter,
-      final Provider provider, final String initializedPlayerKey) {
+      final Provider provider, final ProviderName initializedPlayerKey) {
     try {
       Player player = provider.getPlayerFactory().getPlayer();
       playerCache.put(provider.getProviderName(), player);

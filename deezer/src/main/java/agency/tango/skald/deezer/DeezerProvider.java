@@ -17,9 +17,7 @@ import agency.tango.skald.deezer.models.DeezerPlaylist;
 import agency.tango.skald.deezer.models.DeezerTrack;
 
 public class DeezerProvider extends Provider {
-  @ProviderName
-  public static final String DEEZER_PROVIDER = "deezer";
-
+  public static final ProviderName NAME = new DeezerProviderName();
   static final String EXTRA_CLIENT_ID = "DEEZER_CLIENT_ID";
 
   private final Context context;
@@ -31,8 +29,8 @@ public class DeezerProvider extends Provider {
   }
 
   @Override
-  public String getProviderName() {
-    return DEEZER_PROVIDER;
+  public ProviderName getProviderName() {
+    return NAME;
   }
 
   @Override
