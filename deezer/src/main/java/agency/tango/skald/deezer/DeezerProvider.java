@@ -5,6 +5,7 @@ import android.content.Context;
 import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.Provider;
+import agency.tango.skald.core.ProviderName;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.SkaldAuthStore;
 import agency.tango.skald.core.factories.PlayerFactory;
@@ -16,6 +17,9 @@ import agency.tango.skald.deezer.models.DeezerPlaylist;
 import agency.tango.skald.deezer.models.DeezerTrack;
 
 public class DeezerProvider extends Provider {
+  @ProviderName
+  public static final String DEEZER_PROVIDER = "deezer";
+
   static final String EXTRA_CLIENT_ID = "DEEZER_CLIENT_ID";
 
   private final Context context;

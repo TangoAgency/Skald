@@ -5,6 +5,7 @@ import android.content.Context;
 import agency.tango.skald.core.AuthException;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.Provider;
+import agency.tango.skald.core.ProviderName;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.SkaldAuthStore;
 import agency.tango.skald.core.factories.PlayerFactory;
@@ -16,6 +17,9 @@ import agency.tango.skald.spotify.models.SpotifyPlaylist;
 import agency.tango.skald.spotify.models.SpotifyTrack;
 
 public class SpotifyProvider extends Provider {
+  @ProviderName
+  public static final String SPOTIFY_PROVIDER = "spotify";
+
   static final String EXTRA_CLIENT_ID = "SPOTIFY_CLIENT_ID";
   static final String EXTRA_REDIRECT_URI = "SPOTIFY_REDIRECT_URI";
   static final String EXTRA_CLIENT_SECRET = "SPOTIFY_CLIENT_SECRET";
