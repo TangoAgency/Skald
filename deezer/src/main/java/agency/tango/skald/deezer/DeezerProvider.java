@@ -17,7 +17,6 @@ import agency.tango.skald.deezer.models.DeezerTrack;
 
 public class DeezerProvider extends Provider {
   static final String EXTRA_CLIENT_ID = "DEEZER_CLIENT_ID";
-  static final String DEEZER_PROVIDER = "deezer";
 
   private final Context context;
   private final String clientId;

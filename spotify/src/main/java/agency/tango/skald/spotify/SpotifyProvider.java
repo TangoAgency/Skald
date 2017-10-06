@@ -19,7 +19,6 @@ public class SpotifyProvider extends Provider {
   static final String EXTRA_CLIENT_ID = "SPOTIFY_CLIENT_ID";
   static final String EXTRA_REDIRECT_URI = "SPOTIFY_REDIRECT_URI";
   static final String EXTRA_CLIENT_SECRET = "SPOTIFY_CLIENT_SECRET";
-  static final String SPOTIFY_PROVIDER = "spotify";
 
   private final Context context;
   private final String clientId;

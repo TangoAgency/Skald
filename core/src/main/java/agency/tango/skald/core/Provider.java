@@ -7,6 +7,9 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
 public abstract class Provider {
+  public static final String SPOTIFY_PROVIDER = "spotify";
+  public static final String DEEZER_PROVIDER = "deezer";
+
   public abstract String getProviderName();
 
   public abstract PlayerFactory getPlayerFactory();

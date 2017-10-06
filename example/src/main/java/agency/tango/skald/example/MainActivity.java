@@ -19,7 +19,7 @@ import java.util.List;
 
 import agency.tango.skald.R;
 import agency.tango.skald.core.AuthException;
-import agency.tango.skald.core.Skald;
+import agency.tango.skald.core.Provider;
 import agency.tango.skald.core.SkaldAuthService;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
@@ -30,9 +30,7 @@ import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.deezer.DeezerAuthError;
-import agency.tango.skald.deezer.DeezerProvider;
 import agency.tango.skald.spotify.SpotifyAuthError;
-import agency.tango.skald.spotify.SpotifyProvider;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableCompletableObserver;
@@ -76,9 +74,6 @@ public class MainActivity extends Activity {
     tracksAdapter = new TracksAdapter(getApplicationContext(), R.layout.row_layout);
     listView.setAdapter(tracksAdapter);
 
-    final SpotifyProvider spotifyProvider = (SpotifyProvider) Skald.singleton().providers().get(0);
-    final DeezerProvider deezerProvider = (DeezerProvider) Skald.singleton().providers().get(1);
-
     skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
       @Override
       public void onAuthError(AuthError authError) {
@@ -91,17 +86,17 @@ public class MainActivity extends Activity {
     addOnErrorListener();
     addOnPlaybackListener();
 
-    setSpotifyButtonText(spotifyProvider);
-    setDeezerButtonText(deezerProvider);
+    setSpotifyButtonText();
+    setDeezerButtonText();
     spotifyButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(!skaldAuthService.isLoggedIn(spotifyProvider)) {
-          skaldAuthService.login(spotifyProvider);
+        if(!skaldAuthService.isLoggedIn(Provider.SPOTIFY_PROVIDER)) {
+          skaldAuthService.login(Provider.SPOTIFY_PROVIDER);
           spotifyButton.setText(R.string.logout_from_spotify);
         }
         else {
-          skaldAuthService.logout(spotifyProvider);
+          skaldAuthService.logout(Provider.SPOTIFY_PROVIDER);
           spotifyButton.setText(R.string.login_to_spotify);
         }
       }
@@ -109,12 +104,12 @@ public class MainActivity extends Activity {
     deezerButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(!skaldAuthService.isLoggedIn(deezerProvider)) {
-          skaldAuthService.login(deezerProvider);
+        if(!skaldAuthService.isLoggedIn(Provider.DEEZER_PROVIDER)) {
+          skaldAuthService.login(Provider.DEEZER_PROVIDER);
           deezerButton.setText(R.string.logout_from_deezer);
         }
         else {
-          skaldAuthService.logout(deezerProvider);
+          skaldAuthService.logout(Provider.DEEZER_PROVIDER);
           deezerButton.setText(R.string.login_to_deezer);
         }
       }
@@ -196,8 +191,8 @@ public class MainActivity extends Activity {
     }
   }
 
-  private void setSpotifyButtonText(SpotifyProvider spotifyProvider) {
-    if(skaldAuthService.isLoggedIn(spotifyProvider)) {
+  private void setSpotifyButtonText() {
+    if(skaldAuthService.isLoggedIn(Provider.SPOTIFY_PROVIDER)) {
       spotifyButton.setText(R.string.logout_from_spotify);
     }
     else {
@@ -205,8 +200,8 @@ public class MainActivity extends Activity {
     }
   }
 
-  private void setDeezerButtonText(DeezerProvider deezerProvider) {
-    if(skaldAuthService.isLoggedIn(deezerProvider)) {
+  private void setDeezerButtonText() {
+    if(skaldAuthService.isLoggedIn(Provider.DEEZER_PROVIDER)) {
       deezerButton.setText(R.string.logout_from_deezer);
     }
     else {

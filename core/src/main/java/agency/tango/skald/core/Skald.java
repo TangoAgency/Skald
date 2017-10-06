@@ -12,7 +12,7 @@ public class Skald {
   }
 
   public static Skald singleton() {
-    if(singleton == null) {
+    if (singleton == null) {
       return new Skald();
     }
     return singleton;
@@ -24,5 +24,14 @@ public class Skald {
 
   public List<Provider> providers() {
     return providers;
+  }
+
+  public Provider getProviderByName(String name) {
+    for (Provider provider : providers) {
+      if (provider.getProviderName().equals(name)) {
+        return provider;
+      }
+    }
+    return null;
   }
 }
