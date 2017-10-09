@@ -6,13 +6,17 @@ import android.content.Intent;
 
 import java.util.List;
 
+import agency.tango.skald.core.authentication.SkaldAuthData;
+import agency.tango.skald.core.authentication.SkaldAuthStore;
+import agency.tango.skald.core.provider.Provider;
+
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_AUTH_DATA;
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_PROVIDER_NAME;
 
 public class AuthDataReceiver extends BroadcastReceiver {
   private final List<Provider> providers;
 
-  AuthDataReceiver(final List<Provider> providers) {
+  public AuthDataReceiver(final List<Provider> providers) {
     this.providers = providers;
   }
 

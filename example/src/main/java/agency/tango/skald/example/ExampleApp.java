@@ -3,8 +3,8 @@ package agency.tango.skald.example;
 import android.app.Application;
 
 import agency.tango.skald.core.Skald;
-import agency.tango.skald.deezer.DeezerProvider;
-import agency.tango.skald.spotify.SpotifyProvider;
+import agency.tango.skald.deezer.provider.DeezerProvider;
+import agency.tango.skald.spotify.provider.SpotifyProvider;
 
 public class ExampleApp extends Application {
   public static final String SPOTIFY_CLIENT_ID = "8c43f75741454312adbbbb9d5ac6cb5b";

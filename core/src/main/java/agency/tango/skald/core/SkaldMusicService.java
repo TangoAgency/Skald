@@ -10,11 +10,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.bus.SkaldBus;
+import agency.tango.skald.core.cache.SkaldLruCache;
+import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.provider.Provider;
+import agency.tango.skald.core.provider.ProviderName;
 import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableOnSubscribe;

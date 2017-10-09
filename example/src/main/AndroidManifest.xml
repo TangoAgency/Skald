@@ -23,8 +23,8 @@
       </intent-filter>
     </activity>
 
-    <activity android:name=".spotify.SpotifyAuthActivity"/>
-    <activity android:name=".deezer.DeezerAuthActivity"/>
+    <activity android:name=".spotify.authentication.SpotifyAuthActivity"/>
+    <activity android:name=".deezer.authentication.DeezerAuthActivity"/>
 
   </application>
 

@@ -8,6 +8,9 @@ import org.junit.runner.RunWith;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import agency.tango.skald.core.cache.SkaldLruCache;
+import agency.tango.skald.core.cache.TLruCache;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;

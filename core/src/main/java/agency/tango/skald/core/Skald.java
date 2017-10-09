@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import agency.tango.skald.core.provider.Provider;
+import agency.tango.skald.core.provider.ProviderName;
+
 public class Skald {
   private static volatile Skald singleton;
   private static final List<Provider> providers = new ArrayList<>();

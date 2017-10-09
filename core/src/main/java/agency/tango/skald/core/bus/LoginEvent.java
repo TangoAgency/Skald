@@ -1,6 +1,6 @@
 package agency.tango.skald.core.bus;
 
-import agency.tango.skald.core.ProviderName;
+import agency.tango.skald.core.provider.ProviderName;
 
 public class LoginEvent extends SkaldEvent {
   private final ProviderName providerName;

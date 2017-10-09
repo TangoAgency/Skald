@@ -2,10 +2,14 @@ package agency.tango.skald.core;
 
 import java.util.List;
 
+import agency.tango.skald.core.exceptions.AuthException;
+import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.provider.Provider;
+import agency.tango.skald.core.provider.ProviderName;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
