@@ -87,8 +87,6 @@ public class MainActivity extends Activity {
     addOnErrorListener();
     addOnPlaybackListener();
 
-    setSpotifyButtonText();
-    setDeezerButtonText();
     spotifyButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -171,6 +169,14 @@ public class MainActivity extends Activity {
             });
       }
     });
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+
+    setSpotifyButtonText();
+    setDeezerButtonText();
   }
 
   @Override

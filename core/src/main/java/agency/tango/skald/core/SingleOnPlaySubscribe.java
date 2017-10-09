@@ -19,7 +19,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   private final List<Provider> providers;
 
   private boolean playerInitialized = false;
-  private ProviderName initializedPlayerKey;
+  private Player initializedPlayer;
 
   SingleOnPlaySubscribe(SkaldMusicService skaldMusicService, SkaldTrack skaldTrack,
       List<OnPlaybackListener> onPlaybackListeners, TLruCache<ProviderName, Player> playerCache,
@@ -33,17 +33,21 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
 
   @Override
   public void subscribe(@NonNull final SingleEmitter<Object> emitter) throws Exception {
-    if (skaldMusicService.getCurrentPlayerKey() != null) {
-      playerCache.get(skaldMusicService.getCurrentPlayerKey()).stop();
+    ProviderName currentProviderName = skaldMusicService.getCurrentProviderName();
+    if(currentProviderName != null) {
+      Player currentPlayer = playerCache.get(currentProviderName);
+      if (currentPlayer != null) {
+        currentPlayer.stop();
+      }
     }
     for (Provider provider : providers) {
       if (provider.canHandle(skaldTrack)) {
-        initializedPlayerKey = provider.getProviderName();
-        Player player = playerCache.get(initializedPlayerKey);
+        ProviderName providerName = provider.getProviderName();
+        Player player = playerCache.get(providerName);
         if (player != null) {
-          playTrack(emitter, player, initializedPlayerKey);
+          playTrack(emitter, player, providerName);
         } else {
-          initializePlayerAndPlay(emitter, provider, initializedPlayerKey);
+          initializePlayerAndPlay(emitter, provider, providerName);
         }
       }
     }
@@ -51,8 +55,8 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
     emitter.setDisposable(new Disposable() {
       @Override
       public void dispose() {
-        if (!playerInitialized) {
-          playerCache.remove(initializedPlayerKey);
+        if (!playerInitialized && initializedPlayer != null) {
+          initializedPlayer.release();
         }
       }
 
@@ -64,25 +68,25 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   }
 
   private void playTrack(@NonNull SingleEmitter<Object> emitter, Player player,
-      ProviderName initializedPlayerKey) {
-    player.play(skaldTrack);
-    skaldMusicService.setCurrentPlayerKey(initializedPlayerKey);
+      ProviderName providerName) {
     playerInitialized = true;
+    player.play(skaldTrack);
+    skaldMusicService.setCurrentProviderName(providerName);
     emitter.onSuccess(player);
   }
 
   private void initializePlayerAndPlay(@NonNull final SingleEmitter<Object> emitter,
-      final Provider provider, final ProviderName initializedPlayerKey) {
+      final Provider provider, final ProviderName providerName) {
     try {
-      Player player = provider.getPlayerFactory().getPlayer();
-      playerCache.put(provider.getProviderName(), player);
-      player.addOnPlaybackListener(new OnPlayerPlaybackListener(onPlaybackListeners));
-      player.addOnPlayerReadyListener(new OnPlayerReadyListener() {
+      initializedPlayer = provider.getPlayerFactory().getPlayer();
+      initializedPlayer.addOnPlaybackListener(new OnPlayerPlaybackListener(onPlaybackListeners));
+      initializedPlayer.addOnPlayerReadyListener(new OnPlayerReadyListener() {
         @Override
         public void onPlayerReady(Player player) {
           playerInitialized = true;
+          playerCache.put(provider.getProviderName(), initializedPlayer);
           player.play(skaldTrack);
-          skaldMusicService.setCurrentPlayerKey(initializedPlayerKey);
+          skaldMusicService.setCurrentProviderName(providerName);
           emitter.onSuccess(player);
         }
       });
