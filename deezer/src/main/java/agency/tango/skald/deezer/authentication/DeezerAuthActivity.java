@@ -47,7 +47,7 @@ public class DeezerAuthActivity extends Activity {
             intent.putExtra(EXTRA_PROVIDER_NAME, NAME.getName());
             intent.putExtra(EXTRA_AUTH_DATA, deezerAuthData);
             LocalBroadcastManager
-                .getInstance(DeezerAuthActivity.this)
+                .getInstance(DeezerAuthActivity.this.getApplicationContext())
                 .sendBroadcast(intent);
 
             setResult(RESULT_OK);

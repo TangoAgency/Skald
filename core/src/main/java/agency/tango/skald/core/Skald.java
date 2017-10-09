@@ -9,7 +9,6 @@ import agency.tango.skald.core.provider.ProviderName;
 
 public class Skald {
   private static volatile Skald singleton;
-  private static final List<Provider> providers = new ArrayList<>();
 
   private Skald() {
   }
@@ -20,6 +19,8 @@ public class Skald {
     }
     return singleton;
   }
+
+  private static final List<Provider> providers = new ArrayList<>();
 
   public static void with(Provider... providers) {
     Skald.providers.addAll(Arrays.asList(providers));

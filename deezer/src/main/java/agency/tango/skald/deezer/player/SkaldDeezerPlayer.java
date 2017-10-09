@@ -16,7 +16,7 @@ import agency.tango.skald.deezer.authentication.DeezerAuthData;
 
 public class SkaldDeezerPlayer implements Player {
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
-  private DeezerPlayer deezerPlayer;
+  private final DeezerPlayer deezerPlayer;
 
   public SkaldDeezerPlayer(Context context, DeezerAuthData deezerAuthData) {
     deezerPlayer = new DeezerPlayer(context, deezerAuthData.getDeezerConnect());

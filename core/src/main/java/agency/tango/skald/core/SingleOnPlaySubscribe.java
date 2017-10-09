@@ -2,8 +2,8 @@ package agency.tango.skald.core;
 
 import java.util.List;
 
-import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.cache.TLruCache;
+import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -38,7 +38,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   @Override
   public void subscribe(@NonNull final SingleEmitter<Object> emitter) throws Exception {
     ProviderName currentProviderName = skaldMusicService.getCurrentProviderName();
-    if(currentProviderName != null) {
+    if (currentProviderName != null) {
       Player currentPlayer = playerCache.get(currentProviderName);
       if (currentPlayer != null) {
         currentPlayer.stop();

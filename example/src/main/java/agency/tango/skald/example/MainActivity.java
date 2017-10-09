@@ -18,11 +18,11 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import agency.tango.skald.R;
-import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.SkaldAuthService;
 import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
+import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
@@ -90,11 +90,10 @@ public class MainActivity extends Activity {
     spotifyButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(!skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
+        if (!skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
           skaldAuthService.login(SpotifyProvider.NAME);
           spotifyButton.setText(R.string.logout_from_spotify);
-        }
-        else {
+        } else {
           skaldAuthService.logout(SpotifyProvider.NAME);
           spotifyButton.setText(R.string.login_to_spotify);
         }
@@ -103,11 +102,10 @@ public class MainActivity extends Activity {
     deezerButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(!skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
+        if (!skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
           skaldAuthService.login(DeezerProvider.NAME);
           deezerButton.setText(R.string.logout_from_deezer);
-        }
-        else {
+        } else {
           skaldAuthService.logout(DeezerProvider.NAME);
           deezerButton.setText(R.string.login_to_deezer);
         }
@@ -199,19 +197,17 @@ public class MainActivity extends Activity {
   }
 
   private void setSpotifyButtonText() {
-    if(skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
+    if (skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
       spotifyButton.setText(R.string.logout_from_spotify);
-    }
-    else {
+    } else {
       spotifyButton.setText(R.string.login_to_spotify);
     }
   }
 
   private void setDeezerButtonText() {
-    if(skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
+    if (skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
       deezerButton.setText(R.string.logout_from_deezer);
-    }
-    else {
+    } else {
       deezerButton.setText(R.string.login_to_deezer);
     }
   }

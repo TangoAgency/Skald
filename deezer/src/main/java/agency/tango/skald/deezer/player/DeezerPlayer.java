@@ -36,9 +36,21 @@ class DeezerPlayer {
   private final Context context;
   private final DeezerConnect deezerConnect;
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
+  private final TLruCache<Class, PlayerWrapper> playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
+      new SkaldLruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
+        @Override
+        public void release(Class key, PlayerWrapper playerWrapper) {
+          PlayerState playerState = playerWrapper.getPlayerState();
+          if (playerState == PlayerState.PLAYING) {
+            playerWrapper.stop();
+          }
+          if (playerState != PlayerState.RELEASED) {
+            playerWrapper.release();
+          }
+        }
+      });
   private final Handler mainHandler;
 
-  private TLruCache<Class, PlayerWrapper> playerCache;
   private PlayerWrapper currentPlayer;
   private SkaldTrack skaldTrack;
   private boolean isTrackBeingPlaying = false;
@@ -46,19 +58,6 @@ class DeezerPlayer {
   DeezerPlayer(Context context, DeezerConnect deezerConnect) {
     this.context = context;
     this.deezerConnect = deezerConnect;
-    playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-        new SkaldLruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
-          @Override
-          public void release(Class key, PlayerWrapper playerWrapper) {
-            PlayerState playerState = playerWrapper.getPlayerState();
-            if (playerState == PlayerState.PLAYING) {
-              playerWrapper.stop();
-            }
-            if (playerState != PlayerState.RELEASED) {
-              playerWrapper.release();
-            }
-          }
-        });
     mainHandler = new Handler(context.getMainLooper());
   }
 
@@ -235,9 +234,9 @@ class DeezerPlayer {
     isTrackBeingPlaying = false;
   }
 
-  private <T> T getPlayer(Class<T> a) {
+  private <T> T getPlayer(Class<T> type) {
     for (PlayerWrapper playerWrapper : playerCache.snapshot().values()) {
-      if (a.isAssignableFrom(playerWrapper.getClass())) {
+      if (type.isAssignableFrom(playerWrapper.getClass())) {
         currentPlayer = playerWrapper;
         return (T) playerWrapper;
       }

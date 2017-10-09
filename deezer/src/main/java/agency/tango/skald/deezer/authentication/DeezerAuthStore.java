@@ -5,9 +5,9 @@ import android.content.Context;
 import com.deezer.sdk.network.connect.DeezerConnect;
 import com.deezer.sdk.network.connect.SessionStore;
 
-import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.authentication.SkaldAuthData;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
+import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.deezer.errors.DeezerAuthError;
 import agency.tango.skald.deezer.exceptions.DeezerAuthException;
 import agency.tango.skald.deezer.provider.DeezerProvider;
@@ -29,7 +29,7 @@ public class DeezerAuthStore implements SkaldAuthStore {
   public SkaldAuthData restore(Context context) throws AuthException {
     DeezerConnect deezerConnect = new DeezerConnect(deezerProvider.getClientId());
     SessionStore sessionStore = new SessionStore();
-    if(!sessionStore.restore(deezerConnect, context)) {
+    if (!sessionStore.restore(deezerConnect, context)) {
       throw new DeezerAuthException("Cannot restore session", new DeezerAuthError(context,
           deezerProvider.getClientId()));
     }

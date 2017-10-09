@@ -56,7 +56,8 @@ public class DeezerSearchService implements SearchService {
   public Single<List<SkaldPlaylist>> searchForPlaylists(final String query) {
     return Single.create(new SingleOnSubscribe<List<SkaldPlaylist>>() {
       @Override
-      public void subscribe(@NonNull final SingleEmitter<List<SkaldPlaylist>> emitter) throws Exception {
+      public void subscribe(@NonNull final SingleEmitter<List<SkaldPlaylist>> emitter)
+          throws Exception {
         DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchPlaylists(query);
         deezerRequest.setId(SEARCH_PLAYLIST_REQUEST);
         deezerConnect.requestAsync(deezerRequest,
@@ -65,7 +66,8 @@ public class DeezerSearchService implements SearchService {
               public void onResult(Object result, Object requestId) {
                 if (requestId.equals(SEARCH_PLAYLIST_REQUEST)) {
                   List<Playlist> playlists = (List<Playlist>) result;
-                  List<SkaldPlaylist> skaldPlaylists = mapDeezerPlaylistsToSkaldPlaylists(playlists);
+                  List<SkaldPlaylist> skaldPlaylists = mapDeezerPlaylistsToSkaldPlaylists(
+                      playlists);
                   emitter.onSuccess(skaldPlaylists);
                 }
               }
@@ -91,7 +93,7 @@ public class DeezerSearchService implements SearchService {
   }
 
   private abstract class DeezerRequestListener<T> extends JsonRequestListener {
-    private SingleEmitter<T> emitter;
+    private final SingleEmitter<T> emitter;
 
     private DeezerRequestListener(SingleEmitter<T> emitter) {
       this.emitter = emitter;

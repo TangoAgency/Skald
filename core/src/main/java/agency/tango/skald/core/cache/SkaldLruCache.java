@@ -9,7 +9,7 @@ import java.util.List;
 public class SkaldLruCache<K, V> extends LruCache<K, V> {
   private final List<CacheItemRemovedListener<K, V>> cacheItemRemovedListeners = new ArrayList<>();
 
-  public SkaldLruCache(int maxSize) {
+  SkaldLruCache(int maxSize) {
     super(maxSize);
   }
 
@@ -41,11 +41,11 @@ public class SkaldLruCache<K, V> extends LruCache<K, V> {
     return 1;
   }
 
-  public void addCacheItemRemovedListener(CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
+  void addCacheItemRemovedListener(CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
     cacheItemRemovedListeners.add(cacheItemRemovedListener);
   }
 
-  public void removeCacheRemovedListener(CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
+  void removeCacheItemRemovedListener(CacheItemRemovedListener<K, V> cacheItemRemovedListener) {
     cacheItemRemovedListeners.remove(cacheItemRemovedListener);
   }
 

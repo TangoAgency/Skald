@@ -9,11 +9,11 @@ import agency.tango.skald.core.provider.ProviderName;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableObserver;
 
-public class SkaldEventObserver extends DisposableObserver<SkaldEvent> {
-  private static final String TAG = SkaldEventObserver.class.getSimpleName();
+public class LoginEventObserver extends DisposableObserver<SkaldEvent> {
+  private static final String TAG = LoginEventObserver.class.getSimpleName();
   private final TLruCache<ProviderName, Player> playerCache;
 
-  public SkaldEventObserver(TLruCache<ProviderName, Player> playerCache) {
+  public LoginEventObserver(TLruCache<ProviderName, Player> playerCache) {
     this.playerCache = playerCache;
   }
 
@@ -26,7 +26,7 @@ public class SkaldEventObserver extends DisposableObserver<SkaldEvent> {
 
   @Override
   public void onError(@NonNull Throwable e) {
-    Log.e(TAG, "SkaldEventObserver error", e);
+    Log.e(TAG, "LoginEventObserver error", e);
   }
 
   @Override

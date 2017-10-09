@@ -10,10 +10,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
+import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -35,24 +35,21 @@ public class SkaldMusicService {
 
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
-  private final List<Provider> providers;
+  private final List<Provider> providers = Skald.singleton().providers();
   private final Timer timer = new Timer();
   private final SkaldBus skaldBus = SkaldBus.getInstance();
+  private final TLruCache<ProviderName, Player> playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
+      new SkaldLruCache.CacheItemRemovedListener<ProviderName, Player>() {
+        @Override
+        public void release(ProviderName key, Player player) {
+          player.release();
+        }
+      });
+  private final LoginEventObserver loginEventObserver = new LoginEventObserver(playerCache);
 
-  private TLruCache<ProviderName, Player> playerCache;
   private ProviderName currentProviderName;
 
   public SkaldMusicService(Context context) {
-    this.providers = Skald.singleton().providers();
-
-    this.playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-        new SkaldLruCache.CacheItemRemovedListener<ProviderName, Player>() {
-          @Override
-          public void release(ProviderName key, Player player) {
-            player.release();
-          }
-        });
-
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
@@ -65,7 +62,7 @@ public class SkaldMusicService {
         .registerReceiver(new AuthDataReceiver(this.providers), new IntentFilter(INTENT_ACTION));
 
     skaldBus.onSkaldEvent()
-        .subscribe(new SkaldEventObserver(playerCache));
+        .subscribe(loginEventObserver);
   }
 
   public synchronized Single<Object> play(final SkaldTrack skaldTrack) {
@@ -110,6 +107,7 @@ public class SkaldMusicService {
   }
 
   public void release() {
+    loginEventObserver.dispose();
     playerCache.evictAll();
     timer.cancel();
   }

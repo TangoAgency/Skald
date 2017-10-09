@@ -12,16 +12,16 @@ public abstract class ProviderName {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
+  public boolean equals(Object object) {
+    if (this == object) {
       return true;
     }
-    if (obj == null || getClass() != obj.getClass()) {
+    if (object == null || getClass() != object.getClass()) {
       return false;
     }
 
-    ProviderName that = (ProviderName) obj;
-    return name != null ? name.equals(that.name) : that.name == null;
+    ProviderName providerName = (ProviderName) object;
+    return name != null ? name.equals(providerName.name) : providerName.name == null;
   }
 
   @Override

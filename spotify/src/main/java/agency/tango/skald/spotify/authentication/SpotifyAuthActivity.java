@@ -11,8 +11,8 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
-import agency.tango.skald.spotify.services.TokenService;
 import agency.tango.skald.spotify.api.models.Tokens;
+import agency.tango.skald.spotify.services.TokenService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -59,7 +59,12 @@ public class SpotifyAuthActivity extends Activity {
         case ERROR:
           notifyError(response.getError());
           setResult(RESULT_CANCELED);
+          break;
+        default:
+          notifyError(response.getType().toString());
+          setResult(RESULT_CANCELED);
       }
+      this.finish();
     }
   }
 

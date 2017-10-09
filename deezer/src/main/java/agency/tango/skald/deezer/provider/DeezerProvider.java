@@ -2,23 +2,23 @@ package agency.tango.skald.deezer.provider;
 
 import android.content.Context;
 
-import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.Player;
-import agency.tango.skald.core.provider.Provider;
-import agency.tango.skald.core.provider.ProviderName;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
+import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.deezer.services.DeezerSearchService;
-import agency.tango.skald.deezer.player.SkaldDeezerPlayer;
+import agency.tango.skald.core.provider.Provider;
+import agency.tango.skald.core.provider.ProviderName;
 import agency.tango.skald.deezer.authentication.DeezerAuthData;
 import agency.tango.skald.deezer.authentication.DeezerAuthStore;
 import agency.tango.skald.deezer.models.DeezerPlaylist;
 import agency.tango.skald.deezer.models.DeezerTrack;
+import agency.tango.skald.deezer.player.SkaldDeezerPlayer;
+import agency.tango.skald.deezer.services.DeezerSearchService;
 
 public class DeezerProvider extends Provider {
   public static final ProviderName NAME = new DeezerProviderName();

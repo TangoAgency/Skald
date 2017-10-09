@@ -64,7 +64,7 @@ public class SpotifyAuthData extends SkaldAuthData {
     return refreshToken;
   }
 
-  int getExpiresIn() {
+  public int getExpiresIn() {
     return expiresIn;
   }
 }
