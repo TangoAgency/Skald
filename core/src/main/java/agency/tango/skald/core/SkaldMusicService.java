@@ -10,6 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -31,9 +32,10 @@ public class SkaldMusicService {
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final List<Provider> providers;
   private final Timer timer = new Timer();
+  private final SkaldBus skaldBus = SkaldBus.getInstance();
 
   private TLruCache<ProviderName, Player> playerCache;
-  private ProviderName currentPlayerKey;
+  private ProviderName currentProviderName;
 
   public SkaldMusicService(Context context) {
     this.providers = Skald.singleton().providers();
@@ -49,13 +51,16 @@ public class SkaldMusicService {
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
-        playerCache.evictTo(1, TimeUnit.MINUTES);
+        playerCache.evictTo(60, TimeUnit.SECONDS);
       }
     }, 10000, 10000);
 
     LocalBroadcastManager
         .getInstance(context.getApplicationContext())
         .registerReceiver(new AuthDataReceiver(this.providers), new IntentFilter(INTENT_ACTION));
+
+    skaldBus.onSkaldEvent()
+        .subscribe(new SkaldEventObserver(playerCache));
   }
 
   public synchronized Single<Object> play(final SkaldTrack skaldTrack) {
@@ -67,8 +72,8 @@ public class SkaldMusicService {
     return Completable.create(new CompletableOnSubscribe() {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentPlayerKey != null) {
-          playerCache.get(currentPlayerKey).pause();
+        if (currentProviderName != null) {
+          playerCache.get(currentProviderName).pause();
         }
         emitter.onComplete();
       }
@@ -79,8 +84,8 @@ public class SkaldMusicService {
     return Completable.create(new CompletableOnSubscribe() {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentPlayerKey != null) {
-          playerCache.get(currentPlayerKey).resume();
+        if (currentProviderName != null) {
+          playerCache.get(currentProviderName).resume();
         }
         emitter.onComplete();
       }
@@ -91,8 +96,8 @@ public class SkaldMusicService {
     return Completable.create(new CompletableOnSubscribe() {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentPlayerKey != null) {
-          playerCache.get(currentPlayerKey).stop();
+        if (currentProviderName != null) {
+          playerCache.get(currentProviderName).stop();
         }
         emitter.onComplete();
       }
@@ -144,12 +149,12 @@ public class SkaldMusicService {
     return mergeLists(singles);
   }
 
-  ProviderName getCurrentPlayerKey() {
-    return currentPlayerKey;
+  ProviderName getCurrentProviderName() {
+    return currentProviderName;
   }
 
-  void setCurrentPlayerKey(ProviderName playerKey) {
-    this.currentPlayerKey = playerKey;
+  void setCurrentProviderName(ProviderName providerName) {
+    this.currentProviderName = providerName;
   }
 
   private SearchService getSearchService(Provider provider) throws AuthException {

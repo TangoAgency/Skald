@@ -2,11 +2,14 @@ package agency.tango.skald.core;
 
 import android.content.Context;
 
+import agency.tango.skald.core.bus.LoginEvent;
+import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.listeners.OnAuthErrorListener;
 
 public class SkaldAuthService {
   private final Context context;
   private final OnAuthErrorListener onAuthErrorListener;
+  private final SkaldBus skaldBus = SkaldBus.getInstance();
 
   public SkaldAuthService(Context context, OnAuthErrorListener onAuthErrorListener) {
     this.context = context;
@@ -26,14 +29,8 @@ public class SkaldAuthService {
   }
 
   public void logout(ProviderName providerName) {
-    try {
-      getProviderByName(providerName).getPlayerFactory().getPlayer().release();
-      getSkaldAuthStore(getProviderByName(providerName)).clear(context);
-    } catch (AuthException authException) {
-      if (authException.getAuthError().hasResolution()) {
-        onAuthErrorListener.onAuthError(authException.getAuthError());
-      }
-    }
+    getSkaldAuthStore(getProviderByName(providerName)).clear(context);
+    skaldBus.post(new LoginEvent(providerName));
   }
 
   public boolean isLoggedIn(ProviderName providerName) {
