@@ -121,11 +121,6 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public boolean isPlaying() {
-    return spotifyPlayer.getPlaybackState().isPlaying;
-  }
-
-  @Override
   public void addOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
   }

@@ -63,11 +63,6 @@ public class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public boolean isPlaying() {
-    return deezerPlayer.isPlaying();
-  }
-
-  @Override
   public void addOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
 
