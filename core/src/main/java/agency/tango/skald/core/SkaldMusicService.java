@@ -11,6 +11,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import agency.tango.skald.core.bus.SkaldBus;
+import agency.tango.skald.core.bus.LoginEvent;
 import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.exceptions.AuthException;
@@ -61,7 +62,7 @@ public class SkaldMusicService {
         .getInstance(context.getApplicationContext())
         .registerReceiver(new AuthDataReceiver(this.providers), new IntentFilter(INTENT_ACTION));
 
-    skaldBus.onSkaldEvent()
+    skaldBus.observable(LoginEvent.class)
         .subscribe(loginEventObserver);
   }
 
