@@ -5,6 +5,9 @@ import agency.tango.skald.spotify.api.models.Tokens;
 import io.reactivex.Single;
 
 public class TokenService {
+  private static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
+  private static final String REFRESH_TOKEN_GRANT_TYPE = "refresh_token";
+
   private final SpotifyTokenApi spotifyTokenApi;
 
   public TokenService() {
@@ -13,11 +16,12 @@ public class TokenService {
 
   public Single<Tokens> getTokens(String clientId, String clientSecret, String code,
       String redirectUri) {
-    return spotifyTokenApi.getTokens(clientId, clientSecret, "authorization_code", code,
+    return spotifyTokenApi.getTokens(clientId, clientSecret, AUTHORIZATION_CODE_GRANT_TYPE, code,
         redirectUri);
   }
 
   public Single<Tokens> getRefreshToken(String clientId, String clientSecret, String refreshToken) {
-    return spotifyTokenApi.getRefreshToken(clientId, clientSecret, "refresh_token", refreshToken);
+    return spotifyTokenApi.getRefreshToken(clientId, clientSecret, REFRESH_TOKEN_GRANT_TYPE,
+        refreshToken);
   }
 }

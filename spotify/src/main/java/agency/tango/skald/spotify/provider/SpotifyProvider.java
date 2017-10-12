@@ -2,23 +2,23 @@ package agency.tango.skald.spotify.provider;
 
 import android.content.Context;
 
-import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.Player;
-import agency.tango.skald.core.provider.Provider;
-import agency.tango.skald.core.provider.ProviderName;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
+import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
-import agency.tango.skald.spotify.services.SpotifySearchService;
+import agency.tango.skald.core.provider.Provider;
+import agency.tango.skald.core.provider.ProviderName;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
 import agency.tango.skald.spotify.authentication.SpotifyAuthStore;
 import agency.tango.skald.spotify.models.SpotifyPlaylist;
 import agency.tango.skald.spotify.models.SpotifyTrack;
+import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
+import agency.tango.skald.spotify.services.SpotifySearchService;
 
 public class SpotifyProvider extends Provider {
   public static final ProviderName NAME = new SpotifyProviderName();

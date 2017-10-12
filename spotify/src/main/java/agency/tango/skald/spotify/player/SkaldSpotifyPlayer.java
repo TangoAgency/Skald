@@ -7,10 +7,7 @@ import android.util.Log;
 
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Error;
-import com.spotify.sdk.android.player.Metadata;
 import com.spotify.sdk.android.player.Player.NotificationCallback;
-import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
@@ -18,20 +15,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.Player;
-import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.core.models.TrackMetadata;
-import agency.tango.skald.spotify.services.TokenService;
-import agency.tango.skald.spotify.api.models.Tokens;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
-import agency.tango.skald.spotify.authentication.SpotifyAuthStore;
+import agency.tango.skald.spotify.player.callbacks.SpotifyConnectionStateCallback;
+import agency.tango.skald.spotify.player.callbacks.SpotifyNotificationCallback;
 import agency.tango.skald.spotify.player.callbacks.SpotifyOperationCallback;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
-import io.reactivex.observers.DisposableSingleObserver;
-import io.reactivex.schedulers.Schedulers;
 
 public class SkaldSpotifyPlayer implements Player {
   private static final String TAG = SkaldSpotifyPlayer.class.getSimpleName();
@@ -47,7 +39,6 @@ public class SkaldSpotifyPlayer implements Player {
   private final ConnectionStateCallback connectionStateCallback;
   private final NotificationCallback notificationCallback;
   private final Context context;
-  private final SpotifyProvider spotifyProvider;
   private final Handler mainHandler;
 
   private SpotifyPlayer spotifyPlayer;
@@ -55,14 +46,13 @@ public class SkaldSpotifyPlayer implements Player {
   public SkaldSpotifyPlayer(final Context context, final SpotifyAuthData spotifyAuthData,
       final SpotifyProvider spotifyProvider) {
     this.context = context;
-    this.spotifyProvider = spotifyProvider;
     mainHandler = new Handler(context.getMainLooper());
-    connectionStateCallback = initializeConnectionStateCallback(spotifyAuthData);
-    notificationCallback = initializeNotificationCallback();
+    connectionStateCallback = new SpotifyConnectionStateCallback(context, this,
+        onPlayerReadyListeners, spotifyProvider, spotifyAuthData);
+    notificationCallback = new SpotifyNotificationCallback(this, mainHandler, onPlaybackListeners);
 
     final Config playerConfig = new Config(context, spotifyAuthData.getOauthToken(),
         spotifyProvider.getClientId());
-
 
     spotifyPlayer = Spotify.getPlayer(playerConfig, this,
         new SpotifyPlayer.InitializationObserver() {
@@ -83,16 +73,12 @@ public class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void play(SkaldTrack track) {
-    Uri uri = track.getUri();
-    String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
-    spotifyPlayer.playUri(spotifyOperationCallback, stringUri, 0, 0);
+    spotifyPlayer.playUri(spotifyOperationCallback, getUriToPlay(track.getUri()), 0, 0);
   }
 
   @Override
   public void play(SkaldPlaylist playlist) {
-    Uri uri = playlist.getUri();
-    String stringUri = uri.getPathSegments().get(uri.getPathSegments().size() - 1);
-    spotifyPlayer.playUri(spotifyOperationCallback, stringUri, 0, 0);
+    spotifyPlayer.playUri(spotifyOperationCallback, getUriToPlay(playlist.getUri()), 0, 0);
   }
 
   @Override
@@ -159,80 +145,12 @@ public class SkaldSpotifyPlayer implements Player {
     onPlaybackListeners.remove(0);
   }
 
-  private ConnectionStateCallback initializeConnectionStateCallback(
-      final SpotifyAuthData spotifyAuthData) {
-    return new ConnectionStateCallback() {
-      @Override
-      public void onLoggedIn() {
-        for (OnPlayerReadyListener onPlayerReadyListener : onPlayerReadyListeners) {
-          onPlayerReadyListener.onPlayerReady(SkaldSpotifyPlayer.this);
-        }
-      }
-
-      @Override
-      public void onLoggedOut() {
-
-      }
-
-      @Override
-      public void onLoginFailed(Error error) {
-        new TokenService()
-            .getRefreshToken(spotifyProvider.getClientId(), spotifyProvider.getClientSecret(),
-                spotifyAuthData.getRefreshToken())
-            .subscribeOn(Schedulers.io())
-            .subscribe(new DisposableSingleObserver<Tokens>() {
-              @Override
-              public void onSuccess(Tokens tokens) {
-                spotifyPlayer.login(tokens.getAccessToken());
-                saveTokens(context, tokens, spotifyAuthData);
-              }
-
-              @Override
-              public void onError(Throwable error) {
-                Log.e(TAG, "RefreshToken observer error", error);
-              }
-            });
-      }
-
-      @Override
-      public void onTemporaryError() {
-
-      }
-
-      @Override
-      public void onConnectionMessage(String s) {
-
-      }
-    };
+  public SpotifyPlayer getPlayer() {
+    return spotifyPlayer;
   }
 
-  private NotificationCallback initializeNotificationCallback() {
-    return new NotificationCallback() {
-      @Override
-      public void onPlaybackEvent(PlayerEvent playerEvent) {
-        Metadata metadata = spotifyPlayer.getMetadata();
-
-        if (playerEvent == PlayerEvent.kSpPlaybackNotifyTrackChanged) {
-          if (metadata.currentTrack != null) {
-            notifyPlayEvent(metadata);
-          }
-        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPlay) {
-          if (metadata.currentTrack != null) {
-            notifyResumeEvent();
-          }
-        } else if (playerEvent == PlayerEvent.kSpPlaybackNotifyPause) {
-          notifyPauseEvent();
-        }
-      }
-
-      @Override
-      public void onPlaybackError(Error error) {
-        Log.e(TAG, String.format("PlaybackError occurred %s", error.toString()));
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError());
-        }
-      }
-    };
+  private String getUriToPlay(Uri uri) {
+    return uri.getPathSegments().get(uri.getPathSegments().size() - 1);
   }
 
   private void notifyStopEvent() {
@@ -244,46 +162,5 @@ public class SkaldSpotifyPlayer implements Player {
         }
       }
     });
-  }
-
-  private void notifyPlayEvent(final Metadata metadata) {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
-            metadata.currentTrack.name, metadata.currentTrack.albumCoverWebUrl);
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPlayEvent(trackMetadata);
-        }
-      }
-    });
-  }
-
-  private void notifyResumeEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onResumeEvent();
-        }
-      }
-    });
-  }
-
-  private void notifyPauseEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPauseEvent();
-        }
-      }
-    });
-  }
-
-  private void saveTokens(Context context, Tokens tokens, SpotifyAuthData spotifyAuthData) {
-    SpotifyAuthData spotifyAuthDataRefreshed = new SpotifyAuthData(tokens.getAccessToken(),
-        spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
-    new SpotifyAuthStore(spotifyProvider).save(context, spotifyAuthDataRefreshed);
   }
 }

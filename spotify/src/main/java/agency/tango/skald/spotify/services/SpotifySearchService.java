@@ -34,12 +34,16 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SpotifySearchService implements SearchService {
-  private static final String TAG = SpotifySearchService.class.getSimpleName();
   private static final int UNAUTHORIZED_ERROR_CODE = 401;
+  private static final String TRACK_TYPE = "track";
+  private static final String PLAYLIST_TYPE = "playlist";
+
   private final SpotifyApi spotifyApi;
   private final SpotifyProvider spotifyProvider;
   private final SpotifyAuthData spotifyAuthData;
   private final Context context;
+  private final TokenService tokenService;
+  private final SpotifyAuthStore spotifyAuthStore;
 
   private String token;
 
@@ -49,6 +53,8 @@ public class SpotifySearchService implements SearchService {
     this.context = context;
     this.spotifyAuthData = spotifyAuthData;
     this.spotifyProvider = spotifyProvider;
+    this.tokenService = new TokenService();
+    this.spotifyAuthStore = new SpotifyAuthStore(spotifyProvider);
     this.spotifyApi = resolveApi();
   }
 
@@ -78,7 +84,7 @@ public class SpotifySearchService implements SearchService {
 
   @Override
   public Single<List<SkaldTrack>> searchForTracks(final String query) {
-    return spotifyApi.getTracksForQuery(query, "track")
+    return spotifyApi.getTracksForQuery(query, TRACK_TYPE)
         .onErrorResumeNext(new Function<Throwable, SingleSource<? extends TrackSearch>>() {
           @Override
           public SingleSource<? extends TrackSearch> apply(Throwable throwable) throws Exception {
@@ -89,7 +95,7 @@ public class SpotifySearchService implements SearchService {
                     public SingleSource<TrackSearch> apply(Tokens tokens) throws Exception {
                       saveTokens(tokens);
 
-                      return spotifyApi.getTracksForQuery(query, "track");
+                      return spotifyApi.getTracksForQuery(query, TRACK_TYPE);
                     }
                   });
             }
@@ -107,7 +113,7 @@ public class SpotifySearchService implements SearchService {
 
   @Override
   public Single<List<SkaldPlaylist>> searchForPlaylists(final String query) {
-    return spotifyApi.getPlaylistsForQuery(query, "playlist")
+    return spotifyApi.getPlaylistsForQuery(query, PLAYLIST_TYPE)
         .onErrorResumeNext(new Function<Throwable, SingleSource<? extends BrowsePlaylists>>() {
           @Override
           public SingleSource<? extends BrowsePlaylists> apply(Throwable throwable)
@@ -119,7 +125,7 @@ public class SpotifySearchService implements SearchService {
                     public SingleSource<BrowsePlaylists> apply(Tokens tokens) throws Exception {
                       saveTokens(tokens);
 
-                      return spotifyApi.getPlaylistsForQuery(query, "playlist");
+                      return spotifyApi.getPlaylistsForQuery(query, PLAYLIST_TYPE);
                     }
                   });
             }
@@ -141,7 +147,7 @@ public class SpotifySearchService implements SearchService {
   }
 
   private Single<Tokens> refreshToken() {
-    return new TokenService()
+    return tokenService
         .getRefreshToken(spotifyProvider.getClientId(), spotifyProvider.getClientSecret(),
             spotifyAuthData.getRefreshToken());
   }
@@ -151,7 +157,7 @@ public class SpotifySearchService implements SearchService {
 
     SpotifyAuthData spotifyAuthDataRestored = new SpotifyAuthData(token,
         spotifyAuthData.getRefreshToken(), tokens.getExpiresIn());
-    new SpotifyAuthStore(spotifyProvider).save(context, spotifyAuthDataRestored);
+    spotifyAuthStore.save(context, spotifyAuthDataRestored);
   }
 
   @NonNull
