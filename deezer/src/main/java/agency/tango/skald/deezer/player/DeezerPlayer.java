@@ -61,7 +61,7 @@ class DeezerPlayer {
     mainHandler = new Handler(context.getMainLooper());
   }
 
-  void play(SkaldTrack skaldTrack) throws DeezerError {
+  void play(SkaldTrack skaldTrack) {
     this.skaldTrack = skaldTrack;
     long trackId = getId(skaldTrack.getUri());
     TrackPlayer trackPlayer = getPlayer(TrackPlayer.class);
@@ -76,13 +76,16 @@ class DeezerPlayer {
       } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
         handleTooManyPlayerException(tooManyPlayersExceptions);
         play(skaldTrack);
+      } catch (DeezerError deezerError) {
+        deezerError.printStackTrace();
+        notifyPlaybackError(deezerError.getMessage());
       }
     } else {
       trackPlayer.playTrack(trackId);
     }
   }
 
-  void play(SkaldPlaylist skaldPlaylist) throws DeezerError {
+  void play(SkaldPlaylist skaldPlaylist) {
     long playlistId = getId(skaldPlaylist.getUri());
     PlaylistPlayer playlistPlayer = getPlayer(PlaylistPlayer.class);
     if (playlistPlayer == null) {
@@ -97,6 +100,9 @@ class DeezerPlayer {
       } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
         handleTooManyPlayerException(tooManyPlayersExceptions);
         play(skaldPlaylist);
+      } catch (DeezerError deezerError) {
+        deezerError.printStackTrace();
+        notifyPlaybackError(deezerError.getMessage());
       }
     } else {
       playlistPlayer.playPlaylist(playlistId);
@@ -137,6 +143,12 @@ class DeezerPlayer {
     onPlaybackListeners.remove(0);
   }
 
+  private void notifyPlaybackError(String message) {
+    for(OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+      onPlaybackListener.onError(new PlaybackError(message));
+    }
+  }
+
   private void addOnPlayerStateChangeListener() {
     currentPlayer.addOnPlayerStateChangeListener(new OnPlayerStateChangeListener() {
       @Override
@@ -175,14 +187,14 @@ class DeezerPlayer {
       @Override
       public void onUnparsedResult(String requestResponse, Object requestId) {
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError());
+          onPlaybackListener.onError(new PlaybackError("Cannot get track info"));
         }
       }
 
       @Override
       public void onException(Exception exception, Object requestId) {
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError());
+          onPlaybackListener.onError(new PlaybackError(exception.getMessage()));
         }
       }
     });

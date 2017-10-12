@@ -2,8 +2,6 @@ package agency.tango.skald.deezer.player;
 
 import android.content.Context;
 
-import com.deezer.sdk.network.request.event.DeezerError;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,22 +22,12 @@ public class SkaldDeezerPlayer implements Player {
 
   @Override
   public void play(SkaldTrack track) {
-    try {
-      deezerPlayer.play(track);
-    } catch (DeezerError deezerError) {
-      deezerError.getMessage();
-      deezerError.printStackTrace();
-    }
+    deezerPlayer.play(track);
   }
 
   @Override
   public void play(SkaldPlaylist playlist) {
-    try {
-      deezerPlayer.play(playlist);
-    } catch (DeezerError deezerError) {
-      deezerError.getMessage();
-      deezerError.printStackTrace();
-    }
+    deezerPlayer.play(playlist);
   }
 
   @Override

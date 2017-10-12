@@ -1,7 +1,6 @@
 package agency.tango.skald.spotify.player.callbacks;
 
 import android.os.Handler;
-import android.util.Log;
 
 import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Metadata;
@@ -47,9 +46,8 @@ public class SpotifyNotificationCallback implements Player.NotificationCallback 
 
   @Override
   public void onPlaybackError(Error error) {
-    Log.e(TAG, String.format("PlaybackError occurred %s", error.toString()));
     for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onError(new PlaybackError());
+      onPlaybackListener.onError(new PlaybackError(error.toString()));
     }
   }
 
