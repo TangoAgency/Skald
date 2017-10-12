@@ -60,3 +60,5 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
+- echo yes | sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
