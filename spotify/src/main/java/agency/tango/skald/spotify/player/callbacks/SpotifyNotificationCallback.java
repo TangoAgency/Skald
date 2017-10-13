@@ -15,7 +15,6 @@ import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
 
 public class SpotifyNotificationCallback implements Player.NotificationCallback {
-  private static final String TAG = SpotifyConnectionStateCallback.class.getSimpleName();
   private final SkaldSpotifyPlayer skaldSpotifyPlayer;
   private final List<OnPlaybackListener> onPlaybackListeners;
   private final Handler mainHandler;

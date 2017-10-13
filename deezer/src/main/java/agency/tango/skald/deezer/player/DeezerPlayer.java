@@ -81,6 +81,7 @@ class DeezerPlayer {
         notifyPlaybackError(deezerError.getMessage());
       }
     } else {
+      currentPlayer = trackPlayer;
       trackPlayer.playTrack(trackId);
     }
   }
@@ -105,6 +106,7 @@ class DeezerPlayer {
         notifyPlaybackError(deezerError.getMessage());
       }
     } else {
+      currentPlayer = playlistPlayer;
       playlistPlayer.playPlaylist(playlistId);
     }
   }
@@ -131,10 +133,6 @@ class DeezerPlayer {
     playerCache.evictAll();
   }
 
-  boolean isPlaying() {
-    return currentPlayer.getPlayerState() == PlayerState.PLAYING;
-  }
-
   void addOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
@@ -147,6 +145,10 @@ class DeezerPlayer {
     for(OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
       onPlaybackListener.onError(new PlaybackError(message));
     }
+  }
+
+  private boolean isPlaying() {
+    return currentPlayer.getPlayerState() == PlayerState.PLAYING;
   }
 
   private void addOnPlayerStateChangeListener() {
