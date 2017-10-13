@@ -26,6 +26,7 @@ import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
+import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
@@ -61,53 +62,11 @@ class DeezerPlayer {
     mainHandler = new Handler(context.getMainLooper());
   }
 
-  void play(SkaldTrack skaldTrack) {
-    this.skaldTrack = skaldTrack;
-    long trackId = getId(skaldTrack.getUri());
-    TrackPlayer trackPlayer = getPlayer(TrackPlayer.class);
-    if (trackPlayer == null) {
-      try {
-        trackPlayer = new TrackPlayer((Application) context.getApplicationContext(),
-            deezerConnect, new WifiAndMobileNetworkStateChecker());
-        playerCache.put(TrackPlayer.class, trackPlayer);
-        currentPlayer = trackPlayer;
-        addOnPlayerStateChangeListener();
-        trackPlayer.playTrack(trackId);
-      } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
-        handleTooManyPlayerException(tooManyPlayersExceptions);
-        play(skaldTrack);
-      } catch (DeezerError deezerError) {
-        deezerError.printStackTrace();
-        notifyPlaybackError(deezerError.getMessage());
-      }
-    } else {
-      currentPlayer = trackPlayer;
-      trackPlayer.playTrack(trackId);
-    }
-  }
-
-  void play(SkaldPlaylist skaldPlaylist) {
-    long playlistId = getId(skaldPlaylist.getUri());
-    PlaylistPlayer playlistPlayer = getPlayer(PlaylistPlayer.class);
-    if (playlistPlayer == null) {
-      try {
-        playlistPlayer = new PlaylistPlayer(
-            (Application) context.getApplicationContext(), deezerConnect,
-            new WifiAndMobileNetworkStateChecker());
-        playerCache.put(PlaylistPlayer.class, playlistPlayer);
-        currentPlayer = playlistPlayer;
-        //addOnPlayerStateChangeListener();
-        playlistPlayer.playPlaylist(playlistId);
-      } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
-        handleTooManyPlayerException(tooManyPlayersExceptions);
-        play(skaldPlaylist);
-      } catch (DeezerError deezerError) {
-        deezerError.printStackTrace();
-        notifyPlaybackError(deezerError.getMessage());
-      }
-    } else {
-      currentPlayer = playlistPlayer;
-      playlistPlayer.playPlaylist(playlistId);
+  void play(SkaldPlayableEntity skaldPlayableEntity) {
+    if (skaldPlayableEntity instanceof SkaldTrack) {
+      play((SkaldTrack) skaldPlayableEntity);
+    } else if (skaldPlayableEntity instanceof SkaldPlaylist) {
+      play((SkaldPlaylist) skaldPlayableEntity);
     }
   }
 
@@ -139,6 +98,56 @@ class DeezerPlayer {
 
   void removeOnPlayerReadyListener() {
     onPlaybackListeners.remove(0);
+  }
+
+  private void play(SkaldTrack skaldTrack) {
+    this.skaldTrack = skaldTrack;
+    long trackId = getId(skaldTrack.getUri());
+    TrackPlayer trackPlayer = getPlayer(TrackPlayer.class);
+    if (trackPlayer == null) {
+      try {
+        trackPlayer = new TrackPlayer((Application) context.getApplicationContext(),
+            deezerConnect, new WifiAndMobileNetworkStateChecker());
+        playerCache.put(TrackPlayer.class, trackPlayer);
+        currentPlayer = trackPlayer;
+        addOnPlayerStateChangeListener();
+        trackPlayer.playTrack(trackId);
+      } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
+        handleTooManyPlayerException(tooManyPlayersExceptions);
+        play(skaldTrack);
+      } catch (DeezerError deezerError) {
+        deezerError.printStackTrace();
+        notifyPlaybackError(deezerError.getMessage());
+      }
+    } else {
+      currentPlayer = trackPlayer;
+      trackPlayer.playTrack(trackId);
+    }
+  }
+
+  private void play(SkaldPlaylist skaldPlaylist) {
+    long playlistId = getId(skaldPlaylist.getUri());
+    PlaylistPlayer playlistPlayer = getPlayer(PlaylistPlayer.class);
+    if (playlistPlayer == null) {
+      try {
+        playlistPlayer = new PlaylistPlayer(
+            (Application) context.getApplicationContext(), deezerConnect,
+            new WifiAndMobileNetworkStateChecker());
+        playerCache.put(PlaylistPlayer.class, playlistPlayer);
+        currentPlayer = playlistPlayer;
+        //addOnPlayerStateChangeListener();
+        playlistPlayer.playPlaylist(playlistId);
+      } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
+        handleTooManyPlayerException(tooManyPlayersExceptions);
+        play(skaldPlaylist);
+      } catch (DeezerError deezerError) {
+        deezerError.printStackTrace();
+        notifyPlaybackError(deezerError.getMessage());
+      }
+    } else {
+      currentPlayer = playlistPlayer;
+      playlistPlayer.playPlaylist(playlistId);
+    }
   }
 
   private void notifyPlaybackError(String message) {

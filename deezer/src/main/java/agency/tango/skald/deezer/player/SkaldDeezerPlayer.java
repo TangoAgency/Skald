@@ -9,8 +9,6 @@ import agency.tango.skald.core.Player;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
-import agency.tango.skald.core.models.SkaldPlaylist;
-import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.deezer.authentication.DeezerAuthData;
 
 public class SkaldDeezerPlayer implements Player {
@@ -23,12 +21,7 @@ public class SkaldDeezerPlayer implements Player {
 
   @Override
   public void play(SkaldPlayableEntity skaldPlayableEntity) {
-    if(skaldPlayableEntity instanceof SkaldTrack) {
-      play((SkaldTrack) skaldPlayableEntity);
-    }
-    else if(skaldPlayableEntity instanceof SkaldPlaylist) {
-      play((SkaldPlaylist) skaldPlayableEntity);
-    }
+    deezerPlayer.play(skaldPlayableEntity);
   }
 
   @Override
@@ -73,13 +66,5 @@ public class SkaldDeezerPlayer implements Player {
   @Override
   public void removeOnPlaybackListener() {
     deezerPlayer.removeOnPlayerReadyListener();
-  }
-
-  private void play(SkaldTrack track) {
-    deezerPlayer.play(track);
-  }
-
-  private void play(SkaldPlaylist playlist) {
-    deezerPlayer.play(playlist);
   }
 }
