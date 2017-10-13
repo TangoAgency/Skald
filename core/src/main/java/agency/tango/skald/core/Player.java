@@ -1,14 +1,11 @@
 package agency.tango.skald.core;
 
-import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
-import agency.tango.skald.core.models.SkaldPlaylist;
-import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.listeners.OnPlayerReadyListener;
+import agency.tango.skald.core.models.SkaldPlayableEntity;
 
 public interface Player {
-  void play(SkaldTrack track);
-
-  void play(SkaldPlaylist playlist);
+  void play(SkaldPlayableEntity skaldPlayableEntity);
 
   void stop();
 

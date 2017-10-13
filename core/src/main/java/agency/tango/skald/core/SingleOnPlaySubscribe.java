@@ -7,7 +7,7 @@ import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
-import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 import io.reactivex.SingleEmitter;
@@ -17,7 +17,7 @@ import io.reactivex.disposables.Disposable;
 
 public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   private final SkaldMusicService skaldMusicService;
-  private final SkaldTrack skaldTrack;
+  private final SkaldPlayableEntity skaldPlayableEntity;
   private final List<OnPlaybackListener> onPlaybackListeners;
   private final TLruCache<ProviderName, Player> playerCache;
   private final List<Provider> providers;
@@ -25,11 +25,11 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   private boolean playerInitialized = false;
   private Player initializedPlayer;
 
-  SingleOnPlaySubscribe(SkaldMusicService skaldMusicService, SkaldTrack skaldTrack,
-      List<OnPlaybackListener> onPlaybackListeners, TLruCache<ProviderName, Player> playerCache,
-      List<Provider> providers) {
+  SingleOnPlaySubscribe(SkaldMusicService skaldMusicService,
+      SkaldPlayableEntity skaldPlayableEntity, List<OnPlaybackListener> onPlaybackListeners,
+      TLruCache<ProviderName, Player> playerCache, List<Provider> providers) {
     this.skaldMusicService = skaldMusicService;
-    this.skaldTrack = skaldTrack;
+    this.skaldPlayableEntity = skaldPlayableEntity;
     this.onPlaybackListeners = onPlaybackListeners;
     this.playerCache = playerCache;
     this.providers = providers;
@@ -45,7 +45,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
       }
     }
     for (Provider provider : providers) {
-      if (provider.canHandle(skaldTrack)) {
+      if (provider.canHandle(skaldPlayableEntity)) {
         ProviderName providerName = provider.getProviderName();
         Player player = playerCache.get(providerName);
         if (player != null) {
@@ -74,7 +74,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   private void playTrack(@NonNull SingleEmitter<Object> emitter, Player player,
       ProviderName providerName) {
     playerInitialized = true;
-    player.play(skaldTrack);
+    player.play(skaldPlayableEntity);
     skaldMusicService.setCurrentProviderName(providerName);
     emitter.onSuccess(player);
   }
@@ -89,7 +89,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
         public void onPlayerReady(Player player) {
           playerInitialized = true;
           playerCache.put(provider.getProviderName(), initializedPlayer);
-          player.play(skaldTrack);
+          player.play(skaldPlayableEntity);
           skaldMusicService.setCurrentProviderName(providerName);
           emitter.onSuccess(player);
         }

@@ -17,8 +17,7 @@ import java.util.List;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
-import agency.tango.skald.core.models.SkaldPlaylist;
-import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
 import agency.tango.skald.spotify.player.callbacks.SpotifyConnectionStateCallback;
 import agency.tango.skald.spotify.player.callbacks.SpotifyNotificationCallback;
@@ -72,13 +71,8 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void play(SkaldTrack track) {
-    spotifyPlayer.playUri(spotifyOperationCallback, getUriToPlay(track.getUri()), 0, 0);
-  }
-
-  @Override
-  public void play(SkaldPlaylist playlist) {
-    spotifyPlayer.playUri(spotifyOperationCallback, getUriToPlay(playlist.getUri()), 0, 0);
+  public void play(SkaldPlayableEntity playableEntity) {
+    spotifyPlayer.playUri(spotifyOperationCallback, getUriToPlay(playableEntity.getUri()), 0, 0);
   }
 
   @Override

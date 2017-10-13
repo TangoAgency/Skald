@@ -17,6 +17,7 @@ import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
+import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.provider.Provider;
@@ -66,8 +67,8 @@ public class SkaldMusicService {
         .subscribe(loginEventObserver);
   }
 
-  public synchronized Single<Object> play(final SkaldTrack skaldTrack) {
-    return Single.create(new SingleOnPlaySubscribe(this, skaldTrack, onPlaybackListeners,
+  public synchronized Single<Object> play(final SkaldPlayableEntity skaldPlayableEntity) {
+    return Single.create(new SingleOnPlaySubscribe(this, skaldPlayableEntity, onPlaybackListeners,
         playerCache, providers));
   }
 

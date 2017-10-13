@@ -2,7 +2,7 @@ package agency.tango.skald.core.models;
 
 import android.net.Uri;
 
-public class SkaldTrack {
+public class SkaldTrack extends SkaldPlayableEntity {
   private final Uri uri;
   private final String artistName;
   private final String title;
@@ -15,6 +15,7 @@ public class SkaldTrack {
     this.imageUrl = imageUrl;
   }
 
+  @Override
   public Uri getUri() {
     return uri;
   }

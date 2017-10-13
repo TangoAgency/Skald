@@ -9,8 +9,7 @@ import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
-import agency.tango.skald.core.models.SkaldPlaylist;
-import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 import agency.tango.skald.deezer.authentication.DeezerAuthData;
@@ -53,13 +52,9 @@ public class DeezerProvider extends Provider {
   }
 
   @Override
-  public boolean canHandle(SkaldPlaylist skaldPlaylist) {
-    return skaldPlaylist instanceof DeezerPlaylist;
-  }
-
-  @Override
-  public boolean canHandle(SkaldTrack skaldTrack) {
-    return skaldTrack instanceof DeezerTrack;
+  public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
+    return skaldPlayableEntity instanceof DeezerTrack
+        || skaldPlayableEntity instanceof DeezerPlaylist;
   }
 
   public String getClientId() {
