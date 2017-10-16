@@ -5,12 +5,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 
-import com.deezer.sdk.model.Track;
 import com.deezer.sdk.network.connect.DeezerConnect;
-import com.deezer.sdk.network.request.DeezerRequest;
-import com.deezer.sdk.network.request.DeezerRequestFactory;
 import com.deezer.sdk.network.request.event.DeezerError;
-import com.deezer.sdk.network.request.event.JsonRequestListener;
 import com.deezer.sdk.player.PlayerWrapper;
 import com.deezer.sdk.player.PlaylistPlayer;
 import com.deezer.sdk.player.TrackPlayer;
@@ -29,11 +25,9 @@ import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
-import agency.tango.skald.core.models.TrackMetadata;
 
 class DeezerPlayer {
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
-  private static final String TRACK_REQUEST = "TRACK_REQUEST";
   private final Context context;
   private final DeezerConnect deezerConnect;
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
@@ -53,8 +47,7 @@ class DeezerPlayer {
   private final Handler mainHandler;
 
   private PlayerWrapper currentPlayer;
-  private SkaldTrack skaldTrack;
-  private boolean isTrackBeingPlaying = false;
+  private boolean isPlayEvent = false;
 
   DeezerPlayer(Context context, DeezerConnect deezerConnect) {
     this.context = context;
@@ -100,14 +93,26 @@ class DeezerPlayer {
     onPlaybackListeners.remove(0);
   }
 
+  void notifyResumeEvent() {
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onResumeEvent();
+        }
+      }
+    });
+  }
+
   private void play(SkaldTrack skaldTrack) {
-    this.skaldTrack = skaldTrack;
     long trackId = getId(skaldTrack.getUri());
     TrackPlayer trackPlayer = getPlayer(TrackPlayer.class);
     if (trackPlayer == null) {
       try {
         trackPlayer = new TrackPlayer((Application) context.getApplicationContext(),
             deezerConnect, new WifiAndMobileNetworkStateChecker());
+        trackPlayer.addPlayerListener(new PlayerListener(this, deezerConnect, onPlaybackListeners,
+            mainHandler));
         playerCache.put(TrackPlayer.class, trackPlayer);
         currentPlayer = trackPlayer;
         addOnPlayerStateChangeListener();
@@ -133,9 +138,11 @@ class DeezerPlayer {
         playlistPlayer = new PlaylistPlayer(
             (Application) context.getApplicationContext(), deezerConnect,
             new WifiAndMobileNetworkStateChecker());
+        playlistPlayer.addPlayerListener(new PlayerListener(this, deezerConnect,
+            onPlaybackListeners, mainHandler));
         playerCache.put(PlaylistPlayer.class, playlistPlayer);
         currentPlayer = playlistPlayer;
-        //addOnPlayerStateChangeListener();
+        addOnPlayerStateChangeListener();
         playlistPlayer.playPlaylist(playlistId);
       } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
         handleTooManyPlayerException(tooManyPlayersExceptions);
@@ -151,7 +158,7 @@ class DeezerPlayer {
   }
 
   private void notifyPlaybackError(String message) {
-    for(OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+    for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
       onPlaybackListener.onError(new PlaybackError(message));
     }
   }
@@ -165,70 +172,17 @@ class DeezerPlayer {
       @Override
       public void onPlayerStateChange(PlayerState playerState, long timePosition) {
         if (playerState == PlayerState.PLAYING) {
-          if (isTrackBeingPlaying) {
+          if (!isPlayEvent) {
             notifyResumeEvent();
-          } else {
-            makeTrackRequestAndNotifyPlayResumeEvent(skaldTrack);
           }
+          isPlayEvent = false;
+        } else if (playerState == PlayerState.WAITING_FOR_DATA) {
+          isPlayEvent = true;
         } else if (playerState == PlayerState.PAUSED) {
           notifyPauseEvent();
         } else if (playerState == PlayerState.STOPPED) {
           notifyPauseEvent();
           notifyStopEvent();
-        }
-      }
-    });
-  }
-
-  private void makeTrackRequestAndNotifyPlayResumeEvent(final SkaldTrack skaldTrack) {
-    DeezerRequest deezerRequest = DeezerRequestFactory.requestTrack(getId(skaldTrack.getUri()));
-    deezerRequest.setId(TRACK_REQUEST);
-    deezerConnect.requestAsync(deezerRequest, new JsonRequestListener() {
-      @Override
-      public void onResult(Object result, Object requestId) {
-        if (requestId.equals(TRACK_REQUEST)) {
-          Track track = (Track) result;
-          TrackMetadata trackMetadata = new TrackMetadata(track.getArtist().getName(),
-              track.getTitle(), track.getAlbum().getImageUrl());
-          notifyPlayEvent(trackMetadata);
-          notifyResumeEvent();
-        }
-      }
-
-      @Override
-      public void onUnparsedResult(String requestResponse, Object requestId) {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError("Cannot get track info"));
-        }
-      }
-
-      @Override
-      public void onException(Exception exception, Object requestId) {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError(exception.getMessage()));
-        }
-      }
-    });
-  }
-
-  private void notifyPlayEvent(final TrackMetadata trackMetadata) {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPlayEvent(trackMetadata);
-        }
-      }
-    });
-    isTrackBeingPlaying = true;
-  }
-
-  private void notifyResumeEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onResumeEvent();
         }
       }
     });
@@ -254,7 +208,6 @@ class DeezerPlayer {
         }
       }
     });
-    isTrackBeingPlaying = false;
   }
 
   private <T> T getPlayer(Class<T> type) {
