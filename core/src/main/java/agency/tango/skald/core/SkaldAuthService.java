@@ -48,7 +48,7 @@ public class SkaldAuthService {
   }
 
   private Provider getProviderByName(ProviderName providerName) {
-    return Skald.singleton().getProviderByName(providerName);
+    return Skald.instance().getProviderByName(providerName);
   }
 
   private SkaldAuthStore getSkaldAuthStore(Provider provider) {

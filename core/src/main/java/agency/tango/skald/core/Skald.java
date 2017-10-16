@@ -1,6 +1,5 @@
 package agency.tango.skald.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,24 +7,32 @@ import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 
 public class Skald {
-  private static volatile Skald singleton;
+  private static volatile Skald instance;
+  private final List<Provider> providers;
 
-  private Skald() {
+  private Skald(List<Provider> providers) {
+    this.providers = providers;
   }
 
-  public static Skald singleton() {
-    if (singleton == null) {
-      return new Skald();
+  public static Skald instance() {
+    if (instance == null) {
+      throw new IllegalStateException("Must initialize Skald before using instance()");
     }
-    return singleton;
+    return instance;
   }
 
-  private static final List<Provider> providers = new ArrayList<>();
-
-  public static void with(Provider... providers) {
-    Skald.providers.addAll(Arrays.asList(providers));
+  public static Skald with(Provider... providers) {
+    if(instance == null) {
+      synchronized (Skald.class) {
+        if(instance == null) {
+          setSkald(new Skald.Builder().providers(providers).build());
+        }
+      }
+    }
+    return instance;
   }
 
+  // TODO return unmodifable / immutable list
   public List<Provider> providers() {
     return providers;
   }
@@ -37,5 +44,27 @@ public class Skald {
       }
     }
     return null;
+  }
+
+  private static void setSkald(Skald skald) {
+    instance = skald;
+  }
+
+  public static class Builder {
+    private Provider[] providers;
+
+    public Skald.Builder providers(Provider... providers) {
+      if(this.providers != null) {
+        throw new IllegalArgumentException("Providers already set");
+      }
+      else {
+        this.providers = providers;
+        return this;
+      }
+    }
+
+    public Skald build() {
+      return new Skald(Arrays.asList(this.providers));
+    }
   }
 }

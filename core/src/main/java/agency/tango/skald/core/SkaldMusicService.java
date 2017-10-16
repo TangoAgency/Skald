@@ -37,7 +37,7 @@ public class SkaldMusicService {
 
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
-  private final List<Provider> providers = Skald.singleton().providers();
+  private final List<Provider> providers = Skald.instance().providers();
   private final Timer timer = new Timer();
   private final SkaldBus skaldBus = SkaldBus.getInstance();
   private final TLruCache<ProviderName, Player> playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
