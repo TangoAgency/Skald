@@ -21,6 +21,7 @@ import java.util.List;
 import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.errors.PlaybackError;
+import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -31,6 +32,7 @@ class DeezerPlayer {
   private final Context context;
   private final DeezerConnect deezerConnect;
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
+  private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
   private final TLruCache<Class, PlayerWrapper> playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
       new SkaldLruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
         @Override
@@ -93,6 +95,14 @@ class DeezerPlayer {
     onPlaybackListeners.remove(0);
   }
 
+  void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+    onLoadingListeners.add(onLoadingListener);
+  }
+
+  void removeOnLoadingListener() {
+    onPlaybackListeners.remove(0);
+  }
+
   void notifyResumeEvent() {
     mainHandler.post(new Runnable() {
       @Override
@@ -117,6 +127,7 @@ class DeezerPlayer {
         currentPlayer = trackPlayer;
         addOnPlayerStateChangeListener();
         trackPlayer.playTrack(trackId);
+        notifyLoadingEvent();
       } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
         handleTooManyPlayerException(tooManyPlayersExceptions);
         play(skaldTrack);
@@ -127,6 +138,7 @@ class DeezerPlayer {
     } else {
       currentPlayer = trackPlayer;
       trackPlayer.playTrack(trackId);
+      notifyLoadingEvent();
     }
   }
 
@@ -144,6 +156,7 @@ class DeezerPlayer {
         currentPlayer = playlistPlayer;
         addOnPlayerStateChangeListener();
         playlistPlayer.playPlaylist(playlistId);
+        notifyLoadingEvent();
       } catch (TooManyPlayersExceptions tooManyPlayersExceptions) {
         handleTooManyPlayerException(tooManyPlayersExceptions);
         play(skaldPlaylist);
@@ -154,6 +167,13 @@ class DeezerPlayer {
     } else {
       currentPlayer = playlistPlayer;
       playlistPlayer.playPlaylist(playlistId);
+      notifyLoadingEvent();
+    }
+  }
+
+  private void notifyLoadingEvent() {
+    for(OnLoadingListener onLoadingListener : onLoadingListeners) {
+      onLoadingListener.onLoading();
     }
   }
 

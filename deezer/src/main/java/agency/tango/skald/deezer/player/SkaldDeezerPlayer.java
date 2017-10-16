@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
@@ -66,5 +67,15 @@ public class SkaldDeezerPlayer implements Player {
   @Override
   public void removeOnPlaybackListener() {
     deezerPlayer.removeOnPlayerReadyListener();
+  }
+
+  @Override
+  public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+    deezerPlayer.addOnLoadingListener(onLoadingListener);
+  }
+
+  @Override
+  public void removeOnLoadingListener() {
+    deezerPlayer.removeOnLoadingListener();
   }
 }

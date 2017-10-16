@@ -24,6 +24,7 @@ import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
+import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -83,6 +84,12 @@ public class MainActivity extends Activity {
 
     addOnErrorListener();
     addOnPlaybackListener();
+    skaldMusicService.addOnLoadingListener(new OnLoadingListener() {
+      @Override
+      public void onLoading() {
+        Log.d(TAG, "Loading track...");
+      }
+    });
 
     spotifyButton.setOnClickListener(new View.OnClickListener() {
       @Override

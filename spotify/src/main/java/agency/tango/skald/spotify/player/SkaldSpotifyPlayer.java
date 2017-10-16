@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
@@ -28,6 +29,7 @@ public class SkaldSpotifyPlayer implements Player {
   private static final String TAG = SkaldSpotifyPlayer.class.getSimpleName();
 
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
+  private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final SpotifyOperationCallback spotifyOperationCallback = new SpotifyOperationCallback() {
     @Override
@@ -73,6 +75,7 @@ public class SkaldSpotifyPlayer implements Player {
   @Override
   public void play(SkaldPlayableEntity playableEntity) {
     spotifyPlayer.playUri(spotifyOperationCallback, getUriToPlay(playableEntity.getUri()), 0, 0);
+    notifyLoadingEvent();
   }
 
   @Override
@@ -134,12 +137,28 @@ public class SkaldSpotifyPlayer implements Player {
     onPlaybackListeners.remove(0);
   }
 
+  @Override
+  public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+    onLoadingListeners.add(onLoadingListener);
+  }
+
+  @Override
+  public void removeOnLoadingListener() {
+    onLoadingListeners.remove(0);
+  }
+
   public SpotifyPlayer getPlayer() {
     return spotifyPlayer;
   }
 
   private String getUriToPlay(Uri uri) {
     return uri.getPathSegments().get(uri.getPathSegments().size() - 1);
+  }
+
+  private void notifyLoadingEvent() {
+    for(OnLoadingListener onLoadingListener : onLoadingListeners) {
+      onLoadingListener.onLoading();
+    }
   }
 
   private void notifyStopEvent() {

@@ -16,6 +16,7 @@ import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnErrorListener;
+import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -37,6 +38,7 @@ public class SkaldMusicService {
 
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
+  private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
   private final List<Provider> providers = Skald.instance().providers();
   private final Timer timer = new Timer();
   private final SkaldBus skaldBus = SkaldBus.getInstance();
@@ -69,7 +71,7 @@ public class SkaldMusicService {
 
   public synchronized Single<Object> play(final SkaldPlayableEntity skaldPlayableEntity) {
     return Single.create(new SingleOnPlaySubscribe(this, skaldPlayableEntity, onPlaybackListeners,
-        playerCache, providers));
+        onLoadingListeners, playerCache, providers));
   }
 
   public Completable pause() {
@@ -128,6 +130,14 @@ public class SkaldMusicService {
 
   public void removeOnPlaybackListener() {
     onPlaybackListeners.remove(0);
+  }
+
+  public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+    onLoadingListeners.add(onLoadingListener);
+  }
+
+  public void removeOnLoadingListener() {
+    onLoadingListeners.remove(0);
   }
 
   public Single<List<SkaldTrack>> searchTracks(String query) {

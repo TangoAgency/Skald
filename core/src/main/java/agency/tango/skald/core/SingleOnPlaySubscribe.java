@@ -4,6 +4,7 @@ import java.util.List;
 
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.exceptions.AuthException;
+import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -19,6 +20,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
   private final SkaldMusicService skaldMusicService;
   private final SkaldPlayableEntity skaldPlayableEntity;
   private final List<OnPlaybackListener> onPlaybackListeners;
+  private final List<OnLoadingListener> onLoadingListeners;
   private final TLruCache<ProviderName, Player> playerCache;
   private final List<Provider> providers;
 
@@ -27,10 +29,12 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
 
   SingleOnPlaySubscribe(SkaldMusicService skaldMusicService,
       SkaldPlayableEntity skaldPlayableEntity, List<OnPlaybackListener> onPlaybackListeners,
-      TLruCache<ProviderName, Player> playerCache, List<Provider> providers) {
+      List<OnLoadingListener> onLoadingListeners, TLruCache<ProviderName, Player> playerCache,
+      List<Provider> providers) {
     this.skaldMusicService = skaldMusicService;
     this.skaldPlayableEntity = skaldPlayableEntity;
     this.onPlaybackListeners = onPlaybackListeners;
+    this.onLoadingListeners = onLoadingListeners;
     this.playerCache = playerCache;
     this.providers = providers;
   }
@@ -49,7 +53,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
         ProviderName providerName = provider.getProviderName();
         Player player = playerCache.get(providerName);
         if (player != null) {
-          playTrack(emitter, player, providerName);
+          play(emitter, player, providerName);
         } else {
           initializePlayerAndPlay(emitter, provider, providerName);
         }
@@ -71,7 +75,7 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
     });
   }
 
-  private void playTrack(@NonNull SingleEmitter<Object> emitter, Player player,
+  private void play(@NonNull SingleEmitter<Object> emitter, Player player,
       ProviderName providerName) {
     playerInitialized = true;
     player.play(skaldPlayableEntity);
@@ -84,6 +88,14 @@ public class SingleOnPlaySubscribe implements SingleOnSubscribe<Object> {
     try {
       initializedPlayer = provider.getPlayerFactory().getPlayer();
       initializedPlayer.addOnPlaybackListener(new OnPlayerPlaybackListener(onPlaybackListeners));
+      initializedPlayer.addOnLoadingListener(new OnLoadingListener() {
+        @Override
+        public void onLoading() {
+          for(OnLoadingListener onLoadingListener : onLoadingListeners) {
+            onLoadingListener.onLoading();
+          }
+        }
+      });
       initializedPlayer.addOnPlayerReadyListener(new OnPlayerReadyListener() {
         @Override
         public void onPlayerReady(Player player) {
