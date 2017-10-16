@@ -22,10 +22,23 @@ public class Skald {
   }
 
   public static Skald with(Provider... providers) {
-    if(instance == null) {
+    if (instance == null) {
       synchronized (Skald.class) {
-        if(instance == null) {
-          setSkald(new Skald.Builder().providers(providers).build());
+        if (instance == null) {
+          setSkald(new Skald.Builder()
+              .providers(providers)
+              .build());
+        }
+      }
+    }
+    return instance;
+  }
+
+  public static Skald with(Skald skald) {
+    if (instance == null) {
+      synchronized (Skald.class) {
+        if (instance == null) {
+          setSkald(skald);
         }
       }
     }
@@ -54,10 +67,9 @@ public class Skald {
     private Provider[] providers;
 
     public Skald.Builder providers(Provider... providers) {
-      if(this.providers != null) {
+      if (this.providers != null) {
         throw new IllegalArgumentException("Providers already set");
-      }
-      else {
+      } else {
         this.providers = providers;
         return this;
       }
