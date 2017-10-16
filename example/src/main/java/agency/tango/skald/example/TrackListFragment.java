@@ -36,7 +36,7 @@ public class TrackListFragment extends Fragment {
     searchButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        ((MainActivity) getActivity()).searchTracks(tracksAdapter);
+        searchTracks();
       }
     });
     return view;
@@ -48,5 +48,9 @@ public class TrackListFragment extends Fragment {
 
     tracksAdapter = new TracksAdapter(getActivity().getApplicationContext(), R.layout.row_layout);
     listView.setAdapter(tracksAdapter);
+  }
+
+  public void searchTracks() {
+    ((MainActivity) getActivity()).searchTracks(tracksAdapter);
   }
 }

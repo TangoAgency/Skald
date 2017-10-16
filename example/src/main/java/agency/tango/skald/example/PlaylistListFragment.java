@@ -36,7 +36,7 @@ public class PlaylistListFragment extends Fragment {
     searchButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        ((MainActivity) getActivity()).searchPlaylists(playlistAdapter);
+        searchPlaylists();
       }
     });
     return view;
@@ -49,5 +49,9 @@ public class PlaylistListFragment extends Fragment {
     playlistAdapter = new PlaylistAdapter(getActivity().getApplicationContext(),
         R.layout.row_layout);
     listView.setAdapter(playlistAdapter);
+  }
+
+  public void searchPlaylists() {
+    ((MainActivity) getActivity()).searchPlaylists(playlistAdapter);
   }
 }

@@ -72,7 +72,6 @@ public class MainActivity extends Activity {
     tracksButton = (Button) findViewById(R.id.button_tracks);
     playlistButton = (Button) findViewById(R.id.button_playlists);
 
-
     skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
       @Override
       public void onAuthError(AuthError authError) {
@@ -114,8 +113,11 @@ public class MainActivity extends Activity {
       @Override
       public void onClick(View v) {
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, new TrackListFragment());
+        TrackListFragment fragment = new TrackListFragment();
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
         fragmentTransaction.commit();
+        getFragmentManager().executePendingTransactions();
+        fragment.searchTracks();
       }
     });
 
@@ -123,8 +125,11 @@ public class MainActivity extends Activity {
       @Override
       public void onClick(View v) {
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, new PlaylistListFragment());
+        PlaylistListFragment fragment = new PlaylistListFragment();
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
         fragmentTransaction.commit();
+        getFragmentManager().executePendingTransactions();
+        fragment.searchPlaylists();
       }
     });
 
