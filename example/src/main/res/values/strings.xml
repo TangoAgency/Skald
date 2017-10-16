@@ -5,7 +5,8 @@
   <string name="stop">Stop</string>
   <string name="login_to_spotify">Login to Spotify</string>
   <string name="login_to_deezer">Login to Deezer</string>
-  <string name="refresh">Refresh track list</string>
+  <string name="get_tracks">Get tracks</string>
   <string name="logout_from_spotify">Logout from Spotify</string>
   <string name="logout_from_deezer">Logout from Deezer</string>
+  <string name="get_playlists">Get playlists</string>
 </resources>
