@@ -1,18 +1,20 @@
 package agency.tango.skald.core;
 
+import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 
 public interface Player {
-  void play(SkaldPlayableEntity skaldPlayableEntity);
+  void play(SkaldPlayableEntity skaldPlayableEntity,
+      SkaldOperationCallback skaldOperationCallback);
 
-  void stop();
+  void stop(SkaldOperationCallback skaldOperationCallback);
 
-  void pause();
+  void pause(SkaldOperationCallback skaldOperationCallback);
 
-  void resume();
+  void resume(SkaldOperationCallback skaldOperationCallback);
 
   void release();
 

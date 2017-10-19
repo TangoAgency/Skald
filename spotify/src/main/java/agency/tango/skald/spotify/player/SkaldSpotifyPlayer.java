@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -31,12 +32,6 @@ public class SkaldSpotifyPlayer implements Player {
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
   private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
-  private final SpotifyOperationCallback spotifyOperationCallback = new SpotifyOperationCallback() {
-    @Override
-    public void onSuccess() {
-      Log.i(TAG, "Operation succeed");
-    }
-  };
   private final ConnectionStateCallback connectionStateCallback;
   private final NotificationCallback notificationCallback;
   private final Context context;
@@ -73,14 +68,17 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void play(SkaldPlayableEntity playableEntity) {
-    spotifyPlayer.playUri(spotifyOperationCallback, getUriToPlay(playableEntity.getUri()), 0, 0);
+  public void play(SkaldPlayableEntity playableEntity, SkaldOperationCallback operationCallback) {
+    Log.d("test", "SpotifyPlayStart");
     notifyLoadingEvent();
+    spotifyPlayer.playUri(new SpotifyOperationCallback(operationCallback),
+        getUriToPlay(playableEntity.getUri()), 0, 0);
   }
 
   @Override
-  public void stop() {
+  public void stop(final SkaldOperationCallback skaldOperationCallback) {
     if (spotifyPlayer.getPlaybackState().isPlaying) {
+      Log.d("test", "SpotifyStopStart");
       spotifyPlayer.pause(new SpotifyOperationCallback() {
         @Override
         public void onSuccess() {
@@ -88,6 +86,8 @@ public class SkaldSpotifyPlayer implements Player {
             @Override
             public void onSuccess() {
               notifyStopEvent();
+              Log.d("test", "Stop succeed in Spotify");
+              skaldOperationCallback.onSuccess();
             }
           }, 0);
         }
@@ -96,16 +96,16 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void pause() {
+  public void pause(SkaldOperationCallback skaldOperationCallback) {
     if (spotifyPlayer.getPlaybackState().isPlaying) {
-      spotifyPlayer.pause(spotifyOperationCallback);
+      spotifyPlayer.pause(new SpotifyOperationCallback(skaldOperationCallback));
     }
   }
 
   @Override
-  public void resume() {
+  public void resume(SkaldOperationCallback skaldOperationCallback) {
     if (!spotifyPlayer.getPlaybackState().isPlaying) {
-      spotifyPlayer.resume(spotifyOperationCallback);
+      spotifyPlayer.resume(new SpotifyOperationCallback(skaldOperationCallback));
     }
   }
 
@@ -156,9 +156,14 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   private void notifyLoadingEvent() {
-    for(OnLoadingListener onLoadingListener : onLoadingListeners) {
-      onLoadingListener.onLoading();
-    }
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
+          onLoadingListener.onLoading();
+        }
+      }
+    });
   }
 
   private void notifyStopEvent() {

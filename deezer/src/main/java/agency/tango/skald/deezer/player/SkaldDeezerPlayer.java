@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -20,23 +21,24 @@ public class SkaldDeezerPlayer implements Player {
     deezerPlayer = new DeezerPlayer(context, deezerAuthData.getDeezerConnect());
   }
 
+  //todo add usage of operationCallback
   @Override
-  public void play(SkaldPlayableEntity skaldPlayableEntity) {
-    deezerPlayer.play(skaldPlayableEntity);
+  public void play(SkaldPlayableEntity playableEntity, SkaldOperationCallback operationCallback) {
+    deezerPlayer.play(playableEntity);
   }
 
   @Override
-  public void stop() {
+  public void stop(SkaldOperationCallback skaldOperationCallback) {
     deezerPlayer.stop();
   }
 
   @Override
-  public void pause() {
+  public void pause(SkaldOperationCallback skaldOperationCallback) {
     deezerPlayer.pause();
   }
 
   @Override
-  public void resume() {
+  public void resume(SkaldOperationCallback skaldOperationCallback) {
     deezerPlayer.resume();
   }
 

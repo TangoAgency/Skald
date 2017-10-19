@@ -10,8 +10,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.bus.LoginEvent;
+import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.exceptions.AuthException;
@@ -69,8 +69,8 @@ public class SkaldMusicService {
         .subscribe(loginEventObserver);
   }
 
-  public synchronized Single<Object> play(final SkaldPlayableEntity skaldPlayableEntity) {
-    return Single.create(new SingleOnPlaySubscribe(this, skaldPlayableEntity, onPlaybackListeners,
+  public synchronized Completable play(final SkaldPlayableEntity skaldPlayableEntity) {
+    return Completable.create(new CompletableOnPlaySubscribe(this, skaldPlayableEntity, onPlaybackListeners,
         onLoadingListeners, playerCache, providers));
   }
 
@@ -79,9 +79,8 @@ public class SkaldMusicService {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
         if (currentProviderName != null) {
-          playerCache.get(currentProviderName).pause();
+          playerCache.get(currentProviderName).pause(new SkaldOperationCallbackImpl(emitter));
         }
-        emitter.onComplete();
       }
     });
   }
@@ -91,9 +90,8 @@ public class SkaldMusicService {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
         if (currentProviderName != null) {
-          playerCache.get(currentProviderName).resume();
+          playerCache.get(currentProviderName).resume(new SkaldOperationCallbackImpl(emitter));
         }
-        emitter.onComplete();
       }
     });
   }
@@ -103,9 +101,8 @@ public class SkaldMusicService {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
         if (currentProviderName != null) {
-          playerCache.get(currentProviderName).stop();
+          playerCache.get(currentProviderName).stop(new SkaldOperationCallbackImpl(emitter));
         }
-        emitter.onComplete();
       }
     });
   }

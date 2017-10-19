@@ -198,14 +198,15 @@ public class MainActivity extends Activity {
     skaldMusicService.play(skaldPlayableEntity)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new DisposableSingleObserver<Object>() {
+        .subscribe(new DisposableCompletableObserver() {
           @Override
-          public void onSuccess(Object object) {
-            Log.d(TAG, object.toString());
+          public void onComplete() {
+            Log.d(TAG, "Played complete");
           }
 
           @Override
           public void onError(Throwable error) {
+            Log.e(TAG, "Error during playing sth", error);
             if (error instanceof AuthException) {
               AuthError authError = ((AuthException) error).getAuthError();
               startAuthActivity(authError);
