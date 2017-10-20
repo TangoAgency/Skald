@@ -59,6 +59,9 @@ class DeezerPlayer {
   }
 
   void play(SkaldPlayableEntity skaldPlayableEntity, SkaldOperationCallback operationCallback) {
+    if (currentPlayer != null && isPlaying()) {
+      currentPlayer.stop();
+    }
     if (skaldPlayableEntity instanceof SkaldTrack) {
       play((SkaldTrack) skaldPlayableEntity, operationCallback);
     } else if (skaldPlayableEntity instanceof SkaldPlaylist) {
@@ -191,7 +194,7 @@ class DeezerPlayer {
     mainHandler.post(new Runnable() {
       @Override
       public void run() {
-        for(OnLoadingListener onLoadingListener : onLoadingListeners) {
+        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
           onLoadingListener.onLoading();
         }
       }
