@@ -8,12 +8,12 @@ import agency.tango.skald.core.provider.ProviderName;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableObserver;
 
-public class LoginEventObserver extends DisposableObserver<LoginEvent> {
-  private static final String TAG = LoginEventObserver.class.getSimpleName();
+public class LogoutEventObserver extends DisposableObserver<LoginEvent> {
+  private static final String TAG = LogoutEventObserver.class.getSimpleName();
   private final TLruCache<ProviderName, Player> playerCache;
   private final SkaldMusicService skaldMusicService;
 
-  public LoginEventObserver(TLruCache<ProviderName, Player> playerCache,
+  public LogoutEventObserver(TLruCache<ProviderName, Player> playerCache,
       SkaldMusicService skaldMusicService) {
     this.playerCache = playerCache;
     this.skaldMusicService = skaldMusicService;
@@ -27,7 +27,7 @@ public class LoginEventObserver extends DisposableObserver<LoginEvent> {
 
   @Override
   public void onError(@NonNull Throwable e) {
-    Log.e(TAG, "LoginEventObserver error", e);
+    Log.e(TAG, "LogoutEventObserver error", e);
   }
 
   @Override

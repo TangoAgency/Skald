@@ -20,7 +20,7 @@ import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 
-public class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
+class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   private final SkaldMusicService skaldMusicService;
   private final SkaldPlayableEntity skaldPlayableEntity;
   private final List<OnPlaybackListener> onPlaybackListeners;
@@ -46,9 +46,7 @@ public class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   @Override
   public void subscribe(@NonNull final CompletableEmitter emitter) throws Exception {
     ProviderName currentProviderName = skaldMusicService.getCurrentProviderName();
-    if (currentProviderName != null
-        && skaldMusicService.shouldPlayerBeChanged(skaldPlayableEntity)
-        && skaldMusicService.isPlaying()) {
+    if (isAnotherPlayerPlaying(currentProviderName)) {
       Player currentPlayer = playerCache.get(currentProviderName);
       if (currentPlayer != null) {
         currentPlayer.stop(new SkaldOperationCallback() {
@@ -80,6 +78,12 @@ public class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
         return false;
       }
     });
+  }
+
+  private boolean isAnotherPlayerPlaying(ProviderName currentProviderName) {
+    return currentProviderName != null
+        && skaldMusicService.shouldPlayerBeChanged(skaldPlayableEntity)
+        && skaldMusicService.isPlaying();
   }
 
   private void play(@NonNull CompletableEmitter emitter) {

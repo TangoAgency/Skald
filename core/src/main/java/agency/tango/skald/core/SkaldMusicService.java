@@ -50,7 +50,8 @@ public class SkaldMusicService {
           player.release();
         }
       });
-  private final LoginEventObserver loginEventObserver = new LoginEventObserver(playerCache, this);
+  private final LogoutEventObserver logoutEventObserver = new LogoutEventObserver(playerCache,
+      this);
 
   private ProviderName currentProviderName;
 
@@ -67,7 +68,7 @@ public class SkaldMusicService {
         .registerReceiver(new AuthDataReceiver(this.providers), new IntentFilter(INTENT_ACTION));
 
     skaldBus.observable(LoginEvent.class)
-        .subscribe(loginEventObserver);
+        .subscribe(logoutEventObserver);
   }
 
   public synchronized Completable play(final SkaldPlayableEntity skaldPlayableEntity) {
@@ -109,7 +110,7 @@ public class SkaldMusicService {
   }
 
   public void release() {
-    loginEventObserver.dispose();
+    logoutEventObserver.dispose();
     playerCache.evictAll();
     timer.cancel();
   }
@@ -171,8 +172,8 @@ public class SkaldMusicService {
   }
 
   boolean shouldPlayerBeChanged(SkaldPlayableEntity skaldPlayableEntity) {
-    for(Provider provider : providers) {
-      if(provider.canHandle(skaldPlayableEntity)) {
+    for (Provider provider : providers) {
+      if (provider.canHandle(skaldPlayableEntity)) {
         return !provider.getProviderName().equals(currentProviderName);
       }
     }
