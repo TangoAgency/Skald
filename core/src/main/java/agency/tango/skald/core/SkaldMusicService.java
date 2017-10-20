@@ -14,6 +14,7 @@ import agency.tango.skald.core.bus.LoginEvent;
 import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
+import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
@@ -49,7 +50,7 @@ public class SkaldMusicService {
           player.release();
         }
       });
-  private final LoginEventObserver loginEventObserver = new LoginEventObserver(playerCache);
+  private final LoginEventObserver loginEventObserver = new LoginEventObserver(playerCache, this);
 
   private ProviderName currentProviderName;
 
@@ -70,8 +71,8 @@ public class SkaldMusicService {
   }
 
   public synchronized Completable play(final SkaldPlayableEntity skaldPlayableEntity) {
-    return Completable.create(new CompletableOnPlaySubscribe(this, skaldPlayableEntity, onPlaybackListeners,
-        onLoadingListeners, playerCache, providers));
+    return Completable.create(new CompletableOnPlaySubscribe(this, skaldPlayableEntity,
+        onPlaybackListeners, onLoadingListeners, playerCache, providers));
   }
 
   public Completable pause() {
@@ -79,7 +80,7 @@ public class SkaldMusicService {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
         if (currentProviderName != null) {
-          playerCache.get(currentProviderName).pause(new SkaldOperationCallbackImpl(emitter));
+          getCurrentPlayer().pause(new SkaldCoreOperationCallback(emitter));
         }
       }
     });
@@ -90,7 +91,7 @@ public class SkaldMusicService {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
         if (currentProviderName != null) {
-          playerCache.get(currentProviderName).resume(new SkaldOperationCallbackImpl(emitter));
+          getCurrentPlayer().resume(new SkaldCoreOperationCallback(emitter));
         }
       }
     });
@@ -101,7 +102,7 @@ public class SkaldMusicService {
       @Override
       public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
         if (currentProviderName != null) {
-          playerCache.get(currentProviderName).stop(new SkaldOperationCallbackImpl(emitter));
+          getCurrentPlayer().stop(new SkaldCoreOperationCallback(emitter));
         }
       }
     });
@@ -167,6 +168,23 @@ public class SkaldMusicService {
 
   void setCurrentProviderName(ProviderName providerName) {
     this.currentProviderName = providerName;
+  }
+
+  boolean shouldPlayerBeChanged(SkaldPlayableEntity skaldPlayableEntity) {
+    for(Provider provider : providers) {
+      if(provider.canHandle(skaldPlayableEntity)) {
+        return !provider.getProviderName().equals(currentProviderName);
+      }
+    }
+    return false;
+  }
+
+  boolean isPlaying() {
+    return getCurrentPlayer().isPlaying();
+  }
+
+  private Player getCurrentPlayer() {
+    return playerCache.get(currentProviderName);
   }
 
   private SearchService getSearchService(Provider provider) throws AuthException {

@@ -21,30 +21,34 @@ public class SkaldDeezerPlayer implements Player {
     deezerPlayer = new DeezerPlayer(context, deezerAuthData.getDeezerConnect());
   }
 
-  //todo add usage of operationCallback
   @Override
   public void play(SkaldPlayableEntity playableEntity, SkaldOperationCallback operationCallback) {
-    deezerPlayer.play(playableEntity);
+    deezerPlayer.play(playableEntity, operationCallback);
   }
 
   @Override
   public void stop(SkaldOperationCallback skaldOperationCallback) {
-    deezerPlayer.stop();
+    deezerPlayer.stop(skaldOperationCallback);
   }
 
   @Override
   public void pause(SkaldOperationCallback skaldOperationCallback) {
-    deezerPlayer.pause();
+    deezerPlayer.pause(skaldOperationCallback);
   }
 
   @Override
   public void resume(SkaldOperationCallback skaldOperationCallback) {
-    deezerPlayer.resume();
+    deezerPlayer.resume(skaldOperationCallback);
   }
 
   @Override
   public void release() {
     deezerPlayer.release();
+  }
+
+  @Override
+  public boolean isPlaying() {
+    return deezerPlayer.isPlaying();
   }
 
   @Override

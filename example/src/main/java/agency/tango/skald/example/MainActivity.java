@@ -216,7 +216,7 @@ public class MainActivity extends Activity {
   }
 
   public void searchTracks(final TracksAdapter tracksAdapter) {
-    skaldMusicService.searchTracks("hip-hop")
+    skaldMusicService.searchTracks("rock")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {

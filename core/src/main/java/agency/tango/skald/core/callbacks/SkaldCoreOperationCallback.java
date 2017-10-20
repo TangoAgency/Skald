@@ -1,15 +1,14 @@
-package agency.tango.skald.core;
+package agency.tango.skald.core.callbacks;
 
 import android.util.Log;
 
-import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.exceptions.OperationFailedException;
 import io.reactivex.CompletableEmitter;
 
-public class SkaldOperationCallbackImpl implements SkaldOperationCallback {
+public class SkaldCoreOperationCallback implements SkaldOperationCallback {
   private final CompletableEmitter completableEmitter;
 
-  public SkaldOperationCallbackImpl(CompletableEmitter completableEmitter) {
+  public SkaldCoreOperationCallback(CompletableEmitter completableEmitter) {
     this.completableEmitter = completableEmitter;
   }
 

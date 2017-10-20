@@ -5,6 +5,7 @@ import android.util.Log;
 import java.util.List;
 
 import agency.tango.skald.core.cache.TLruCache;
+import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnLoadingListener;
@@ -45,7 +46,9 @@ public class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   @Override
   public void subscribe(@NonNull final CompletableEmitter emitter) throws Exception {
     ProviderName currentProviderName = skaldMusicService.getCurrentProviderName();
-    if (currentProviderName != null) {
+    if (currentProviderName != null
+        && skaldMusicService.shouldPlayerBeChanged(skaldPlayableEntity)
+        && skaldMusicService.isPlaying()) {
       Player currentPlayer = playerCache.get(currentProviderName);
       if (currentPlayer != null) {
         currentPlayer.stop(new SkaldOperationCallback() {
@@ -96,7 +99,7 @@ public class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   private void playEntity(@NonNull CompletableEmitter emitter, Player player,
       ProviderName providerName) {
     playerInitialized = true;
-    player.play(skaldPlayableEntity, new SkaldOperationCallbackImpl(emitter));
+    player.play(skaldPlayableEntity, new SkaldCoreOperationCallback(emitter));
     skaldMusicService.setCurrentProviderName(providerName);
   }
 
@@ -118,7 +121,7 @@ public class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
         public void onPlayerReady(Player player) {
           playerInitialized = true;
           playerCache.put(provider.getProviderName(), initializedPlayer);
-          player.play(skaldPlayableEntity, new SkaldOperationCallbackImpl(emitter));
+          player.play(skaldPlayableEntity, new SkaldCoreOperationCallback(emitter));
           skaldMusicService.setCurrentProviderName(providerName);
         }
       });

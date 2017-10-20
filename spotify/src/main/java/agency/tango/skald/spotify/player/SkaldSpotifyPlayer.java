@@ -69,7 +69,6 @@ public class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void play(SkaldPlayableEntity playableEntity, SkaldOperationCallback operationCallback) {
-    Log.d("test", "SpotifyPlayStart");
     notifyLoadingEvent();
     spotifyPlayer.playUri(new SpotifyOperationCallback(operationCallback),
         getUriToPlay(playableEntity.getUri()), 0, 0);
@@ -77,8 +76,7 @@ public class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void stop(final SkaldOperationCallback skaldOperationCallback) {
-    if (spotifyPlayer.getPlaybackState().isPlaying) {
-      Log.d("test", "SpotifyStopStart");
+    if (isPlaying()) {
       spotifyPlayer.pause(new SpotifyOperationCallback() {
         @Override
         public void onSuccess() {
@@ -86,7 +84,6 @@ public class SkaldSpotifyPlayer implements Player {
             @Override
             public void onSuccess() {
               notifyStopEvent();
-              Log.d("test", "Stop succeed in Spotify");
               skaldOperationCallback.onSuccess();
             }
           }, 0);
@@ -97,14 +94,14 @@ public class SkaldSpotifyPlayer implements Player {
 
   @Override
   public void pause(SkaldOperationCallback skaldOperationCallback) {
-    if (spotifyPlayer.getPlaybackState().isPlaying) {
+    if (isPlaying()) {
       spotifyPlayer.pause(new SpotifyOperationCallback(skaldOperationCallback));
     }
   }
 
   @Override
   public void resume(SkaldOperationCallback skaldOperationCallback) {
-    if (!spotifyPlayer.getPlaybackState().isPlaying) {
+    if (!isPlaying()) {
       spotifyPlayer.resume(new SpotifyOperationCallback(skaldOperationCallback));
     }
   }
@@ -115,6 +112,11 @@ public class SkaldSpotifyPlayer implements Player {
     spotifyPlayer.removeNotificationCallback(notificationCallback);
     spotifyPlayer.removeConnectionStateCallback(connectionStateCallback);
     Spotify.destroyPlayer(context);
+  }
+
+  @Override
+  public boolean isPlaying() {
+    return spotifyPlayer.getPlaybackState().isPlaying;
   }
 
   @Override
