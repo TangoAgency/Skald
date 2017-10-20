@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
   private static final String TAG = MainActivity.class.getSimpleName();
   private static final int AUTH_SPOTIFY_REQUEST_CODE = 1334;
   private static final int AUTH_DEEZER_REQUEST_CODE = 1656;
+  private static final String EMPTY = "";
 
   private SkaldMusicService skaldMusicService;
   private SkaldAuthService skaldAuthService;
@@ -56,6 +57,7 @@ public class MainActivity extends Activity {
   private Button deezerButton;
   private Button tracksButton;
   private Button playlistButton;
+  private TextView loadingTextView;
 
   private boolean isPlaying = false;
 
@@ -72,6 +74,7 @@ public class MainActivity extends Activity {
     deezerButton = (Button) findViewById(R.id.button_login_deezer);
     tracksButton = (Button) findViewById(R.id.button_tracks);
     playlistButton = (Button) findViewById(R.id.button_playlists);
+    loadingTextView = (TextView) findViewById(R.id.textView_loading);
 
     skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
       @Override
@@ -88,6 +91,7 @@ public class MainActivity extends Activity {
       @Override
       public void onLoading() {
         Log.d(TAG, "Loading track...");
+        loadingTextView.setText(R.string.loading);
       }
     });
 
@@ -330,6 +334,7 @@ public class MainActivity extends Activity {
         .into(trackImage);
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());
+    loadingTextView.setText(EMPTY);
   }
 
   private void notifyResumePauseButton() {
