@@ -22,15 +22,15 @@ android {
 }
 
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-  compile deps.appCompat
-  compile deps.rxJava
-  compile deps.supportUtils
+  implementation deps.appCompat
+  implementation deps.rxJava
+  implementation deps.supportUtils
 
-  androidTestCompile deps.supportAnnotations
-  androidTestCompile deps.supportTestRunner
-  androidTestCompile deps.supportTestRules
+  androidTestImplementation deps.supportAnnotations
+  androidTestImplementation deps.supportTestRunner
+  androidTestImplementation deps.supportTestRules
 
   testCompile 'junit:junit:4.12'
 }

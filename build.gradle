@@ -3,6 +3,7 @@ subprojects { project ->
 
   repositories {
     mavenCentral()
+    google()
     maven {
       url "https://plugins.gradle.org/m2/"
     }
@@ -28,15 +29,15 @@ subprojects { project ->
     repositories {
       jcenter()
       mavenCentral()
+      google()
       maven {
         url "https://plugins.gradle.org/m2/"
       }
     }
     dependencies {
-      classpath 'com.android.tools.build:gradle:2.3.3'
+      classpath 'com.android.tools.build:gradle:3.0.0'
       classpath 'gradle.plugin.com.kageiit:lintrules:1.1.2'
       classpath 'com.novoda:bintray-release:0.3.4'
-      classpath 'me.tatarka:gradle-retrolambda:3.3.0-beta4'
       classpath 'com.dicedmelon.gradle:jacoco-android:0.1.1'
     }
   }
@@ -45,6 +46,7 @@ subprojects { project ->
 allprojects {
   repositories {
     jcenter()
+    google()
     maven { url 'https://jitpack.io' }
     flatDir {
       dirs "libs"
@@ -60,14 +62,14 @@ task clean(type: Delete) {
 ext {
   minSdkVersion = 15
   targetSdkVersion = 25
-  compileSdkVersion = 25
-  buildToolsVersion = '25.0.2'
+  compileSdkVersion = 26
+  buildToolsVersion = '26.0.2'
   sourceCompatibilityVersion = JavaVersion.VERSION_1_7
   targetCompatibilityVersion = JavaVersion.VERSION_1_7
 }
 
 def androidToolsVersion = '25.2.0'
-def supportLibraryVersion = '25.1.1'
+def supportLibraryVersion = '26.1.0'
 def googlePlayServicesVersion = '10.0.1'
 ext.deps = [// Android
             android               : 'com.google.android:android:4.1.1.4',
@@ -107,11 +109,11 @@ ext.deps = [// Android
             // Square
             javapoet              : 'com.squareup:javapoet:1.7.0',
             rxJavaAdapter         : 'com.squareup.retrofit2:adapter-rxjava2:2.3.0',
+            gson                  : "com.squareup.retrofit2:converter-gson:2.3.0",
 
             // Third Party
             javaparser            : 'com.github.javaparser:javaparser-core:2.4.0',
             javax                 : 'javax.inject:javax.inject:1',
-            gson                  : "com.squareup.retrofit2:converter-gson:2.3.0",
 
             // Test dependencies
             junit                 : 'junit:junit:4.12',

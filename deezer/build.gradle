@@ -29,10 +29,14 @@ android {
 }
 
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
-  compile project(path: ':core')
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  implementation project(path: ':core')
 
-  compile deps.deezer
+  implementation deps.deezer
 
-  testCompile 'junit:junit:4.12'
+  implementation deps.appCompat
+  implementation deps.rxJava
+  implementation deps.supportUtils
+
+  testImplementation 'junit:junit:4.12'
 }

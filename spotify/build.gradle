@@ -29,16 +29,16 @@ android {
 }
 
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
-  compile project(path: ':core')
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  implementation project(path: ':core')
 
-  compile deps.appCompat
+  implementation deps.appCompat
 
-  compile deps.spotifyAuth
-  compile deps.spotifyPlayer
-  compile deps.gson
-  compile deps.rxAndroid
-  compile deps.rxJavaAdapter
+  implementation deps.spotifyAuth
+  implementation deps.spotifyPlayer
+  implementation deps.gson
+  implementation deps.rxAndroid
+  implementation deps.rxJavaAdapter
 
-  testCompile 'junit:junit:4.12'
+  testImplementation 'junit:junit:4.12'
 }
