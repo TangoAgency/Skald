@@ -20,6 +20,7 @@ import io.reactivex.schedulers.Schedulers;
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_AUTH_DATA;
 import static agency.tango.skald.core.SkaldMusicService.EXTRA_PROVIDER_NAME;
 import static agency.tango.skald.core.SkaldMusicService.INTENT_ACTION;
+import static agency.tango.skald.core.SkaldMusicService.INTENT_ACTION_ERROR;
 import static agency.tango.skald.spotify.provider.SpotifyProvider.EXTRA_CLIENT_ID;
 import static agency.tango.skald.spotify.provider.SpotifyProvider.EXTRA_CLIENT_SECRET;
 import static agency.tango.skald.spotify.provider.SpotifyProvider.EXTRA_REDIRECT_URI;
@@ -58,19 +59,11 @@ public class SpotifyAuthActivity extends Activity {
           break;
         case ERROR:
           notifyError(response.getError());
-          setResult(RESULT_CANCELED);
-          this.finish();
           break;
         default:
           notifyError(response.getType().toString());
-          setResult(RESULT_CANCELED);
-          this.finish();
       }
     }
-  }
-
-  private void notifyError(String error) {
-    Log.e(TAG, String.format("Spotify authentication request error %s", error));
   }
 
   private void notifyAuthData(String code) {
@@ -98,10 +91,21 @@ public class SpotifyAuthActivity extends Activity {
 
           @Override
           public void onError(Throwable error) {
-            Log.e(TAG, "Tokens observer error", error);
-            setResult(RESULT_CANCELED);
-            SpotifyAuthActivity.this.finish();
+            notifyError(String.format("Cannot get auth tokens %s", error.toString()));
           }
         });
+  }
+
+  private void notifyError(String error) {
+    Log.e(TAG, String.format("Spotify authentication request error %s", error));
+
+    Intent intent = new Intent(INTENT_ACTION_ERROR);
+    intent.putExtra(EXTRA_PROVIDER_NAME, NAME.getName());
+    LocalBroadcastManager
+        .getInstance(this)
+        .sendBroadcast(intent);
+
+    setResult(RESULT_CANCELED);
+    this.finish();
   }
 }

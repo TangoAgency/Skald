@@ -33,6 +33,7 @@ import io.reactivex.functions.Function;
 
 public class SkaldMusicService {
   public static final String INTENT_ACTION = "auth_action";
+  public static final String INTENT_ACTION_ERROR = "auth_action_error";
   public static final String EXTRA_AUTH_DATA = "auth_data";
   public static final String EXTRA_PROVIDER_NAME = "provider_name";
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
