@@ -33,6 +33,7 @@ dependencies {
   implementation project(path: ':core')
 
   implementation deps.appCompat
+  implementation deps.supportCustomTabs
 
   implementation deps.spotifyAuth
   implementation deps.spotifyPlayer
