@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:weightSum="1"
+  >
+
+  <ImageView
+    android:id="@+id/image_list_cover"
+    android:layout_width="64dp"
+    android:layout_height="48dp"
+    app:srcCompat="@drawable/ic_action_play"
+    />
+  <TextView
+    android:id="@+id/text_track_info"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    />
+</LinearLayout>
