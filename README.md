@@ -19,6 +19,7 @@ If you would like to use Deezer you need to do the same thing. Deezer aar file c
 
 After copying the files add gradle dependencies:
 ```groovy
+dependencies {
     implementation "com.github.TangoAgency.Skald:core:{latest_release}"
 
     //if you want to use Spotify
@@ -35,6 +36,7 @@ After copying the files add gradle dependencies:
     implementation 'io.reactivex.rxjava2:rxandroid:{latest_release}'
     implementation 'io.reactivex.rxjava2:rxjava:{latest_release}'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:{latest_release}'
+}
 ```
 
 #### Step 2
@@ -104,14 +106,14 @@ Do not forget to release resources (e.g. within onDestroy method in your Activit
 ```
 
 ## Find what you like
-With Skald you have possibility to search tracks and playlists by query so you can find and play whatever you like!<br/><br/>
+With Skald you have possibility to search tracks and playlists by query so you can find and play whatever you like!<br/>
 Just use SkaldMusicService:
 ```java
     skaldMusicService.searchTracks("workout")
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
             @Override
             public void onSuccess(List<SkaldTrack> skaldTracks) {
-                play(skaldTracks.get(0);
+                play(skaldTracks.get(0));
             }
 
             @Override
@@ -124,7 +126,7 @@ Just use SkaldMusicService:
         .subscribe(new DisposableSingleObserver<List<SkaldPlaylist>>() {
             @Override
             public void onSuccess(List<SkaldPlaylist> skaldPlaylists) {
-                play(skaldPlaylists.get(0);
+                play(skaldPlaylists.get(0));
             }
 
             @Override
@@ -138,7 +140,7 @@ Just use SkaldMusicService:
             .subscribe(new DisposableCompletableObserver() {
                 @Override
                 public void onComplete() {
-                    Log.d(TAG, "Played complete");
+                    Log.d(TAG, "Play completed");
                 }
 
                 @Override
@@ -151,7 +153,7 @@ Just use SkaldMusicService:
 
 ## Get track info
 Playback listener gives you opportunity to get TrackMetadata which contains
-useful track info. <br/><br/>
+useful track info. <br/>
 You can achieve this by adding and implementing OnPlaybackListener class:
 ```java
     skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
