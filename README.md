@@ -4,8 +4,8 @@
 [![Build Status](https://travis-ci.org/TangoAgency/Skald.svg?branch=master)](https://travis-ci.org/TangoAgency/Skald) 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/70f38ae0149147d7998efd9fc17c65a3)](https://www.codacy.com/app/TangoAgency/Skald?utm_source=github.com&utm_medium=referral&utm_content=TangoAgency/Skald&utm_campaign=badger)
 
-<a href="https://github.com/TangoAgency/Skald"><img src="https://user-images.githubusercontent.com/469111/32132925-6d179078-bbcd-11e7-9c4e-d268e20247f7.png" width="300px"></a>
-<br/><br/>
+<a href="https://github.com/TangoAgency/Skald"><img src="https://user-images.githubusercontent.com/469111/32132925-6d179078-bbcd-11e7-9c4e-d268e20247f7.png" width="300px"></a> &nbsp;&nbsp;
+
 Skald library was implemented to deliver easy-to-use API for playing music in services such as Spotify and Deezer.
 I decided to create this library in order to use music services in applications easily.
 
@@ -13,21 +13,19 @@ I decided to create this library in order to use music services in applications 
 
 ### Step 1
 #### Copy files and add gradle dependencies
-In order to use Spotify you need to copy spotify-player-*.aar file from [spotify Android SDK][SpotifySDK] 
-to the libs folder in your app project. <br/>
-If you would like to use Deezer you need to do the same thing. Deezer aar file can be found here: [deezer Android SDK][DeezerSDK]
+In order to use Spotify you need to copy spotify-player-*.aar file from [spotify Android SDK][SpotifySDK] to the libs folder in your app project.  
+For Deezer you need to do the same thing. Deezer aar file can be found here: [deezer Android SDK][DeezerSDK]
 
 After copying the files add gradle dependencies:
 ```groovy
 dependencies {
-    //firstly, to use Skald, you need to provide these dependencies
+    //necessary dependencies for Skald
+    implementation "com.github.TangoAgency.Skald:core:{latest_release}"
+
     implementation "com.squareup.retrofit2:converter-gson:{latest_release}"
     implementation 'io.reactivex.rxjava2:rxandroid:{latest_release}'
     implementation 'io.reactivex.rxjava2:rxjava:{latest_release}'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:{latest_release}'
-
-    //dependency for Skald
-    implementation "com.github.TangoAgency.Skald:core:{latest_release}"
 
     //if you want to use Spotify
     implementation "com.github.TangoAgency.Skald:spotify:{latest_release}"
@@ -63,8 +61,14 @@ public class App extends Application {
 }
 ```
 
-## Authentication
-#### In order to log in use SkaldAuthService:
+## SkaldAuthService
+### Methods in SkaldAuthService
+  - ```login(ProviderName providerName)``` &#8702; login to music service. As a parameter, pass provider name appropriate for service you want to log into
+  - ```logout(ProviderName providerName)``` &#8702; logout from music service. Pass provider name for service you want to logout from
+  - ```isLoggedIn(ProviderName providerName)``` &#8702; checks if user is logged into specific service
+
+### Login
+
 ```java
 static final int AUTH_REQUEST_CODE = 1234;
 
@@ -82,19 +86,31 @@ public void login() {
 }
 ```
 
-#### Things to remember when using auth service:
-  - ```getApplicationContext()``` - please better use Application Context (avoid using Activity Context)
-  - ```skaldAuthService.login``` - as a parameter pass provider name appropriate for service you want to log into
+## SkaldMusicService
 
-## Playing music
-#### If you want to play some music, use SkaldMusicService:
+### Methods in SkaldMusicService
+  - ```play(SkaldPlayableEntity skaldPlayableEntity)``` &#8702; plays music
+  - ```pause()``` &#8702; pauses music
+  - ```resume()``` &#8702; resumes music
+  - ```stop()``` &#8702; stops music
+  - ```release()``` &#8702; releases resources
+  - ```addOnErrorListener(OnErrorListener onErrorListener)``` &#8702; adds OnErrorListener which method is triggered when an error occurs
+  - ```removeOnErrorListener()``` &#8702; removes OnErrorListener
+  - ```addOnPlaybackListener(OnPlaybackListener onPlaybackListener)``` &#8702; adds OnPlaybackListener which methods are triggered when playback event occurs
+  - ```removeOnPlaybackListener()``` &#8702; removes OnPlaybackListener
+  - ```addOnLoadingListener(OnLoadingListener onLoadingListener)``` &#8702; adds OnLoadingListener which method is triggered when service stars loading track
+  - ```removeOnLoadingListener()``` &#8702; removes OnLoadingListener
+  - ```searchTracks(String query)``` &#8702; returns founded tracks by the provided query
+  - ```searchPlayLists(String query)``` &#8702; returns founded playlists by the provided query
+
+### Playing music
 ```java
-pubilc void playExampleTrack() {
+public void playExampleTrack() {
     static final int AUTH_REQUEST_CODE = 1234;
     SkaldMusicService skaldMusicService = new SkaldMusicService(getApplicationContext());
 
     SkaldPlayableEntity spotifyTrack = new SpotifyTrack(
-        Uri.parse("skald://spotify/track/0tKcYR2II1VCQWT79i5NrW"), "artist_name", "song_title",
+        Uri.parse("skald://spotify/track/spotify:track:0tKcYR2II1VCQWT79i5NrW"), "artist_name", "song_title",
         "image_url");
 
     skaldMusicService.play(spotifyTrack)
@@ -121,66 +137,56 @@ pubilc void playExampleTrack() {
     }
 }
 ```
-
-  - ```getApplicationContext()``` - remember about using App context instead of Activity context
-
 #### Explanation of creating playable entity and playing music:
   - ```SkaldPlayableEntity``` &#8702; base class for SkaldTrack and SkaldPlaylist
   - ```SpotifyTrack``` &#8702; subclass of SkaldTrack for playing Spotify tracks (you can also use DeezerTrack)
   - ```skald://spotify/track/0tKcYR2II1VCQWT79i5NrW``` &#8702; Skald uri format (skald://{service_name}}/{type_of_playable_entity}/{song_uri_from_service})
-  - ```skaldMusicService.play``` &#8702; playing SkaldPlayableEntity passed as a parameter after you subscribe to it
-  - ```error instanceof AuthException``` &#8702; if a user is not authenticated you can extort logging in from him
+  - ```error instanceof AuthException``` &#8702; if a user is not authenticated, you can force him to do it
 
-#### To pause, resume or stop music use one of the following methods:
-  - ```skaldMusicService.pause()```
-  - ```skaldMusicService.resume()```
-  - ```skaldMusicService.stop()```
+### Release resources
+#### ULTRA-IMPORTANT
+##### ALWAYS call this in your onDestroy() method, otherwise you will leak native resources!    This is an unfortunate necessity due to the different memory management models of Java's garbage collector and C++ RAII.
 
-#### Usage of pause method (use others of these functions by analogy):
 ```java
-skaldMusicService.pause()
-    .subscribe(new DisposableCompletableObserver() {
-        @Override
-        public void onComplete() {
-            Log.d(TAG, "Pause completed");
-        }
-
-        @Override
-        public void onError(@NonNull Throwable error) {
-            Log.e(TAG, "Error during pausing", error);
-        }
-    });
+    @Override
+    protected void onDestroy() {
+        skaldMusicService.release();
+        super.onDestroy();
+    }
 ```
 
-## Find favourites tracks and playlists
-#### With Skald you have a possibility to search tracks and playlists by a query, so you can find and play whatever you like!<br/>
-Just use SkaldMusicService:
+### Find tracks and playlists
+#### With Skald, you are able to find tracks and playlists by the query:
 ```java
-skaldMusicService.searchTracks("workout")
-    .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
-        @Override
-        public void onSuccess(List<SkaldTrack> skaldTracks) {
-            play(skaldTracks.get(0));
-        }
+private void searchAndPlayTrack() {
+    skaldMusicService.searchTracks("workout")
+        .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
+            @Override
+            public void onSuccess(List<SkaldTrack> skaldTracks) {
+                play(skaldTracks.get(0));
+            }
 
-        @Override
-        public void onError(Throwable error) {
-            Log.e(TAG, "Error during searching tracks", error);
-        }
-    });
+            @Override
+            public void onError(Throwable error) {
+                Log.e(TAG, "Error during searching tracks", error);
+            }
+        });
+}
 
-skaldMusicService.searchPlayLists("hip-hop")
-    .subscribe(new DisposableSingleObserver<List<SkaldPlaylist>>() {
-        @Override
-        public void onSuccess(List<SkaldPlaylist> skaldPlaylists) {
-            play(skaldPlaylists.get(0));
-        }
+private void searchAndPlayPlaylist() {
+    skaldMusicService.searchPlayLists("hip-hop")
+        .subscribe(new DisposableSingleObserver<List<SkaldPlaylist>>() {
+            @Override
+            public void onSuccess(List<SkaldPlaylist> skaldPlaylists) {
+                play(skaldPlaylists.get(0));
+            }
 
-        @Override
-        public void onError(Throwable error) {
-            Log.e(TAG, "Error during searching playlists", error);
-        }
-    });
+            @Override
+            public void onError(Throwable error) {
+                Log.e(TAG, "Error during searching playlists", error);
+            }
+        });
+}
 
 private void play(SkaldPlayableEntity skaldPlayableEntity) {
     skaldMusicService.play(skaldPlayableEntity)
@@ -198,11 +204,14 @@ private void play(SkaldPlayableEntity skaldPlayableEntity) {
   }
 ```
 
-#### Remember that searchTracks and searchPlaylists methods return merged lists of tracks or playlists from authenticated services. Order of entities in final list is determined by the order in which you added providers in static ```Skald.with``` method.
+#### Additional info:
+searchTracks and searchPlaylists methods return merged lists of tracks or playlists from authenticated services. Order of entities in final list is determined by the order in which you added providers in static ```Skald.with``` method.
 
-## Get track info
-#### Playback listener gives you opportunity to get TrackMetadata which contains useful track info.
-You can achieve this by adding and implementing OnPlaybackListener class:
+### Get track information
+#### In order to get TrackMetadata which contains useful track info, use playback listener
+Playback listener's methods are triggered when playback event occurs(play, pause etc.).
+By implementing its method you can inform a user about these events. Especially, you can notify about the current track.
+Just add and implement OnPlaybackListener class:
 ```java
 skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
     @Override
@@ -239,15 +248,8 @@ skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
 });
 ```
 
-## <span style="color:#ff4d4d">Release resources</span>
-#### Last but not least, do not forget to release resources (e.g. within onDestroy method in your Activity):
-```java
-    @Override
-    protected void onDestroy() {
-        skaldMusicService.release();
-        super.onDestroy();
-    }
-```
+## Things to remember when using Skald:
+  - ```getApplicationContext()``` - use Application Context (do not use Activity Context)
 
 ## Getting Help
 
