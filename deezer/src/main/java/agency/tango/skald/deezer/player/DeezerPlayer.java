@@ -266,13 +266,13 @@ class DeezerPlayer {
       SkaldOperationCallback operationCallback) {
     deezerError.getMessage();
     deezerError.printStackTrace();
-    notifyPlaybackError(deezerError.getMessage());
+    notifyPlaybackError(deezerError);
     operationCallback.onError();
   }
 
-  private void notifyPlaybackError(String message) {
+  private void notifyPlaybackError(Exception exception) {
     for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onError(new PlaybackError(message));
+      onPlaybackListener.onError(new PlaybackError(exception));
     }
   }
 

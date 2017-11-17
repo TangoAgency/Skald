@@ -312,7 +312,7 @@ public class MainActivity extends Activity {
 
       @Override
       public void onError(PlaybackError playbackError) {
-        Log.e(TAG, String.format("Playback error occurred %s", playbackError.getMessage()));
+        Log.e(TAG, "Playback error occurred", playbackError.getException());
       }
     });
   }
