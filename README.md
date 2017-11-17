@@ -62,11 +62,6 @@ public class App extends Application {
 ```
 
 ## SkaldAuthService
-### Methods in SkaldAuthService
-  - ```login(ProviderName providerName)``` &#8702; login to music service. As a parameter, pass provider name appropriate for service you want to log into
-  - ```logout(ProviderName providerName)``` &#8702; logout from music service. Pass provider name for service you want to logout from
-  - ```isLoggedIn(ProviderName providerName)``` &#8702; checks if user is logged into specific service
-
 ### Login
 
 ```java
@@ -86,22 +81,16 @@ public void login() {
 }
 ```
 
-## SkaldMusicService
+### Methods in SkaldAuthService
+  - ```login(ProviderName providerName)``` &#8702; login to music service. ProviderName can be found in specific implementation of Provider class (e.g. DeezerProvider.NAME)
+  - ```logout(ProviderName providerName)``` &#8702; logout from music service
+  - ```isLoggedIn(ProviderName providerName)``` &#8702; checks if user is logged into specific service
 
-### Methods in SkaldMusicService
-  - ```play(SkaldPlayableEntity skaldPlayableEntity)``` &#8702; plays music
-  - ```pause()``` &#8702; pauses music
-  - ```resume()``` &#8702; resumes music
-  - ```stop()``` &#8702; stops music
-  - ```release()``` &#8702; releases resources
-  - ```addOnErrorListener(OnErrorListener onErrorListener)``` &#8702; adds OnErrorListener which method is triggered when an error occurs
-  - ```removeOnErrorListener()``` &#8702; removes OnErrorListener
-  - ```addOnPlaybackListener(OnPlaybackListener onPlaybackListener)``` &#8702; adds OnPlaybackListener which methods are triggered when playback event occurs
-  - ```removeOnPlaybackListener()``` &#8702; removes OnPlaybackListener
-  - ```addOnLoadingListener(OnLoadingListener onLoadingListener)``` &#8702; adds OnLoadingListener which method is triggered when service stars loading track
-  - ```removeOnLoadingListener()``` &#8702; removes OnLoadingListener
-  - ```searchTracks(String query)``` &#8702; returns founded tracks by the provided query
-  - ```searchPlayLists(String query)``` &#8702; returns founded playlists by the provided query
+## Things to remember when using Skald:
+  - ```getApplicationContext()``` - use Application Context (do not use Activity Context)
+
+
+## SkaldMusicService
 
 ### Playing music
 ```java
@@ -140,11 +129,11 @@ public void playExampleTrack() {
 #### Explanation of creating playable entity and playing music:
   - ```SkaldPlayableEntity``` &#8702; base class for SkaldTrack and SkaldPlaylist
   - ```SpotifyTrack``` &#8702; subclass of SkaldTrack for playing Spotify tracks (you can also use DeezerTrack)
-  - ```skald://spotify/track/0tKcYR2II1VCQWT79i5NrW``` &#8702; Skald uri format (skald://{service_name}}/{type_of_playable_entity}/{song_uri_from_service})
+  - ```skald://spotify/track/0tKcYR2II1VCQWT79i5NrW``` &#8702; Skald uri format (skald://{service_name}}/{type_of_playable_entity}/{uri_from_service})
   - ```error instanceof AuthException``` &#8702; if a user is not authenticated, you can force him to do it
 
 ### Release resources
-#### ULTRA-IMPORTANT
+### ULTRA-IMPORTANT
 ##### ALWAYS call this in your onDestroy() method, otherwise you will leak native resources!    This is an unfortunate necessity due to the different memory management models of Java's garbage collector and C++ RAII.
 
 ```java
@@ -205,12 +194,11 @@ private void play(SkaldPlayableEntity skaldPlayableEntity) {
 ```
 
 #### Additional info:
-searchTracks and searchPlaylists methods return merged lists of tracks or playlists from authenticated services. Order of entities in final list is determined by the order in which you added providers in static ```Skald.with``` method.
+These methods (searchTracks and searchPlaylists) returns merged lists of tracks or playlists from authenticated services. Order of entities in final list is determined by the order in which you added providers in a static ```Skald.with``` method.
 
 ### Get track information
-#### In order to get TrackMetadata which contains useful track info, use playback listener
-Playback listener's methods are triggered when playback event occurs(play, pause etc.).
-By implementing its method you can inform a user about these events. Especially, you can notify about the current track.
+#### In order to get TrackMetadata which contains useful track information, use playback listener
+Playback listener's methods are triggered when playback event occurs(play, pause etc.). In onPlayEvent method you have access to track information.
 Just add and implement OnPlaybackListener class:
 ```java
 skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
@@ -248,8 +236,20 @@ skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
 });
 ```
 
-## Things to remember when using Skald:
-  - ```getApplicationContext()``` - use Application Context (do not use Activity Context)
+### Methods in SkaldMusicService
+  - ```play(SkaldPlayableEntity skaldPlayableEntity)``` &#8702; plays music
+  - ```pause()``` &#8702; pauses music
+  - ```resume()``` &#8702; resumes music
+  - ```stop()``` &#8702; stops music
+  - ```release()``` &#8702; releases resources
+  - ```addOnErrorListener(OnErrorListener onErrorListener)``` &#8702; adds OnErrorListener which method is triggered when an error occurs
+  - ```removeOnErrorListener()``` &#8702; removes OnErrorListener
+  - ```addOnPlaybackListener(OnPlaybackListener onPlaybackListener)``` &#8702; adds OnPlaybackListener which methods are triggered when playback event occurs
+  - ```removeOnPlaybackListener()``` &#8702; removes OnPlaybackListener
+  - ```addOnLoadingListener(OnLoadingListener onLoadingListener)``` &#8702; adds OnLoadingListener which method is triggered when service stars loading track
+  - ```removeOnLoadingListener()``` &#8702; removes OnLoadingListener
+  - ```searchTracks(String query)``` &#8702; returns founded tracks by the provided query
+  - ```searchPlayLists(String query)``` &#8702; returns founded playlists by the provided query
 
 ## Getting Help
 
