@@ -353,7 +353,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onError(@NonNull Throwable e) {
-
+      Log.e(TAG, "Error during playback operation", e);
     }
   }
 }

@@ -2,10 +2,10 @@ package agency.tango.skald.spotify.exceptions;
 
 import com.spotify.sdk.android.player.Error;
 
-public class SpotifyError extends Exception {
+public class SpotifyException extends Exception {
   private final Error error;
 
-  public SpotifyError(Error error) {
+  public SpotifyException(Error error) {
     this.error = error;
   }
 

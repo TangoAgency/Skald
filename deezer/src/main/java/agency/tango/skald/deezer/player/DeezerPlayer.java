@@ -259,7 +259,7 @@ class DeezerPlayer {
     tooManyPlayersExceptions.getMessage();
     tooManyPlayersExceptions.printStackTrace();
     playerCache.evictAll();
-    operationCallback.onError();
+    operationCallback.onError(tooManyPlayersExceptions);
   }
 
   private void handleDeezerError(DeezerError deezerError,
@@ -267,7 +267,7 @@ class DeezerPlayer {
     deezerError.getMessage();
     deezerError.printStackTrace();
     notifyPlaybackError(deezerError);
-    operationCallback.onError();
+    operationCallback.onError(deezerError);
   }
 
   private void notifyPlaybackError(Exception exception) {

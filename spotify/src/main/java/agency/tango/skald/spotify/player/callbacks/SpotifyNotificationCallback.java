@@ -12,7 +12,7 @@ import java.util.List;
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.TrackMetadata;
-import agency.tango.skald.spotify.exceptions.SpotifyError;
+import agency.tango.skald.spotify.exceptions.SpotifyException;
 import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
 
 public class SpotifyNotificationCallback implements Player.NotificationCallback {
@@ -47,7 +47,7 @@ public class SpotifyNotificationCallback implements Player.NotificationCallback 
   @Override
   public void onPlaybackError(Error error) {
     for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-      onPlaybackListener.onError(new PlaybackError(new SpotifyError(error)));
+      onPlaybackListener.onError(new PlaybackError(new SpotifyException(error)));
     }
   }
 

@@ -56,8 +56,9 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
           }
 
           @Override
-          public void onError() {
+          public void onError(Exception exception) {
             Log.e(this.getClass().getSimpleName(), "Error during stopping");
+            emitter.onError(exception);
           }
         });
       }
