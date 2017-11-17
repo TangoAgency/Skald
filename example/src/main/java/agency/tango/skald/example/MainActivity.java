@@ -3,6 +3,7 @@ package agency.tango.skald.example;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -169,6 +170,10 @@ public class MainActivity extends Activity {
             .subscribe(new PlaybackEventCompletableObserver());
       }
     });
+
+    SkaldTrack track = new SkaldTrack(
+        Uri.parse("skald://spotify/track/spotify:track:0tKcYR2II1VCQWT79i5NrW"));
+    play(track);
   }
 
   @Override

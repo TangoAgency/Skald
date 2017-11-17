@@ -3,8 +3,12 @@ package agency.tango.skald.core.models;
 import android.net.Uri;
 
 public class SkaldTrack extends SkaldPlayableEntity {
-  private final String artistName;
-  private final String title;
+  private String artistName;
+  private String title;
+
+  public SkaldTrack(Uri uri) {
+    super(uri);
+  }
 
   public SkaldTrack(Uri uri, String artistName, String title, String imageUrl) {
     super(uri, imageUrl);
@@ -18,6 +22,14 @@ public class SkaldTrack extends SkaldPlayableEntity {
 
   public String getTitle() {
     return title;
+  }
+
+  public void setArtistName(String artistName) {
+    this.artistName = artistName;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
   }
 
   @Override
