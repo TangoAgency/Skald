@@ -274,8 +274,8 @@ public class MainActivity extends Activity {
   private void addOnErrorListener() {
     skaldMusicService.addOnErrorListener(new OnErrorListener() {
       @Override
-      public void onError() {
-        Log.e(TAG, "Error in SkaldMusicService occurred");
+      public void onError(Exception exception) {
+        Log.e(TAG, "Error in SkaldMusicService occurred", exception);
       }
     });
   }

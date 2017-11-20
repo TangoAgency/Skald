@@ -8,10 +8,12 @@ import com.spotify.sdk.android.player.Error;
 
 import java.util.List;
 
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.spotify.api.models.Tokens;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
 import agency.tango.skald.spotify.authentication.SpotifyAuthStore;
+import agency.tango.skald.spotify.exceptions.SpotifyException;
 import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
 import agency.tango.skald.spotify.services.TokenService;
@@ -23,6 +25,7 @@ public class SpotifyConnectionStateCallback implements ConnectionStateCallback {
   private static final String TAG = SpotifyConnectionStateCallback.class.getSimpleName();
   private final Context context;
   private final List<OnPlayerReadyListener> onPlayerReadyListeners;
+  private final OnErrorListener onErrorListener;
   private final SkaldSpotifyPlayer skaldSpotifyPlayer;
   private final SpotifyProvider spotifyProvider;
   private final SpotifyAuthData spotifyAuthData;
@@ -30,11 +33,12 @@ public class SpotifyConnectionStateCallback implements ConnectionStateCallback {
   private final SpotifyAuthStore spotifyAuthStore;
 
   public SpotifyConnectionStateCallback(Context context, SkaldSpotifyPlayer skaldSpotifyPlayer,
-      List<OnPlayerReadyListener> onPlayerReadyListeners, SpotifyProvider spotifyProvider,
-      SpotifyAuthData spotifyAuthData) {
+      List<OnPlayerReadyListener> onPlayerReadyListeners, OnErrorListener onErrorListener,
+      SpotifyProvider spotifyProvider, SpotifyAuthData spotifyAuthData) {
     this.context = context;
     this.skaldSpotifyPlayer = skaldSpotifyPlayer;
     this.onPlayerReadyListeners = onPlayerReadyListeners;
+    this.onErrorListener = onErrorListener;
     this.spotifyProvider = spotifyProvider;
     this.spotifyAuthData = spotifyAuthData;
     this.tokenService = new TokenService();
@@ -55,27 +59,32 @@ public class SpotifyConnectionStateCallback implements ConnectionStateCallback {
 
   @Override
   public void onLoginFailed(Error error) {
-    tokenService
-        .getRefreshToken(spotifyProvider.getClientId(), spotifyProvider.getClientSecret(),
-            spotifyAuthData.getRefreshToken())
-        .subscribeOn(Schedulers.io())
-        .subscribe(new DisposableSingleObserver<Tokens>() {
-          @Override
-          public void onSuccess(Tokens tokens) {
-            skaldSpotifyPlayer.getPlayer().login(tokens.getAccessToken());
-            saveTokens(context, tokens, spotifyAuthData);
-          }
+    if(error == Error.kSpErrorLoginBadCredentials) {
+      tokenService
+          .getRefreshToken(spotifyProvider.getClientId(), spotifyProvider.getClientSecret(),
+              spotifyAuthData.getRefreshToken())
+          .subscribeOn(Schedulers.io())
+          .subscribe(new DisposableSingleObserver<Tokens>() {
+            @Override
+            public void onSuccess(Tokens tokens) {
+              skaldSpotifyPlayer.getPlayer().login(tokens.getAccessToken());
+              saveTokens(context, tokens, spotifyAuthData);
+            }
 
-          @Override
-          public void onError(Throwable error) {
-            Log.e(TAG, "RefreshToken observer error", error);
-          }
-        });
+            @Override
+            public void onError(Throwable error) {
+              Log.e(TAG, "RefreshToken observer error", error);
+              onErrorListener.onError(new Exception("Could not refresh token", error));
+            }
+          });
+    } else {
+      onErrorListener.onError(new SpotifyException(error));
+    }
   }
 
   @Override
   public void onTemporaryError() {
-
+    onErrorListener.onError(new Exception("Temporary error in Spotify"));
   }
 
   @Override
