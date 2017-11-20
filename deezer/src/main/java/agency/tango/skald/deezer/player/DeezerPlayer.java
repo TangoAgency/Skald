@@ -98,16 +98,16 @@ class DeezerPlayer {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  void removeOnPlayerReadyListener() {
-    onPlaybackListeners.remove(0);
+  void removeOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
+    onPlaybackListeners.remove(onPlaybackListener);
   }
 
   void addOnLoadingListener(OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
-  void removeOnLoadingListener() {
-    onPlaybackListeners.remove(0);
+  void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+    onLoadingListeners.remove(onLoadingListener);
   }
 
   void notifyResumeEvent() {

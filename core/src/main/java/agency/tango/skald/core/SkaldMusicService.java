@@ -120,24 +120,24 @@ public class SkaldMusicService {
     onErrorListeners.add(onErrorListener);
   }
 
-  public void removeOnErrorListener() {
-    onErrorListeners.remove(0);
+  public void removeOnErrorListener(OnErrorListener onErrorListener) {
+    onErrorListeners.remove(onErrorListener);
   }
 
   public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  public void removeOnPlaybackListener() {
-    onPlaybackListeners.remove(0);
+  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+    onPlaybackListeners.remove(onPlaybackListener);
   }
 
   public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
-  public void removeOnLoadingListener() {
-    onLoadingListeners.remove(0);
+  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+    onLoadingListeners.remove(onLoadingListener);
   }
 
   public Single<List<SkaldTrack>> searchTracks(String query) {
