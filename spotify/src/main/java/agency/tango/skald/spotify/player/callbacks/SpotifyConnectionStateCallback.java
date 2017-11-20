@@ -59,7 +59,7 @@ public class SpotifyConnectionStateCallback implements ConnectionStateCallback {
 
   @Override
   public void onLoginFailed(Error error) {
-    if(error == Error.kSpErrorLoginBadCredentials) {
+    if (error == Error.kSpErrorLoginBadCredentials) {
       tokenService
           .getRefreshToken(spotifyProvider.getClientId(), spotifyProvider.getClientSecret(),
               spotifyAuthData.getRefreshToken())

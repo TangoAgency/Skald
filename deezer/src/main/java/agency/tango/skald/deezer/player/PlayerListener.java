@@ -13,6 +13,7 @@ import com.deezer.sdk.player.event.PlayerWrapperListener;
 import java.util.List;
 
 import agency.tango.skald.core.errors.PlaybackError;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.TrackMetadata;
 
@@ -21,13 +22,16 @@ public class PlayerListener implements PlayerWrapperListener {
   private final DeezerPlayer deezerPLayer;
   private final DeezerConnect deezerConnect;
   private final List<OnPlaybackListener> onPlaybackListeners;
+  private final OnErrorListener onErrorListener;
   private final Handler mainHandler;
 
   public PlayerListener(DeezerPlayer deezerPLayer, DeezerConnect deezerConnect,
-      List<OnPlaybackListener> onPlaybackListeners, Handler mainHandler) {
+      List<OnPlaybackListener> onPlaybackListeners, OnErrorListener onErrorListener,
+      Handler mainHandler) {
     this.deezerPLayer = deezerPLayer;
     this.deezerConnect = deezerConnect;
     this.onPlaybackListeners = onPlaybackListeners;
+    this.onErrorListener = onErrorListener;
     this.mainHandler = mainHandler;
   }
 
@@ -47,8 +51,8 @@ public class PlayerListener implements PlayerWrapperListener {
   }
 
   @Override
-  public void onRequestException(Exception e, Object o) {
-
+  public void onRequestException(Exception exception, Object o) {
+    onErrorListener.onError(exception);
   }
 
   private void makeTrackRequestAndNotifyPlayResumeEvent(long trackId) {

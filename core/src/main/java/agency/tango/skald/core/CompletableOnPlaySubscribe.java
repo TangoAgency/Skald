@@ -117,7 +117,7 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
       final OnErrorListener onErrorListener = new OnErrorListener() {
         @Override
         public void onError(Exception exception) {
-          for(OnErrorListener onErrorListener : onErrorListeners) {
+          for (OnErrorListener onErrorListener : onErrorListeners) {
             onErrorListener.onError(exception);
           }
         }

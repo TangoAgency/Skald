@@ -348,7 +348,7 @@ public class MainActivity extends Activity {
   private class PlaybackEventCompletableObserver extends DisposableCompletableObserver {
     @Override
     public void onComplete() {
-
+      Log.d(TAG, "Operation completed");
     }
 
     @Override

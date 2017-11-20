@@ -7,6 +7,7 @@ import java.util.List;
 
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -17,8 +18,9 @@ public class SkaldDeezerPlayer implements Player {
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
   private final DeezerPlayer deezerPlayer;
 
-  public SkaldDeezerPlayer(Context context, DeezerAuthData deezerAuthData) {
-    deezerPlayer = new DeezerPlayer(context, deezerAuthData.getDeezerConnect());
+  public SkaldDeezerPlayer(Context context, DeezerAuthData deezerAuthData,
+      OnErrorListener onErrorListener) {
+    deezerPlayer = new DeezerPlayer(context, deezerAuthData.getDeezerConnect(), onErrorListener);
   }
 
   @Override

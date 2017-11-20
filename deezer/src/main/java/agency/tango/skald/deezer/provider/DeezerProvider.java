@@ -74,7 +74,7 @@ public class DeezerProvider extends Provider {
     @Override
     public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
-      return new SkaldDeezerPlayer(context, deezerAuthData);
+      return new SkaldDeezerPlayer(context, deezerAuthData, onErrorListener);
     }
   }
 
