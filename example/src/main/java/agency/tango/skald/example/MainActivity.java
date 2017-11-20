@@ -65,16 +65,16 @@ public class MainActivity extends Activity {
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    resumePauseButton = (ImageButton) findViewById(R.id.imageButton_play);
-    stopButton = (ImageButton) findViewById(R.id.imageButton_stop);
-    trackImage = (ImageView) findViewById(R.id.image_cover);
-    artistName = (TextView) findViewById(R.id.text_artist);
-    title = (TextView) findViewById(R.id.text_title);
-    spotifyButton = (Button) findViewById(R.id.button_login_spotify);
-    deezerButton = (Button) findViewById(R.id.button_login_deezer);
-    tracksButton = (Button) findViewById(R.id.button_tracks);
-    playlistButton = (Button) findViewById(R.id.button_playlists);
-    loadingTextView = (TextView) findViewById(R.id.textView_loading);
+    resumePauseButton = findViewById(R.id.imageButton_play);
+    stopButton = findViewById(R.id.imageButton_stop);
+    trackImage = findViewById(R.id.image_cover);
+    artistName = findViewById(R.id.text_artist);
+    title = findViewById(R.id.text_title);
+    spotifyButton = findViewById(R.id.button_login_spotify);
+    deezerButton = findViewById(R.id.button_login_deezer);
+    tracksButton = findViewById(R.id.button_tracks);
+    playlistButton = findViewById(R.id.button_playlists);
+    loadingTextView = findViewById(R.id.textView_loading);
 
     skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
       @Override
@@ -100,7 +100,6 @@ public class MainActivity extends Activity {
       public void onClick(View v) {
         if (!skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
           skaldAuthService.login(SpotifyProvider.NAME);
-          spotifyButton.setText(R.string.logout_from_spotify);
         } else {
           skaldAuthService.logout(SpotifyProvider.NAME);
           spotifyButton.setText(R.string.login_to_spotify);
@@ -112,7 +111,6 @@ public class MainActivity extends Activity {
       public void onClick(View v) {
         if (!skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
           skaldAuthService.login(DeezerProvider.NAME);
-          deezerButton.setText(R.string.logout_from_deezer);
         } else {
           skaldAuthService.logout(DeezerProvider.NAME);
           deezerButton.setText(R.string.login_to_deezer);
@@ -189,12 +187,10 @@ public class MainActivity extends Activity {
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    if (requestCode == AUTH_SPOTIFY_REQUEST_CODE || requestCode == AUTH_DEEZER_REQUEST_CODE) {
-      if (resultCode == RESULT_OK) {
-        Log.d(TAG, "Authentication completed");
-      } else {
-        Log.e(TAG, "Authentication went wrong");
-      }
+    if (requestCode == AUTH_SPOTIFY_REQUEST_CODE) {
+      verifyResult(resultCode, spotifyButton, R.string.logout_from_spotify);
+    } else if (requestCode == AUTH_DEEZER_REQUEST_CODE) {
+      verifyResult(resultCode, deezerButton, R.string.logout_from_deezer);
     }
   }
 
@@ -268,6 +264,15 @@ public class MainActivity extends Activity {
       deezerButton.setText(R.string.logout_from_deezer);
     } else {
       deezerButton.setText(R.string.login_to_deezer);
+    }
+  }
+
+  private void verifyResult(int resultCode, Button serviceButton, int buttonText) {
+    if (resultCode == RESULT_OK) {
+      Log.d(TAG, "Authentication completed");
+      serviceButton.setText(buttonText);
+    } else {
+      Log.e(TAG, "Authentication went wrong");
     }
   }
 
