@@ -109,8 +109,7 @@ public class MainActivity extends Activity {
         } else {
           skaldAuthService.logout(SpotifyProvider.NAME);
           spotifyButton.setText(R.string.login_to_spotify);
-          notifyUserViews(EMPTY, null);
-          userName.setText(R.string.hello);
+          notifyViewsAfterLoggingOut();
         }
       }
     });
@@ -123,8 +122,7 @@ public class MainActivity extends Activity {
         } else {
           skaldAuthService.logout(DeezerProvider.NAME);
           deezerButton.setText(R.string.login_to_deezer);
-          notifyUserViews(EMPTY, null);
-          userName.setText(R.string.hello);
+          notifyViewsAfterLoggingOut();
         }
       }
     });
@@ -265,8 +263,17 @@ public class MainActivity extends Activity {
         });
   }
 
+  private void notifyViewsAfterLoggingOut() {
+    if (!isUserLoggedIn()) {
+      notifyUserViews(EMPTY, null);
+      userName.setText(R.string.hello);
+    } else {
+      getUserAndNotifyUserViews();
+    }
+  }
+
   private void getUserAndNotifyUserViews() {
-    if (skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
+    if (isUserLoggedIn()) {
       skaldMusicService.getCurrentUser()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
@@ -282,6 +289,11 @@ public class MainActivity extends Activity {
             }
           });
     }
+  }
+
+  private boolean isUserLoggedIn() {
+    return skaldAuthService.isLoggedIn(SpotifyProvider.NAME) ||
+        skaldAuthService.isLoggedIn(DeezerProvider.NAME);
   }
 
   private void notifyUserViews(String name, String imageUrl) {

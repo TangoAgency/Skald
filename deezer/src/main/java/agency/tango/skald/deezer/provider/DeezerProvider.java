@@ -109,7 +109,8 @@ public class DeezerProvider extends Provider {
 
     @Override
     public UserService getUserService() throws AuthException {
-      return new DeezerUserService();
+      DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
+      return new DeezerUserService(deezerAuthData.getDeezerConnect());
     }
   }
 }

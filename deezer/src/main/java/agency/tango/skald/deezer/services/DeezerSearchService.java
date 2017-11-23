@@ -5,7 +5,6 @@ import com.deezer.sdk.model.Track;
 import com.deezer.sdk.network.connect.DeezerConnect;
 import com.deezer.sdk.network.request.DeezerRequest;
 import com.deezer.sdk.network.request.DeezerRequestFactory;
-import com.deezer.sdk.network.request.event.JsonRequestListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +14,7 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.deezer.models.DeezerPlaylist;
 import agency.tango.skald.deezer.models.DeezerTrack;
+import agency.tango.skald.deezer.services.listeners.DeezerRequestListener;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
@@ -90,23 +90,5 @@ public class DeezerSearchService implements SearchService {
       skaldPlaylists.add(new DeezerPlaylist(playlist));
     }
     return skaldPlaylists;
-  }
-
-  private abstract class DeezerRequestListener<T> extends JsonRequestListener {
-    private final SingleEmitter<T> emitter;
-
-    private DeezerRequestListener(SingleEmitter<T> emitter) {
-      this.emitter = emitter;
-    }
-
-    @Override
-    public void onUnparsedResult(String requestResponse, Object requestId) {
-      emitter.onError(new IllegalStateException(requestResponse));
-    }
-
-    @Override
-    public void onException(Exception exception, Object requestId) {
-      emitter.onError(exception);
-    }
   }
 }
