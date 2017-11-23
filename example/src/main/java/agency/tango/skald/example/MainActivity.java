@@ -280,7 +280,8 @@ public class MainActivity extends Activity {
           .subscribe(new DisposableSingleObserver<List<SkaldUser>>() {
             @Override
             public void onSuccess(List<SkaldUser> skaldUsers) {
-              notifyUserViews(skaldUsers.get(0).getName(), skaldUsers.get(0).getImageUrl());
+              String message = String.format("Hello, %s!", skaldUsers.get(0).getName());
+              notifyUserViews(message, skaldUsers.get(0).getImageUrl());
             }
 
             @Override
@@ -296,8 +297,8 @@ public class MainActivity extends Activity {
         skaldAuthService.isLoggedIn(DeezerProvider.NAME);
   }
 
-  private void notifyUserViews(String name, String imageUrl) {
-    userName.setText(name);
+  private void notifyUserViews(String message, String imageUrl) {
+    userName.setText(message);
     Picasso
         .with(MainActivity.this)
         .load(imageUrl)
