@@ -29,6 +29,7 @@ import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.models.SkaldUser;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.deezer.errors.DeezerAuthError;
 import agency.tango.skald.deezer.provider.DeezerProvider;
@@ -58,6 +59,8 @@ public class MainActivity extends Activity {
   private Button tracksButton;
   private Button playlistButton;
   private TextView loadingTextView;
+  private TextView userName;
+  private ImageView userAvatar;
 
   private boolean isPlaying = false;
 
@@ -74,7 +77,9 @@ public class MainActivity extends Activity {
     deezerButton = (Button) findViewById(R.id.button_login_deezer);
     tracksButton = (Button) findViewById(R.id.button_tracks);
     playlistButton = (Button) findViewById(R.id.button_playlists);
-    loadingTextView = (TextView) findViewById(R.id.textView_loading);
+    loadingTextView = (TextView) findViewById(R.id.text_loading);
+    userName = findViewById(R.id.text_user_name);
+    userAvatar = findViewById(R.id.image_user);
 
     skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
       @Override
@@ -104,6 +109,8 @@ public class MainActivity extends Activity {
         } else {
           skaldAuthService.logout(SpotifyProvider.NAME);
           spotifyButton.setText(R.string.login_to_spotify);
+          notifyUserViews(EMPTY, null);
+          userName.setText(R.string.hello);
         }
       }
     });
@@ -116,6 +123,8 @@ public class MainActivity extends Activity {
         } else {
           skaldAuthService.logout(DeezerProvider.NAME);
           deezerButton.setText(R.string.login_to_deezer);
+          notifyUserViews(EMPTY, null);
+          userName.setText(R.string.hello);
         }
       }
     });
@@ -177,6 +186,7 @@ public class MainActivity extends Activity {
 
     setSpotifyButtonText();
     setDeezerButtonText();
+    getUserAndNotifyUserViews();
   }
 
   @Override
@@ -255,6 +265,33 @@ public class MainActivity extends Activity {
         });
   }
 
+  private void getUserAndNotifyUserViews() {
+    if (skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
+      skaldMusicService.getCurrentUser()
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(new DisposableSingleObserver<List<SkaldUser>>() {
+            @Override
+            public void onSuccess(List<SkaldUser> skaldUsers) {
+              notifyUserViews(skaldUsers.get(0).getName(), skaldUsers.get(0).getImageUrl());
+            }
+
+            @Override
+            public void onError(Throwable e) {
+              Log.e(TAG, "Error during getting player");
+            }
+          });
+    }
+  }
+
+  private void notifyUserViews(String name, String imageUrl) {
+    userName.setText(name);
+    Picasso
+        .with(MainActivity.this)
+        .load(imageUrl)
+        .into(userAvatar);
+  }
+
   private void setSpotifyButtonText() {
     if (skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
       spotifyButton.setText(R.string.logout_from_spotify);
@@ -287,7 +324,7 @@ public class MainActivity extends Activity {
         Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
             trackMetadata.getTitle()));
         isPlaying = true;
-        notifyViews(trackMetadata);
+        notifySongViews(trackMetadata);
       }
 
       @Override
@@ -327,7 +364,7 @@ public class MainActivity extends Activity {
     }
   }
 
-  private void notifyViews(TrackMetadata trackMetadata) {
+  private void notifySongViews(TrackMetadata trackMetadata) {
     Picasso
         .with(this)
         .load(trackMetadata.getImageUrl())

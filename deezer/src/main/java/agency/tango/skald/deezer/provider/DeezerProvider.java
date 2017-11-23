@@ -4,10 +4,11 @@ import android.content.Context;
 
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.SearchService;
+import agency.tango.skald.core.UserService;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
-import agency.tango.skald.core.factories.SearchServiceFactory;
+import agency.tango.skald.core.factories.ServicesFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
@@ -18,6 +19,7 @@ import agency.tango.skald.deezer.models.DeezerPlaylist;
 import agency.tango.skald.deezer.models.DeezerTrack;
 import agency.tango.skald.deezer.player.SkaldDeezerPlayer;
 import agency.tango.skald.deezer.services.DeezerSearchService;
+import agency.tango.skald.deezer.services.DeezerUserService;
 
 public class DeezerProvider extends Provider {
   public static final ProviderName NAME = new DeezerProviderName();
@@ -47,8 +49,8 @@ public class DeezerProvider extends Provider {
   }
 
   @Override
-  public SearchServiceFactory getSearchServiceFactory() {
-    return new DeezerSearchServiceFactory(context, this);
+  public ServicesFactory getServicesFactory() {
+    return new DeezerServicesFactory(context, this);
   }
 
   @Override
@@ -90,11 +92,11 @@ public class DeezerProvider extends Provider {
     }
   }
 
-  private static class DeezerSearchServiceFactory extends SearchServiceFactory {
+  private static class DeezerServicesFactory extends ServicesFactory {
     private final Context context;
     private final SkaldAuthStore skaldAuthStore;
 
-    private DeezerSearchServiceFactory(Context context, DeezerProvider deezerProvider) {
+    private DeezerServicesFactory(Context context, DeezerProvider deezerProvider) {
       this.context = context;
       skaldAuthStore = new DeezerAuthStore(deezerProvider);
     }
@@ -103,6 +105,11 @@ public class DeezerProvider extends Provider {
     public SearchService getSearchService() throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
       return new DeezerSearchService(deezerAuthData.getDeezerConnect());
+    }
+
+    @Override
+    public UserService getUserService() throws AuthException {
+      return new DeezerUserService();
     }
   }
 }

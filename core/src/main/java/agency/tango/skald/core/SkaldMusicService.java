@@ -22,6 +22,7 @@ import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.models.SkaldUser;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 import io.reactivex.Completable;
@@ -164,6 +165,19 @@ public class SkaldMusicService {
     return mergeLists(singles);
   }
 
+  public Single<List<SkaldUser>> getCurrentUser() {
+    List<Single<SkaldUser>> singles = new ArrayList<>();
+    for (Provider provider : providers) {
+      try {
+        singles.add(getUserService(provider).getUser());
+      } catch (AuthException authException) {
+        authException.printStackTrace();
+      }
+    }
+    return Single.merge(singles)
+        .toList();
+  }
+
   ProviderName getCurrentProviderName() {
     return currentProviderName;
   }
@@ -190,7 +204,11 @@ public class SkaldMusicService {
   }
 
   private SearchService getSearchService(Provider provider) throws AuthException {
-    return provider.getSearchServiceFactory().getSearchService();
+    return provider.getServicesFactory().getSearchService();
+  }
+
+  private UserService getUserService(Provider provider) throws AuthException {
+    return provider.getServicesFactory().getUserService();
   }
 
   private <T> Single<List<T>> mergeLists(List<Single<List<T>>> singlesList) {
