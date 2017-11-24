@@ -10,6 +10,11 @@ public class SkaldTrack extends SkaldPlayableEntity {
     super(uri);
   }
 
+  @Override
+  boolean verifyPath() {
+    return uri.getPathSegments().get(0).equals("track");
+  }
+
   public SkaldTrack(Uri uri, String imageUrl, String artistName, String title) {
     super(uri, imageUrl);
     this.artistName = artistName;

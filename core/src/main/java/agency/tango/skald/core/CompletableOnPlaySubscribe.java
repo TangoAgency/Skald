@@ -8,6 +8,7 @@ import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.exceptions.AuthException;
+import agency.tango.skald.core.exceptions.UriException;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
@@ -87,16 +88,24 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   }
 
   private void play(@NonNull CompletableEmitter emitter) {
-    for (Provider provider : providers) {
-      if (provider.canHandle(skaldPlayableEntity)) {
-        ProviderName providerName = provider.getProviderName();
-        Player player = playerCache.get(providerName);
-        if (player != null) {
-          playEntity(emitter, player, providerName);
-        } else {
-          initializePlayerAndPlay(emitter, provider, providerName);
+    if(skaldPlayableEntity.verifyUri()) {
+      for (Provider provider : providers) {
+        if (provider.canHandle(skaldPlayableEntity)) {
+          ProviderName providerName = provider.getProviderName();
+          Player player = playerCache.get(providerName);
+          if (player != null) {
+            playEntity(emitter, player, providerName);
+          } else {
+            initializePlayerAndPlay(emitter, provider, providerName);
+          }
+        }
+        if(providers.indexOf(provider) == providers.size() - 1) {
+          emitter.onError(new UriException("Wrong Uri"));
         }
       }
+    }
+    else {
+      emitter.onError(new UriException("Wrong Uri"));
     }
   }
 

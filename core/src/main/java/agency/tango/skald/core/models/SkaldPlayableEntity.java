@@ -3,7 +3,7 @@ package agency.tango.skald.core.models;
 import android.net.Uri;
 
 public abstract class SkaldPlayableEntity {
-  private final Uri uri;
+  protected final Uri uri;
   private String imageUrl;
 
   public SkaldPlayableEntity(Uri uri) {
@@ -29,5 +29,15 @@ public abstract class SkaldPlayableEntity {
 
   public String getServiceNameFromUri() {
     return uri.getAuthority();
+  }
+
+  public boolean verifyUri() {
+    return verifyScheme() && verifyPath();
+  }
+
+  abstract boolean verifyPath();
+
+  private boolean verifyScheme() {
+    return uri.getScheme().equals("skald");
   }
 }

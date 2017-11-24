@@ -9,6 +9,11 @@ public class SkaldPlaylist extends SkaldPlayableEntity {
     super(uri);
   }
 
+  @Override
+  boolean verifyPath() {
+    return uri.getPathSegments().get(0).equals("playlist");
+  }
+
   public SkaldPlaylist(Uri uri, String imageUrl, String name) {
     super(uri, imageUrl);
     this.name = name;
