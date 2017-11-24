@@ -14,6 +14,7 @@ import agency.tango.skald.spotify.api.models.Tokens;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
 import agency.tango.skald.spotify.authentication.SpotifyAuthStore;
 import agency.tango.skald.spotify.exceptions.SpotifyException;
+import agency.tango.skald.spotify.exceptions.TokenRefreshException;
 import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
 import agency.tango.skald.spotify.services.TokenService;
@@ -74,7 +75,7 @@ public class SpotifyConnectionStateCallback implements ConnectionStateCallback {
             @Override
             public void onError(Throwable error) {
               Log.e(TAG, "RefreshToken observer error", error);
-              onErrorListener.onError(new Exception("Could not refresh token", error));
+              onErrorListener.onError(new TokenRefreshException("Could not refresh token", error));
             }
           });
     } else {
@@ -84,7 +85,7 @@ public class SpotifyConnectionStateCallback implements ConnectionStateCallback {
 
   @Override
   public void onTemporaryError() {
-    onErrorListener.onError(new Exception("Temporary error in Spotify"));
+    onErrorListener.onError(new Exception("Temporary connection error in Spotify"));
   }
 
   @Override

@@ -73,7 +73,9 @@ public class PlayerListener implements PlayerWrapperListener {
       @Override
       public void onUnparsedResult(String requestResponse, Object requestId) {
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError(new Exception("Cannot get track info")));
+          onPlaybackListener.onError(
+              new PlaybackError(new IllegalStateException(
+                  String.format("Cannot get track info: %s", requestResponse))));
         }
       }
 
