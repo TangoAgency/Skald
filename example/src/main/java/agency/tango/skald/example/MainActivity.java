@@ -5,6 +5,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -189,9 +190,9 @@ public class MainActivity extends Activity {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (requestCode == AUTH_SPOTIFY_REQUEST_CODE) {
-      handleResult(resultCode, spotifyButton, R.string.logout_from_spotify);
+      handleAuthenticationResult(resultCode, spotifyButton, R.string.logout_from_spotify);
     } else if (requestCode == AUTH_DEEZER_REQUEST_CODE) {
-      handleResult(resultCode, deezerButton, R.string.logout_from_deezer);
+      handleAuthenticationResult(resultCode, deezerButton, R.string.logout_from_deezer);
     }
   }
 
@@ -268,12 +269,13 @@ public class MainActivity extends Activity {
     }
   }
 
-  private void handleResult(int resultCode, Button serviceButton, int buttonText) {
+  private void handleAuthenticationResult(int resultCode, Button serviceButton,
+      @StringRes int buttonText) {
     if (resultCode == RESULT_OK) {
       serviceButton.setText(buttonText);
     } else {
       Log.e(TAG, "Authentication went wrong");
-      Toast.makeText(this, "Authentication went wrong. Try again", Toast.LENGTH_LONG)
+      Toast.makeText(this, R.string.authentication_error, Toast.LENGTH_LONG)
           .show();
     }
   }
