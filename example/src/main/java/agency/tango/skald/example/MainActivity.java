@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -188,9 +189,9 @@ public class MainActivity extends Activity {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (requestCode == AUTH_SPOTIFY_REQUEST_CODE) {
-      verifyResult(resultCode, spotifyButton, R.string.logout_from_spotify);
+      handleResult(resultCode, spotifyButton, R.string.logout_from_spotify);
     } else if (requestCode == AUTH_DEEZER_REQUEST_CODE) {
-      verifyResult(resultCode, deezerButton, R.string.logout_from_deezer);
+      handleResult(resultCode, deezerButton, R.string.logout_from_deezer);
     }
   }
 
@@ -267,12 +268,13 @@ public class MainActivity extends Activity {
     }
   }
 
-  private void verifyResult(int resultCode, Button serviceButton, int buttonText) {
+  private void handleResult(int resultCode, Button serviceButton, int buttonText) {
     if (resultCode == RESULT_OK) {
-      Log.d(TAG, "Authentication completed");
       serviceButton.setText(buttonText);
     } else {
       Log.e(TAG, "Authentication went wrong");
+      Toast.makeText(this, "Authentication went wrong. Try again", Toast.LENGTH_LONG)
+          .show();
     }
   }
 
