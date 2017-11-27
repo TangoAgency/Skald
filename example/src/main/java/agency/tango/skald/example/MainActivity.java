@@ -274,8 +274,8 @@ public class MainActivity extends Activity {
   private void addOnErrorListener() {
     skaldMusicService.addOnErrorListener(new OnErrorListener() {
       @Override
-      public void onError() {
-        Log.e(TAG, "Error in SkaldMusicService occurred");
+      public void onError(Exception exception) {
+        Log.e(TAG, "Error in SkaldMusicService occurred", exception);
       }
     });
   }
@@ -312,7 +312,7 @@ public class MainActivity extends Activity {
 
       @Override
       public void onError(PlaybackError playbackError) {
-        Log.e(TAG, String.format("Playback error occurred %s", playbackError.getMessage()));
+        Log.e(TAG, "Playback error occurred", playbackError.getException());
       }
     });
   }
@@ -348,12 +348,12 @@ public class MainActivity extends Activity {
   private class PlaybackEventCompletableObserver extends DisposableCompletableObserver {
     @Override
     public void onComplete() {
-
+      Log.d(TAG, "Operation completed");
     }
 
     @Override
     public void onError(@NonNull Throwable e) {
-
+      Log.e(TAG, "Error during playback operation", e);
     }
   }
 }

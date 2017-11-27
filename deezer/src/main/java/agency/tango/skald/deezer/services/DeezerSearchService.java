@@ -13,6 +13,7 @@ import java.util.List;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.deezer.exceptions.UnparsedResultException;
 import agency.tango.skald.deezer.models.DeezerPlaylist;
 import agency.tango.skald.deezer.models.DeezerTrack;
 import io.reactivex.Single;
@@ -101,7 +102,8 @@ public class DeezerSearchService implements SearchService {
 
     @Override
     public void onUnparsedResult(String requestResponse, Object requestId) {
-      emitter.onError(new IllegalStateException(requestResponse));
+      emitter.onError(
+          new UnparsedResultException(String.format("Cannot get entities: %s", requestResponse)));
     }
 
     @Override
