@@ -193,7 +193,6 @@ class DeezerPlayer {
 
   private void playPlaylist(long playlistId, PlaylistPlayer playlistPlayer) {
     playlistPlayer.playPlaylist(playlistId);
-
   }
 
   private void notifyLoadingEvent() {
