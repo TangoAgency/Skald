@@ -181,7 +181,6 @@ public class MainActivity extends Activity {
                 "https://ia800706.us.archive.org/4/items/Sample_Audio_Clips_mp3/KuumbaPodcast1.mp3"),
             "", "", "");
         play(skaldTrack);
-        isPlaying = true;
       }
     });
   }

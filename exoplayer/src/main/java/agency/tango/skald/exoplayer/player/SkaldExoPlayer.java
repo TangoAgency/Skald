@@ -1,7 +1,7 @@
 package agency.tango.skald.exoplayer.player;
 
 import android.content.Context;
-import android.net.Uri;
+import android.os.Handler;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -28,56 +28,63 @@ import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
+import agency.tango.skald.exoplayer.player.listeners.PlayerEventsListener;
 
 public class SkaldExoPlayer implements Player {
   private final SimpleExoPlayer exoPlayer;
   private final DataSource.Factory dataSourceFactory;
   private final ExtractorsFactory extractorsFactory;
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
+  private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
+  private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
 
   public SkaldExoPlayer(Context context) {
+    Handler mainHandler = new Handler(context.getMainLooper());
+
     BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-    TrackSelection.Factory videoTrackSelectionFactory =
+    TrackSelection.Factory trackSelectionFactory =
         new AdaptiveTrackSelection.Factory(bandwidthMeter);
     TrackSelector trackSelector =
-        new DefaultTrackSelector(videoTrackSelectionFactory);
+        new DefaultTrackSelector(trackSelectionFactory);
 
     exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
 
     dataSourceFactory = new DefaultDataSourceFactory(context,
         Util.getUserAgent(context, "Skald"));
     extractorsFactory = new DefaultExtractorsFactory();
+
+    exoPlayer.addListener(
+        new PlayerEventsListener(mainHandler, onPlaybackListeners, onLoadingListeners));
   }
 
   @Override
   public void play(SkaldPlayableEntity skaldPlayableEntity,
       SkaldOperationCallback skaldOperationCallback) {
-    Uri uri = skaldPlayableEntity.getUri();
-    MediaSource videoSource = new ExtractorMediaSource(uri,
+    MediaSource trackSource = new ExtractorMediaSource(skaldPlayableEntity.getUri(),
         dataSourceFactory, extractorsFactory, null, null);
 
-    exoPlayer.prepare(videoSource);
+    exoPlayer.prepare(trackSource);
 
-    if(!isPlaying()) {
+    if (!isPlaying()) {
       exoPlayer.setPlayWhenReady(true);
     }
   }
 
   @Override
   public void stop(SkaldOperationCallback skaldOperationCallback) {
-
+    exoPlayer.stop();
   }
 
   @Override
   public void pause(SkaldOperationCallback skaldOperationCallback) {
-    if(isPlaying()) {
+    if (isPlaying()) {
       exoPlayer.setPlayWhenReady(false);
     }
   }
 
   @Override
   public void resume(SkaldOperationCallback skaldOperationCallback) {
-    if(!isPlaying()) {
+    if (!isPlaying()) {
       exoPlayer.setPlayWhenReady(true);
     }
   }
@@ -103,26 +110,26 @@ public class SkaldExoPlayer implements Player {
 
   @Override
   public void removeOnPlayerReadyListener() {
-
+    onPlayerReadyListeners.remove(0);
   }
 
   @Override
   public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
-
+    onPlaybackListeners.add(onPlaybackListener);
   }
 
   @Override
   public void removeOnPlaybackListener() {
-
+    onPlaybackListeners.remove(0);
   }
 
   @Override
   public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
-
+    onLoadingListeners.add(onLoadingListener);
   }
 
   @Override
   public void removeOnLoadingListener() {
-
+    onLoadingListeners.remove(0);
   }
 }
