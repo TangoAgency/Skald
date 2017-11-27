@@ -24,7 +24,6 @@ import io.reactivex.disposables.Disposable;
 class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   private final SkaldMusicService skaldMusicService;
   private final SkaldPlayableEntity skaldPlayableEntity;
-  private final List<OnLoadingListener> onLoadingListeners;
   private final List<OnErrorListener> onErrorListeners;
   private final TLruCache<ProviderName, Player> playerCache;
   private final List<Provider> providers;
@@ -41,7 +40,6 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
       TLruCache<ProviderName, Player> playerCache, List<Provider> providers) {
     this.skaldMusicService = skaldMusicService;
     this.skaldPlayableEntity = skaldPlayableEntity;
-    this.onLoadingListeners = onLoadingListeners;
     this.onErrorListeners = onErrorListeners;
     this.playerCache = playerCache;
     this.providers = providers;
