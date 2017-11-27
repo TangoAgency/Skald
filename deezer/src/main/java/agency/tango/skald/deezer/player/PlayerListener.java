@@ -16,6 +16,7 @@ import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.TrackMetadata;
+import agency.tango.skald.deezer.exceptions.UnparsedResultException;
 
 public class PlayerListener implements PlayerWrapperListener {
   private static final String TRACK_REQUEST = "TRACK_REQUEST";
@@ -74,7 +75,7 @@ public class PlayerListener implements PlayerWrapperListener {
       public void onUnparsedResult(String requestResponse, Object requestId) {
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
           onPlaybackListener.onError(
-              new PlaybackError(new IllegalStateException(
+              new PlaybackError(new UnparsedResultException(
                   String.format("Cannot get track info: %s", requestResponse))));
         }
       }

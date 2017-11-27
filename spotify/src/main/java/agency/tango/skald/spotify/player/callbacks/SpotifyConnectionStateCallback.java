@@ -85,7 +85,7 @@ public class SpotifyConnectionStateCallback implements ConnectionStateCallback {
 
   @Override
   public void onTemporaryError() {
-    onErrorListener.onError(new Exception("Temporary connection error in Spotify"));
+
   }
 
   @Override

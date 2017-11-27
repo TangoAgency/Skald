@@ -22,7 +22,7 @@ import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
-import agency.tango.skald.spotify.exceptions.SpotifyPlayerInitializationException;
+import agency.tango.skald.spotify.exceptions.PlayerInitializationException;
 import agency.tango.skald.spotify.player.callbacks.SpotifyConnectionStateCallback;
 import agency.tango.skald.spotify.player.callbacks.SpotifyNotificationCallback;
 import agency.tango.skald.spotify.player.callbacks.SpotifyOperationCallback;
@@ -64,7 +64,7 @@ public class SkaldSpotifyPlayer implements Player {
           public void onError(Throwable throwable) {
             Log.e(TAG, "Could not initialize player", throwable);
             onErrorListener.onError(
-                new SpotifyPlayerInitializationException("Could not initialize spotify player",
+                new PlayerInitializationException("Could not initialize spotify player",
                     throwable));
           }
         });
