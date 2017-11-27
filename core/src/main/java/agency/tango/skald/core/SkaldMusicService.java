@@ -142,39 +142,41 @@ public class SkaldMusicService {
   }
 
   public Single<List<SkaldTrack>> searchTracks(String query) {
-    List<Single<List<SkaldTrack>>> singles = new ArrayList<>();
+    List<Single<List<SkaldTrack>>> tracks = new ArrayList<>();
     for (Provider provider : providers) {
       try {
-        singles.add(getSearchService(provider).searchForTracks(query));
+        tracks.add(getSearchService(provider).searchForTracks(query));
       } catch (AuthException authException) {
-        authException.printStackTrace();
+        //method just returns tracks from authenticated services
+        //if none of services is authenticated, method returns an empty list
       }
     }
-    return mergeLists(singles);
+    return mergeLists(tracks);
   }
 
   public Single<List<SkaldPlaylist>> searchPlayLists(String query) {
-    List<Single<List<SkaldPlaylist>>> singles = new ArrayList<>();
+    List<Single<List<SkaldPlaylist>>> playlists = new ArrayList<>();
     for (Provider provider : providers) {
       try {
-        singles.add(getSearchService(provider).searchForPlaylists(query));
+        playlists.add(getSearchService(provider).searchForPlaylists(query));
       } catch (AuthException authException) {
-        authException.printStackTrace();
+        //method just returns playlists from authenticated services
+        //if none of services is authenticated, method returns an empty list
       }
     }
-    return mergeLists(singles);
+    return mergeLists(playlists);
   }
 
   public Single<List<SkaldUser>> getCurrentUser() {
-    List<Single<SkaldUser>> singles = new ArrayList<>();
+    List<Single<SkaldUser>> users = new ArrayList<>();
     for (Provider provider : providers) {
       try {
-        singles.add(getUserService(provider).getUser());
+        users.add(getUser(provider));
       } catch (AuthException authException) {
         authException.printStackTrace();
       }
     }
-    return Single.merge(singles)
+    return Single.merge(users)
         .toList();
   }
 
@@ -201,6 +203,10 @@ public class SkaldMusicService {
 
   private Player getCurrentPlayer() {
     return playerCache.get(currentProviderName);
+  }
+
+  private Single<SkaldUser> getUser(Provider provider) throws AuthException {
+    return getUserService(provider).getUser();
   }
 
   private SearchService getSearchService(Provider provider) throws AuthException {

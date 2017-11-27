@@ -266,7 +266,7 @@ public class MainActivity extends Activity {
   private void notifyViewsAfterLoggingOut() {
     if (!isUserLoggedIn()) {
       notifyUserViews(EMPTY, null);
-      userName.setText(R.string.hello);
+      userName.setText(R.string.hello_exc_mark);
     } else {
       getUserAndNotifyUserViews();
     }
@@ -280,7 +280,7 @@ public class MainActivity extends Activity {
           .subscribe(new DisposableSingleObserver<List<SkaldUser>>() {
             @Override
             public void onSuccess(List<SkaldUser> skaldUsers) {
-              String message = String.format("Hello, %s!", skaldUsers.get(0).getName());
+              String message = String.format("Hello, %s!", skaldUsers.get(0).getNickName());
               notifyUserViews(message, skaldUsers.get(0).getImageUrl());
             }
 

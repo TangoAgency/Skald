@@ -3,17 +3,17 @@ package agency.tango.skald.core.models;
 public class SkaldUser {
   private final String firstName;
   private final String lastName;
-  private final String name;
+  private final String nickName;
   private final String imageUrl;
   private final String email;
   private final String country;
   private final String birthDate;
 
-  public SkaldUser(String firstName, String lastName, String name, String imageUrl,
+  public SkaldUser(String firstName, String lastName, String nickName, String imageUrl,
       String email, String country, String birthDate) {
     this.firstName = firstName;
     this.lastName = lastName;
-    this.name = name;
+    this.nickName = nickName;
     this.imageUrl = imageUrl;
     this.email = email;
     this.country = country;
@@ -28,8 +28,8 @@ public class SkaldUser {
     return lastName;
   }
 
-  public String getName() {
-    return name;
+  public String getNickName() {
+    return nickName;
   }
 
   public String getImageUrl() {

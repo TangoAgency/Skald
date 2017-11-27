@@ -21,8 +21,8 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
 
 public class DeezerSearchService implements SearchService {
-  private static final String SEARCH_TRACK_REQUEST = "SEARCH_TRACK_REQUEST";
-  private static final String SEARCH_PLAYLIST_REQUEST = "SEARCH_PLAYLIST_REQUEST";
+  private static final String SEARCH_TRACK_REQUEST_ID = "SEARCH_TRACK_REQUEST";
+  private static final String SEARCH_PLAYLIST_REQUEST_ID = "SEARCH_PLAYLIST_REQUEST";
   private final DeezerConnect deezerConnect;
 
   public DeezerSearchService(DeezerConnect deezerConnect) {
@@ -36,12 +36,12 @@ public class DeezerSearchService implements SearchService {
       public void subscribe(@NonNull final SingleEmitter<List<SkaldTrack>> emitter)
           throws Exception {
         final DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchTracks(query);
-        deezerRequest.setId(SEARCH_TRACK_REQUEST);
+        deezerRequest.setId(SEARCH_TRACK_REQUEST_ID);
         deezerConnect.requestAsync(deezerRequest,
             new DeezerRequestListener<List<SkaldTrack>>(emitter) {
               @Override
               public void onResult(Object result, Object requestId) {
-                if (requestId.equals(SEARCH_TRACK_REQUEST)) {
+                if (requestId.equals(SEARCH_TRACK_REQUEST_ID)) {
                   List<Track> tracks = (List<Track>) result;
                   List<SkaldTrack> skaldTracks = mapDeezerTracksToSkaldTracks(tracks);
                   emitter.onSuccess(skaldTracks);
@@ -59,12 +59,12 @@ public class DeezerSearchService implements SearchService {
       public void subscribe(@NonNull final SingleEmitter<List<SkaldPlaylist>> emitter)
           throws Exception {
         DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchPlaylists(query);
-        deezerRequest.setId(SEARCH_PLAYLIST_REQUEST);
+        deezerRequest.setId(SEARCH_PLAYLIST_REQUEST_ID);
         deezerConnect.requestAsync(deezerRequest,
             new DeezerRequestListener<List<SkaldPlaylist>>(emitter) {
               @Override
               public void onResult(Object result, Object requestId) {
-                if (requestId.equals(SEARCH_PLAYLIST_REQUEST)) {
+                if (requestId.equals(SEARCH_PLAYLIST_REQUEST_ID)) {
                   List<Playlist> playlists = (List<Playlist>) result;
                   List<SkaldPlaylist> skaldPlaylists = mapDeezerPlaylistsToSkaldPlaylists(
                       playlists);

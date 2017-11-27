@@ -14,7 +14,7 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
 
 public class DeezerUserService implements UserService {
-  private static final String CURRENT_USER_REQUEST = "current_user_request";
+  private static final String CURRENT_USER_REQUEST_ID = "current_user_request";
   private final DeezerConnect deezerConnect;
 
   public DeezerUserService(DeezerConnect deezerConnect) {
@@ -28,12 +28,12 @@ public class DeezerUserService implements UserService {
       public void subscribe(@NonNull final SingleEmitter<SkaldUser> emitter)
           throws Exception {
         final DeezerRequest deezerRequest = DeezerRequestFactory.requestCurrentUser();
-        deezerRequest.setId(CURRENT_USER_REQUEST);
+        deezerRequest.setId(CURRENT_USER_REQUEST_ID);
         deezerConnect.requestAsync(deezerRequest,
             new DeezerRequestListener<SkaldUser>(emitter) {
               @Override
               public void onResult(Object result, Object requestId) {
-                if (requestId.equals(CURRENT_USER_REQUEST)) {
+                if (requestId.equals(CURRENT_USER_REQUEST_ID)) {
                   SkaldUser skaldUser = mapDeezerUserToSkaldUser((User) result);
                   emitter.onSuccess(skaldUser);
                 }
