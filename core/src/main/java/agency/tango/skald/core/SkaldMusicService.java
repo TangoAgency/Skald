@@ -74,7 +74,7 @@ public class SkaldMusicService {
 
   public synchronized Completable play(final SkaldPlayableEntity skaldPlayableEntity) {
     return Completable.create(new CompletableOnPlaySubscribe(this, skaldPlayableEntity,
-        onPlaybackListeners, onLoadingListeners, playerCache, providers));
+        onPlaybackListeners, onLoadingListeners, onErrorListeners, playerCache, providers));
   }
 
   public Completable pause() {

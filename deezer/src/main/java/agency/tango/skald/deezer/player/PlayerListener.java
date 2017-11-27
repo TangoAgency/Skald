@@ -13,21 +13,26 @@ import com.deezer.sdk.player.event.PlayerWrapperListener;
 import java.util.List;
 
 import agency.tango.skald.core.errors.PlaybackError;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.TrackMetadata;
+import agency.tango.skald.deezer.exceptions.UnparsedResultException;
 
 public class PlayerListener implements PlayerWrapperListener {
   private static final String TRACK_REQUEST = "TRACK_REQUEST";
   private final DeezerPlayer deezerPLayer;
   private final DeezerConnect deezerConnect;
   private final List<OnPlaybackListener> onPlaybackListeners;
+  private final OnErrorListener onErrorListener;
   private final Handler mainHandler;
 
   public PlayerListener(DeezerPlayer deezerPLayer, DeezerConnect deezerConnect,
-      List<OnPlaybackListener> onPlaybackListeners, Handler mainHandler) {
+      List<OnPlaybackListener> onPlaybackListeners, OnErrorListener onErrorListener,
+      Handler mainHandler) {
     this.deezerPLayer = deezerPLayer;
     this.deezerConnect = deezerConnect;
     this.onPlaybackListeners = onPlaybackListeners;
+    this.onErrorListener = onErrorListener;
     this.mainHandler = mainHandler;
   }
 
@@ -47,8 +52,8 @@ public class PlayerListener implements PlayerWrapperListener {
   }
 
   @Override
-  public void onRequestException(Exception e, Object o) {
-
+  public void onRequestException(Exception exception, Object o) {
+    onErrorListener.onError(exception);
   }
 
   private void makeTrackRequestAndNotifyPlayResumeEvent(long trackId) {
@@ -69,14 +74,16 @@ public class PlayerListener implements PlayerWrapperListener {
       @Override
       public void onUnparsedResult(String requestResponse, Object requestId) {
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError("Cannot get track info"));
+          onPlaybackListener.onError(
+              new PlaybackError(new UnparsedResultException(
+                  String.format("Cannot get track info: %s", requestResponse))));
         }
       }
 
       @Override
       public void onException(Exception exception, Object requestId) {
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onError(new PlaybackError(exception.getMessage()));
+          onPlaybackListener.onError(new PlaybackError(exception));
         }
       }
     });

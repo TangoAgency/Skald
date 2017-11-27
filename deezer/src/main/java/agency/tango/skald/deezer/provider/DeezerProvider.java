@@ -9,6 +9,7 @@ import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
@@ -71,9 +72,9 @@ public class DeezerProvider extends Provider {
     }
 
     @Override
-    public Player getPlayer() throws AuthException {
+    public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
-      return new SkaldDeezerPlayer(context, deezerAuthData);
+      return new SkaldDeezerPlayer(context, deezerAuthData, onErrorListener);
     }
   }
 
