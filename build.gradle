@@ -35,7 +35,7 @@ subprojects { project ->
       }
     }
     dependencies {
-      classpath 'com.android.tools.build:gradle:3.0.0'
+      classpath 'com.android.tools.build:gradle:3.0.1'
       classpath 'gradle.plugin.com.kageiit:lintrules:1.1.2'
       classpath 'com.novoda:bintray-release:0.3.4'
       classpath 'com.dicedmelon.gradle:jacoco-android:0.1.1'
@@ -94,6 +94,9 @@ ext.deps = [// Android
 
             //Deezer
             deezer                : 'com.deezer:deezer-sdk-0.11.2@aar',
+
+            //ExoPlayer
+            exoplayer             : 'com.google.android.exoplayer:exoplayer:r2.5.4',
 
             // Google Services
             googlePlayServicesMaps: "com.google.android.gms:play-services-maps:$googlePlayServicesVersion",

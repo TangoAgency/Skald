@@ -4,6 +4,7 @@ import android.app.Application;
 
 import agency.tango.skald.core.Skald;
 import agency.tango.skald.deezer.provider.DeezerProvider;
+import agency.tango.skald.exoplayer.provider.ExoPlayerProvider;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
 
 public class ExampleApp extends Application {
@@ -23,7 +24,8 @@ public class ExampleApp extends Application {
     SpotifyProvider spotifyProvider = new SpotifyProvider(this, SPOTIFY_CLIENT_ID,
         SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET);
     DeezerProvider deezerProvider = new DeezerProvider(this, DEEZER_CLIENT_ID);
+    ExoPlayerProvider exoPlayerProvider = new ExoPlayerProvider(this);
 
-    Skald.with(spotifyProvider, deezerProvider);
+    Skald.with(spotifyProvider, deezerProvider, exoPlayerProvider);
   }
 }

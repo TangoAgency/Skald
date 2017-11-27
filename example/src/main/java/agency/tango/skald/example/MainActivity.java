@@ -3,6 +3,7 @@ package agency.tango.skald.example;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -58,6 +59,7 @@ public class MainActivity extends Activity {
   private Button tracksButton;
   private Button playlistButton;
   private TextView loadingTextView;
+  private Button exoPlayButton;
 
   private boolean isPlaying = false;
 
@@ -75,6 +77,7 @@ public class MainActivity extends Activity {
     tracksButton = (Button) findViewById(R.id.button_tracks);
     playlistButton = (Button) findViewById(R.id.button_playlists);
     loadingTextView = (TextView) findViewById(R.id.textView_loading);
+    exoPlayButton = findViewById(R.id.button_exo_play);
 
     skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
       @Override
@@ -167,6 +170,18 @@ public class MainActivity extends Activity {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new PlaybackEventCompletableObserver());
+      }
+    });
+
+    exoPlayButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        SkaldPlayableEntity skaldTrack = new SkaldTrack(
+            Uri.parse(
+                "https://ia800706.us.archive.org/4/items/Sample_Audio_Clips_mp3/KuumbaPodcast1.mp3"),
+            "", "", "");
+        play(skaldTrack);
+        isPlaying = true;
       }
     });
   }

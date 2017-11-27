@@ -115,8 +115,7 @@
     android:id="@+id/button_login_deezer"
     android:layout_width="125dp"
     android:layout_height="0dp"
-    android:layout_marginEnd="42dp"
-    android:layout_marginRight="42dp"
+    android:layout_marginRight="96dp"
     android:layout_marginTop="8dp"
     android:background="@android:color/holo_blue_light"
     android:text="@string/login_to_deezer"
@@ -146,17 +145,13 @@
     android:id="@+id/button_playlists"
     android:layout_width="127dp"
     android:layout_height="48dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginLeft="86dp"
-    android:layout_marginRight="8dp"
-    android:layout_marginStart="86dp"
+    android:layout_marginEnd="96dp"
     android:layout_marginTop="14dp"
     android:background="@android:color/holo_orange_light"
     android:text="@string/get_playlists"
-    app:layout_constraintHorizontal_bias="0.0"
-    app:layout_constraintLeft_toRightOf="@+id/button_tracks"
-    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/button_login_deezer"
+    android:layout_marginRight="96dp"
     />
   <FrameLayout
     android:id="@+id/fragment_container"
@@ -187,5 +182,17 @@
     app:layout_constraintBottom_toTopOf="@+id/imageButton_stop"
     app:layout_constraintRight_toRightOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/fragment_container"
+    />
+  <Button
+    android:id="@+id/button_exo_play"
+    android:layout_width="72dp"
+    android:layout_height="60dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginRight="8dp"
+    android:layout_marginTop="32dp"
+    android:text="@string/play_exo"
+    android:textSize="10sp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
     />
 </android.support.constraint.ConstraintLayout>

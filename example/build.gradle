@@ -40,9 +40,11 @@ dependencies {
   implementation project(":core")
   implementation project(":spotify")
   implementation project(":deezer")
+  implementation project(":exoplayer")
 
   implementation 'com.android.support.constraint:constraint-layout:1.0.2'
   implementation 'com.squareup.picasso:picasso:2.5.2'
+  implementation 'com.google.android.exoplayer:exoplayer:r2.5.4'
 
   implementation deps.rxJava
   implementation deps.rxAndroid

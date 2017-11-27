@@ -1,1 +1,1 @@
-include ':core', ':spotify', ':example', ':deezer'
+include ':core', ':spotify', ':example', ':deezer', ':exoplayer'
