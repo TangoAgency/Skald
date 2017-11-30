@@ -64,8 +64,8 @@ ext {
   targetSdkVersion = 25
   compileSdkVersion = 26
   buildToolsVersion = '26.0.2'
-  sourceCompatibilityVersion = JavaVersion.VERSION_1_7
-  targetCompatibilityVersion = JavaVersion.VERSION_1_7
+  sourceCompatibilityVersion = JavaVersion.VERSION_1_8
+  targetCompatibilityVersion = JavaVersion.VERSION_1_8
 }
 
 def androidToolsVersion = '25.2.0'

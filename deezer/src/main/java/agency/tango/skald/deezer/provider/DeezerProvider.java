@@ -49,8 +49,10 @@ public class DeezerProvider extends Provider {
   }
 
   @Override
-  public ServicesFactory getServicesFactory() {
-    return new DeezerServicesFactory(context, this);
+  public ServicesFactory getServicesFactory() throws AuthException {
+    SkaldAuthStore skaldAuthStore = new DeezerAuthStore(this);
+    DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
+    return new DeezerServicesFactory(deezerAuthData);
   }
 
   @Override
@@ -93,23 +95,19 @@ public class DeezerProvider extends Provider {
   }
 
   private static class DeezerServicesFactory extends ServicesFactory {
-    private final Context context;
-    private final SkaldAuthStore skaldAuthStore;
+    private final DeezerAuthData deezerAuthData;
 
-    private DeezerServicesFactory(Context context, DeezerProvider deezerProvider) {
-      this.context = context;
-      skaldAuthStore = new DeezerAuthStore(deezerProvider);
+    private DeezerServicesFactory(DeezerAuthData deezerAuthData) {
+      this.deezerAuthData = deezerAuthData;
     }
 
     @Override
-    public SearchService getSearchService() throws AuthException {
-      DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
+    public SearchService getSearchService() {
       return new DeezerSearchService(deezerAuthData.getDeezerConnect());
     }
 
     @Override
-    public UserService getUserService() throws AuthException {
-      DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
+    public UserService getUserService() {
       return new DeezerUserService(deezerAuthData.getDeezerConnect());
     }
   }

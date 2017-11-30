@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 import agency.tango.skald.core.bus.LoginEvent;
 import agency.tango.skald.core.bus.SkaldBus;
-import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.exceptions.AuthException;
@@ -26,11 +25,7 @@ import agency.tango.skald.core.models.SkaldUser;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 import io.reactivex.Completable;
-import io.reactivex.CompletableEmitter;
-import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Single;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Function;
 
 public class SkaldMusicService {
   public static final String INTENT_ACTION = "auth_action";
@@ -46,12 +41,7 @@ public class SkaldMusicService {
   private final Timer timer = new Timer();
   private final SkaldBus skaldBus = SkaldBus.getInstance();
   private final TLruCache<ProviderName, Player> playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-      new SkaldLruCache.CacheItemRemovedListener<ProviderName, Player>() {
-        @Override
-        public void release(ProviderName key, Player player) {
-          player.release();
-        }
-      });
+      (key, player) -> player.release());
   private final LogoutEventObserver logoutEventObserver = new LogoutEventObserver(playerCache,
       this);
 
@@ -79,34 +69,25 @@ public class SkaldMusicService {
   }
 
   public Completable pause() {
-    return Completable.create(new CompletableOnSubscribe() {
-      @Override
-      public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentProviderName != null) {
-          getCurrentPlayer().pause(new SkaldCoreOperationCallback(emitter));
-        }
+    return Completable.create(emitter -> {
+      if (currentProviderName != null) {
+        getCurrentPlayer().pause(new SkaldCoreOperationCallback(emitter));
       }
     });
   }
 
   public Completable resume() {
-    return Completable.create(new CompletableOnSubscribe() {
-      @Override
-      public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentProviderName != null) {
-          getCurrentPlayer().resume(new SkaldCoreOperationCallback(emitter));
-        }
+    return Completable.create(emitter -> {
+      if (currentProviderName != null) {
+        getCurrentPlayer().resume(new SkaldCoreOperationCallback(emitter));
       }
     });
   }
 
   public Completable stop() {
-    return Completable.create(new CompletableOnSubscribe() {
-      @Override
-      public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentProviderName != null) {
-          getCurrentPlayer().stop(new SkaldCoreOperationCallback(emitter));
-        }
+    return Completable.create(emitter -> {
+      if (currentProviderName != null) {
+        getCurrentPlayer().stop(new SkaldCoreOperationCallback(emitter));
       }
     });
   }
@@ -173,7 +154,8 @@ public class SkaldMusicService {
       try {
         users.add(getUser(provider));
       } catch (AuthException authException) {
-        authException.printStackTrace();
+        //method just returns users from authenticated services
+        //if none of services is authenticated, method returns an empty list
       }
     }
     return Single.merge(users)
@@ -220,15 +202,12 @@ public class SkaldMusicService {
   private <T> Single<List<T>> mergeLists(List<Single<List<T>>> singlesList) {
     return Single.merge(singlesList)
         .toList()
-        .map(new Function<List<List<T>>, List<T>>() {
-          @Override
-          public List<T> apply(@NonNull List<List<T>> lists) throws Exception {
-            List<T> mergedList = new ArrayList<>();
-            for (List<T> list : lists) {
-              mergedList.addAll(list);
-            }
-            return mergedList;
+        .map(lists -> {
+          List<T> mergedList = new ArrayList<>();
+          for (List<T> list : lists) {
+            mergedList.addAll(list);
           }
+          return mergedList;
         });
   }
 }

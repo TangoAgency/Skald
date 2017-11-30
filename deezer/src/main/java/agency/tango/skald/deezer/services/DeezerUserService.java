@@ -9,9 +9,6 @@ import agency.tango.skald.core.UserService;
 import agency.tango.skald.core.models.SkaldUser;
 import agency.tango.skald.deezer.services.listeners.DeezerRequestListener;
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.annotations.NonNull;
 
 public class DeezerUserService implements UserService {
   private static final String CURRENT_USER_REQUEST_ID = "current_user_request";
@@ -23,23 +20,19 @@ public class DeezerUserService implements UserService {
 
   @Override
   public Single<SkaldUser> getUser() {
-    return Single.create(new SingleOnSubscribe<SkaldUser>() {
-      @Override
-      public void subscribe(@NonNull final SingleEmitter<SkaldUser> emitter)
-          throws Exception {
-        final DeezerRequest deezerRequest = DeezerRequestFactory.requestCurrentUser();
-        deezerRequest.setId(CURRENT_USER_REQUEST_ID);
-        deezerConnect.requestAsync(deezerRequest,
-            new DeezerRequestListener<SkaldUser>(emitter) {
-              @Override
-              public void onResult(Object result, Object requestId) {
-                if (requestId.equals(CURRENT_USER_REQUEST_ID)) {
-                  SkaldUser skaldUser = mapDeezerUserToSkaldUser((User) result);
-                  emitter.onSuccess(skaldUser);
-                }
+    return Single.create(emitter -> {
+      final DeezerRequest deezerRequest = DeezerRequestFactory.requestCurrentUser();
+      deezerRequest.setId(CURRENT_USER_REQUEST_ID);
+      deezerConnect.requestAsync(deezerRequest,
+          new DeezerRequestListener<SkaldUser>(emitter) {
+            @Override
+            public void onResult(Object result, Object requestId) {
+              if (requestId.equals(CURRENT_USER_REQUEST_ID)) {
+                SkaldUser skaldUser = mapDeezerUserToSkaldUser((User) result);
+                emitter.onSuccess(skaldUser);
               }
-            });
-      }
+            }
+          });
     });
   }
 

@@ -16,9 +16,6 @@ import agency.tango.skald.deezer.models.DeezerPlaylist;
 import agency.tango.skald.deezer.models.DeezerTrack;
 import agency.tango.skald.deezer.services.listeners.DeezerRequestListener;
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.annotations.NonNull;
 
 public class DeezerSearchService implements SearchService {
   private static final String SEARCH_TRACK_REQUEST_ID = "SEARCH_TRACK_REQUEST";
@@ -31,48 +28,40 @@ public class DeezerSearchService implements SearchService {
 
   @Override
   public Single<List<SkaldTrack>> searchForTracks(final String query) {
-    return Single.create(new SingleOnSubscribe<List<SkaldTrack>>() {
-      @Override
-      public void subscribe(@NonNull final SingleEmitter<List<SkaldTrack>> emitter)
-          throws Exception {
-        final DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchTracks(query);
-        deezerRequest.setId(SEARCH_TRACK_REQUEST_ID);
-        deezerConnect.requestAsync(deezerRequest,
-            new DeezerRequestListener<List<SkaldTrack>>(emitter) {
-              @Override
-              public void onResult(Object result, Object requestId) {
-                if (requestId.equals(SEARCH_TRACK_REQUEST_ID)) {
-                  List<Track> tracks = (List<Track>) result;
-                  List<SkaldTrack> skaldTracks = mapDeezerTracksToSkaldTracks(tracks);
-                  emitter.onSuccess(skaldTracks);
-                }
+    return Single.create(emitter -> {
+      final DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchTracks(query);
+      deezerRequest.setId(SEARCH_TRACK_REQUEST_ID);
+      deezerConnect.requestAsync(deezerRequest,
+          new DeezerRequestListener<List<SkaldTrack>>(emitter) {
+            @Override
+            public void onResult(Object result, Object requestId) {
+              if (requestId.equals(SEARCH_TRACK_REQUEST_ID)) {
+                List<Track> tracks = (List<Track>) result;
+                List<SkaldTrack> skaldTracks = mapDeezerTracksToSkaldTracks(tracks);
+                emitter.onSuccess(skaldTracks);
               }
-            });
-      }
+            }
+          });
     });
   }
 
   @Override
   public Single<List<SkaldPlaylist>> searchForPlaylists(final String query) {
-    return Single.create(new SingleOnSubscribe<List<SkaldPlaylist>>() {
-      @Override
-      public void subscribe(@NonNull final SingleEmitter<List<SkaldPlaylist>> emitter)
-          throws Exception {
-        DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchPlaylists(query);
-        deezerRequest.setId(SEARCH_PLAYLIST_REQUEST_ID);
-        deezerConnect.requestAsync(deezerRequest,
-            new DeezerRequestListener<List<SkaldPlaylist>>(emitter) {
-              @Override
-              public void onResult(Object result, Object requestId) {
-                if (requestId.equals(SEARCH_PLAYLIST_REQUEST_ID)) {
-                  List<Playlist> playlists = (List<Playlist>) result;
-                  List<SkaldPlaylist> skaldPlaylists = mapDeezerPlaylistsToSkaldPlaylists(
-                      playlists);
-                  emitter.onSuccess(skaldPlaylists);
-                }
+    return Single.create(emitter -> {
+      DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchPlaylists(query);
+      deezerRequest.setId(SEARCH_PLAYLIST_REQUEST_ID);
+      deezerConnect.requestAsync(deezerRequest,
+          new DeezerRequestListener<List<SkaldPlaylist>>(emitter) {
+            @Override
+            public void onResult(Object result, Object requestId) {
+              if (requestId.equals(SEARCH_PLAYLIST_REQUEST_ID)) {
+                List<Playlist> playlists = (List<Playlist>) result;
+                List<SkaldPlaylist> skaldPlaylists = mapDeezerPlaylistsToSkaldPlaylists(
+                    playlists);
+                emitter.onSuccess(skaldPlaylists);
               }
-            });
-      }
+            }
+          });
     });
   }
 
