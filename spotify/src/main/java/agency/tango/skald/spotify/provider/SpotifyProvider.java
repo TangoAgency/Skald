@@ -58,7 +58,9 @@ public class SpotifyProvider extends Provider {
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return skaldPlayableEntity.getServiceNameFromUri().equals(NAME.getName());
+    return skaldPlayableEntity.verifyScheme() &&
+        skaldPlayableEntity.getUri().getAuthority().equals(NAME.getName()) &&
+        skaldPlayableEntity.verifyPath();
   }
 
   public String getClientId() {

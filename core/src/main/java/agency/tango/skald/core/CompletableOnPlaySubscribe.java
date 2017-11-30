@@ -88,24 +88,21 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   }
 
   private void play(@NonNull CompletableEmitter emitter) {
-    if(skaldPlayableEntity.verifyUri()) {
-      for (Provider provider : providers) {
-        if (provider.canHandle(skaldPlayableEntity)) {
-          ProviderName providerName = provider.getProviderName();
-          Player player = playerCache.get(providerName);
-          if (player != null) {
-            playEntity(emitter, player, providerName);
-          } else {
-            initializePlayerAndPlay(emitter, provider, providerName);
-          }
-        }
-        if(providers.indexOf(provider) == providers.size() - 1) {
-          emitter.onError(new UriException("Wrong Uri"));
+    boolean canHandle = false;
+    for (Provider provider : providers) {
+      if (provider.canHandle(skaldPlayableEntity)) {
+        canHandle = true;
+        ProviderName providerName = provider.getProviderName();
+        Player player = playerCache.get(providerName);
+        if (player != null) {
+          playEntity(emitter, player, providerName);
+        } else {
+          initializePlayerAndPlay(emitter, provider, providerName);
         }
       }
-    }
-    else {
-      emitter.onError(new UriException("Wrong Uri"));
+      if (providers.indexOf(provider) == providers.size() - 1 && !canHandle) {
+        emitter.onError(new UriException("Wrong Uri"));
+      }
     }
   }
 
