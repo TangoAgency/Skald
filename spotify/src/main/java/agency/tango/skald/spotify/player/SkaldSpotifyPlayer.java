@@ -130,8 +130,8 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlayerReadyListener() {
-    onPlayerReadyListeners.remove(0);
+  public void removeOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+    onPlayerReadyListeners.remove(onPlayerReadyListener);
   }
 
   @Override
@@ -140,8 +140,8 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlaybackListener() {
-    onPlaybackListeners.remove(0);
+  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+    onPlaybackListeners.remove(onPlaybackListener);
   }
 
   @Override
@@ -150,8 +150,8 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void removeOnLoadingListener() {
-    onLoadingListeners.remove(0);
+  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+    onLoadingListeners.remove(onLoadingListener);
   }
 
   public SpotifyPlayer getPlayer() {

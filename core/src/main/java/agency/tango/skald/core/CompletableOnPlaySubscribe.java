@@ -24,26 +24,35 @@ import io.reactivex.disposables.Disposable;
 class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   private final SkaldMusicService skaldMusicService;
   private final SkaldPlayableEntity skaldPlayableEntity;
-  private final List<OnPlaybackListener> onPlaybackListeners;
-  private final List<OnLoadingListener> onLoadingListeners;
   private final List<OnErrorListener> onErrorListeners;
   private final TLruCache<ProviderName, Player> playerCache;
   private final List<Provider> providers;
+  private final OnPlayerPlaybackListener onPlayerPlaybackListener;
+  private final OnLoadingListener onLoadingListener;
+  private OnPlayerReadyListener onPlayerReadyListener;
 
   private boolean playerInitialized = false;
   private Player initializedPlayer;
 
   CompletableOnPlaySubscribe(SkaldMusicService skaldMusicService,
       SkaldPlayableEntity skaldPlayableEntity, List<OnPlaybackListener> onPlaybackListeners,
-      List<OnLoadingListener> onLoadingListeners, List<OnErrorListener> onErrorListeners,
+      final List<OnLoadingListener> onLoadingListeners, List<OnErrorListener> onErrorListeners,
       TLruCache<ProviderName, Player> playerCache, List<Provider> providers) {
     this.skaldMusicService = skaldMusicService;
     this.skaldPlayableEntity = skaldPlayableEntity;
-    this.onPlaybackListeners = onPlaybackListeners;
-    this.onLoadingListeners = onLoadingListeners;
     this.onErrorListeners = onErrorListeners;
     this.playerCache = playerCache;
     this.providers = providers;
+
+    onPlayerPlaybackListener = new OnPlayerPlaybackListener(onPlaybackListeners);
+    onLoadingListener = new OnLoadingListener() {
+      @Override
+      public void onLoading() {
+        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
+          onLoadingListener.onLoading();
+        }
+      }
+    };
   }
 
   @Override
@@ -73,6 +82,9 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
       @Override
       public void dispose() {
         if (!playerInitialized && initializedPlayer != null) {
+          initializedPlayer.removeOnPlaybackListener(onPlayerPlaybackListener);
+          initializedPlayer.removeOnLoadingListener(onLoadingListener);
+          initializedPlayer.removeOnPlayerReadyListener(onPlayerReadyListener);
           initializedPlayer.release();
         }
       }
@@ -123,16 +135,9 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
         }
       };
       initializedPlayer = provider.getPlayerFactory().getPlayer(onErrorListener);
-      initializedPlayer.addOnPlaybackListener(new OnPlayerPlaybackListener(onPlaybackListeners));
-      initializedPlayer.addOnLoadingListener(new OnLoadingListener() {
-        @Override
-        public void onLoading() {
-          for (OnLoadingListener onLoadingListener : onLoadingListeners) {
-            onLoadingListener.onLoading();
-          }
-        }
-      });
-      initializedPlayer.addOnPlayerReadyListener(new OnPlayerReadyListener() {
+      initializedPlayer.addOnPlaybackListener(onPlayerPlaybackListener);
+      initializedPlayer.addOnLoadingListener(onLoadingListener);
+      onPlayerReadyListener = new OnPlayerReadyListener() {
         @Override
         public void onPlayerReady(Player player) {
           playerInitialized = true;
@@ -140,7 +145,8 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
           player.play(skaldPlayableEntity, new SkaldCoreOperationCallback(emitter));
           skaldMusicService.setCurrentProviderName(providerName);
         }
-      });
+      };
+      initializedPlayer.addOnPlayerReadyListener(onPlayerReadyListener);
     } catch (AuthException authException) {
       emitter.onError(authException);
     }
