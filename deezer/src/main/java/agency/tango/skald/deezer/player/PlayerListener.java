@@ -83,12 +83,9 @@ public class PlayerListener implements PlayerWrapperListener {
   }
 
   private void notifyPlayEvent(final TrackMetadata trackMetadata) {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPlayEvent(trackMetadata);
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onPlayEvent(trackMetadata);
       }
     });
   }

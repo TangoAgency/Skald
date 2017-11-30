@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -22,9 +21,6 @@ import agency.tango.skald.core.SkaldMusicService;
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.exceptions.AuthException;
-import agency.tango.skald.core.listeners.OnAuthErrorListener;
-import agency.tango.skald.core.listeners.OnErrorListener;
-import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -81,101 +77,73 @@ public class MainActivity extends Activity {
     userName = findViewById(R.id.text_user_name);
     userAvatar = findViewById(R.id.image_user);
 
-    skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
-      @Override
-      public void onAuthError(AuthError authError) {
-        startAuthActivity(authError);
-      }
-    });
+    skaldAuthService = new SkaldAuthService(getApplicationContext(), this::startAuthActivity);
 
     skaldMusicService = new SkaldMusicService(getApplicationContext());
 
     addOnErrorListener();
     addOnPlaybackListener();
-    skaldMusicService.addOnLoadingListener(new OnLoadingListener() {
-      @Override
-      public void onLoading() {
-        Log.d(TAG, "Loading track...");
-        loadingTextView.setText(R.string.loading);
+    skaldMusicService.addOnLoadingListener(() -> {
+      Log.d(TAG, "Loading track...");
+      loadingTextView.setText(R.string.loading);
+    });
+
+    spotifyButton.setOnClickListener(v -> {
+      if (!skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
+        skaldAuthService.login(SpotifyProvider.NAME);
+        spotifyButton.setText(R.string.logout_from_spotify);
+      } else {
+        skaldAuthService.logout(SpotifyProvider.NAME);
+        spotifyButton.setText(R.string.login_to_spotify);
+        updateViewsAfterLoggingOut();
+      }
+    });
+    deezerButton.setOnClickListener(v -> {
+      if (!skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
+        skaldAuthService.login(DeezerProvider.NAME);
+        deezerButton.setText(R.string.logout_from_deezer);
+      } else {
+        skaldAuthService.logout(DeezerProvider.NAME);
+        deezerButton.setText(R.string.login_to_deezer);
+        updateViewsAfterLoggingOut();
       }
     });
 
-    spotifyButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        if (!skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
-          skaldAuthService.login(SpotifyProvider.NAME);
-          spotifyButton.setText(R.string.logout_from_spotify);
-        } else {
-          skaldAuthService.logout(SpotifyProvider.NAME);
-          spotifyButton.setText(R.string.login_to_spotify);
-          updateViewsAfterLoggingOut();
-        }
-      }
-    });
-    deezerButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        if (!skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
-          skaldAuthService.login(DeezerProvider.NAME);
-          deezerButton.setText(R.string.logout_from_deezer);
-        } else {
-          skaldAuthService.logout(DeezerProvider.NAME);
-          deezerButton.setText(R.string.login_to_deezer);
-          updateViewsAfterLoggingOut();
-        }
-      }
+    tracksButton.setOnClickListener(v -> {
+      FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+      TrackListFragment fragment = new TrackListFragment();
+      fragmentTransaction.replace(R.id.fragment_container, fragment);
+      fragmentTransaction.commit();
+      getFragmentManager().executePendingTransactions();
+      fragment.searchTracks();
     });
 
-    tracksButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        TrackListFragment fragment = new TrackListFragment();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.commit();
-        getFragmentManager().executePendingTransactions();
-        fragment.searchTracks();
-      }
+    playlistButton.setOnClickListener(v -> {
+      FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+      PlaylistListFragment fragment = new PlaylistListFragment();
+      fragmentTransaction.replace(R.id.fragment_container, fragment);
+      fragmentTransaction.commit();
+      getFragmentManager().executePendingTransactions();
+      fragment.searchPlaylists();
     });
 
-    playlistButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        PlaylistListFragment fragment = new PlaylistListFragment();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.commit();
-        getFragmentManager().executePendingTransactions();
-        fragment.searchPlaylists();
-      }
-    });
-
-    resumePauseButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        if (isPlaying) {
-          skaldMusicService.pause()
-              .subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread())
-              .subscribe(new PlaybackEventCompletableObserver());
-        } else {
-          skaldMusicService.resume()
-              .subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread())
-              .subscribe(new PlaybackEventCompletableObserver());
-        }
-      }
-    });
-    stopButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        skaldMusicService.stop()
+    resumePauseButton.setOnClickListener(v -> {
+      if (isPlaying) {
+        skaldMusicService.pause()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new PlaybackEventCompletableObserver());
+      } else {
+        skaldMusicService.resume()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new PlaybackEventCompletableObserver());
       }
     });
+    stopButton.setOnClickListener(v -> skaldMusicService.stop()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new PlaybackEventCompletableObserver()));
   }
 
   @Override
@@ -322,12 +290,7 @@ public class MainActivity extends Activity {
   }
 
   private void addOnErrorListener() {
-    skaldMusicService.addOnErrorListener(new OnErrorListener() {
-      @Override
-      public void onError() {
-        Log.e(TAG, "Error in SkaldMusicService occurred");
-      }
-    });
+    skaldMusicService.addOnErrorListener(() -> Log.e(TAG, "Error in SkaldMusicService occurred"));
   }
 
   private void addOnPlaybackListener() {

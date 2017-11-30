@@ -10,7 +10,6 @@ import com.deezer.sdk.network.request.event.DeezerError;
 import com.deezer.sdk.player.PlayerWrapper;
 import com.deezer.sdk.player.PlaylistPlayer;
 import com.deezer.sdk.player.TrackPlayer;
-import com.deezer.sdk.player.event.OnPlayerStateChangeListener;
 import com.deezer.sdk.player.event.PlayerState;
 import com.deezer.sdk.player.exception.TooManyPlayersExceptions;
 import com.deezer.sdk.player.networkcheck.WifiAndMobileNetworkStateChecker;
@@ -18,7 +17,6 @@ import com.deezer.sdk.player.networkcheck.WifiAndMobileNetworkStateChecker;
 import java.util.ArrayList;
 import java.util.List;
 
-import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.errors.PlaybackError;
@@ -35,16 +33,13 @@ class DeezerPlayer {
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
   private final TLruCache<Class, PlayerWrapper> playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-      new SkaldLruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
-        @Override
-        public void release(Class key, PlayerWrapper playerWrapper) {
-          PlayerState playerState = playerWrapper.getPlayerState();
-          if (playerState == PlayerState.PLAYING) {
-            playerWrapper.stop();
-          }
-          if (playerState != PlayerState.RELEASED) {
-            playerWrapper.release();
-          }
+      (key, playerWrapper) -> {
+        PlayerState playerState = playerWrapper.getPlayerState();
+        if (playerState == PlayerState.PLAYING) {
+          playerWrapper.stop();
+        }
+        if (playerState != PlayerState.RELEASED) {
+          playerWrapper.release();
         }
       });
   private final Handler mainHandler;
@@ -111,12 +106,9 @@ class DeezerPlayer {
   }
 
   void notifyResumeEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onResumeEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onResumeEvent();
       }
     });
   }
@@ -191,55 +183,43 @@ class DeezerPlayer {
   }
 
   private void notifyLoadingEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
-          onLoadingListener.onLoading();
-        }
+    mainHandler.post(() -> {
+      for (OnLoadingListener onLoadingListener : onLoadingListeners) {
+        onLoadingListener.onLoading();
       }
     });
   }
 
   private void addOnPlayerStateChangeListener() {
-    currentPlayer.addOnPlayerStateChangeListener(new OnPlayerStateChangeListener() {
-      @Override
-      public void onPlayerStateChange(PlayerState playerState, long timePosition) {
-        if (playerState == PlayerState.PLAYING) {
-          if (!isPlayEvent) {
-            notifyResumeEvent();
-          }
-          isPlayEvent = false;
-        } else if (playerState == PlayerState.WAITING_FOR_DATA) {
-          isPlayEvent = true;
-        } else if (playerState == PlayerState.PAUSED) {
-          notifyPauseEvent();
-        } else if (playerState == PlayerState.STOPPED) {
-          notifyPauseEvent();
-          notifyStopEvent();
+    currentPlayer.addOnPlayerStateChangeListener((playerState, timePosition) -> {
+      if (playerState == PlayerState.PLAYING) {
+        if (!isPlayEvent) {
+          notifyResumeEvent();
         }
+        isPlayEvent = false;
+      } else if (playerState == PlayerState.WAITING_FOR_DATA) {
+        isPlayEvent = true;
+      } else if (playerState == PlayerState.PAUSED) {
+        notifyPauseEvent();
+      } else if (playerState == PlayerState.STOPPED) {
+        notifyPauseEvent();
+        notifyStopEvent();
       }
     });
   }
 
   private void notifyPauseEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPauseEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onPauseEvent();
       }
     });
   }
 
   private void notifyStopEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onStopEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onStopEvent();
       }
     });
   }

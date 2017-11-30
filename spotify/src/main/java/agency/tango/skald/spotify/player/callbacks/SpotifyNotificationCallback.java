@@ -51,36 +51,27 @@ public class SpotifyNotificationCallback implements Player.NotificationCallback 
   }
 
   private void notifyPlayEvent(final Metadata metadata) {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
-            metadata.currentTrack.name, metadata.currentTrack.albumCoverWebUrl);
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPlayEvent(trackMetadata);
-        }
+    mainHandler.post(() -> {
+      TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
+          metadata.currentTrack.name, metadata.currentTrack.albumCoverWebUrl);
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onPlayEvent(trackMetadata);
       }
     });
   }
 
   private void notifyResumeEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onResumeEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onResumeEvent();
       }
     });
   }
 
   private void notifyPauseEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPauseEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onPauseEvent();
       }
     });
   }

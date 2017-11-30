@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 
 import org.reactivestreams.Publisher;
 
+import java.net.HttpURLConnection;
+
 import agency.tango.skald.spotify.api.models.BrowseCategories;
 import agency.tango.skald.spotify.api.models.BrowsePlaylists;
 import agency.tango.skald.spotify.api.models.Category;
@@ -161,7 +163,7 @@ public interface SpotifyApi {
 
     private boolean isTokenExpired(Throwable throwable) {
       return throwable instanceof HttpException
-          && ((HttpException) throwable).code() == 401; // TODO use from okhttp
+          && ((HttpException) throwable).code() == HttpURLConnection.HTTP_UNAUTHORIZED;
     }
 
     private Single<Tokens> refreshToken() {

@@ -158,23 +158,17 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   private void notifyLoadingEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
-          onLoadingListener.onLoading();
-        }
+    mainHandler.post(() -> {
+      for (OnLoadingListener onLoadingListener : onLoadingListeners) {
+        onLoadingListener.onLoading();
       }
     });
   }
 
   private void notifyStopEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onStopEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onStopEvent();
       }
     });
   }
