@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
         } else {
           skaldAuthService.logout(SpotifyProvider.NAME);
           spotifyButton.setText(R.string.login_to_spotify);
-          notifyViewsAfterLoggingOut();
+          updateViewsAfterLoggingOut();
         }
       }
     });
@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
         } else {
           skaldAuthService.logout(DeezerProvider.NAME);
           deezerButton.setText(R.string.login_to_deezer);
-          notifyViewsAfterLoggingOut();
+          updateViewsAfterLoggingOut();
         }
       }
     });
@@ -184,7 +184,7 @@ public class MainActivity extends Activity {
 
     setSpotifyButtonText();
     setDeezerButtonText();
-    getUserAndNotifyUserViews();
+    getUserAndUpdateUserViews();
   }
 
   @Override
@@ -263,16 +263,16 @@ public class MainActivity extends Activity {
         });
   }
 
-  private void notifyViewsAfterLoggingOut() {
+  private void updateViewsAfterLoggingOut() {
     if (!isUserLoggedIn()) {
-      notifyUserViews(EMPTY, null);
+      updateUserViews(EMPTY, null);
       userName.setText(R.string.hello_exc_mark);
     } else {
-      getUserAndNotifyUserViews();
+      getUserAndUpdateUserViews();
     }
   }
 
-  private void getUserAndNotifyUserViews() {
+  private void getUserAndUpdateUserViews() {
     if (isUserLoggedIn()) {
       skaldMusicService.getCurrentUser()
           .subscribeOn(Schedulers.io())
@@ -281,7 +281,7 @@ public class MainActivity extends Activity {
             @Override
             public void onSuccess(List<SkaldUser> skaldUsers) {
               String message = String.format("Hello, %s!", skaldUsers.get(0).getNickName());
-              notifyUserViews(message, skaldUsers.get(0).getImageUrl());
+              updateUserViews(message, skaldUsers.get(0).getImageUrl());
             }
 
             @Override
@@ -297,7 +297,7 @@ public class MainActivity extends Activity {
         skaldAuthService.isLoggedIn(DeezerProvider.NAME);
   }
 
-  private void notifyUserViews(String message, String imageUrl) {
+  private void updateUserViews(String message, String imageUrl) {
     userName.setText(message);
     Picasso
         .with(MainActivity.this)
@@ -337,21 +337,21 @@ public class MainActivity extends Activity {
         Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
             trackMetadata.getTitle()));
         isPlaying = true;
-        notifySongViews(trackMetadata);
+        updateSongViews(trackMetadata);
       }
 
       @Override
       public void onPauseEvent() {
         Log.d(TAG, "Pause Event");
         isPlaying = false;
-        notifyResumePauseButton();
+        updateResumePauseButton();
       }
 
       @Override
       public void onResumeEvent() {
         Log.d(TAG, "Resume Event");
         isPlaying = true;
-        notifyResumePauseButton();
+        updateResumePauseButton();
       }
 
       @Override
@@ -377,7 +377,7 @@ public class MainActivity extends Activity {
     }
   }
 
-  private void notifySongViews(TrackMetadata trackMetadata) {
+  private void updateSongViews(TrackMetadata trackMetadata) {
     Picasso
         .with(this)
         .load(trackMetadata.getImageUrl())
@@ -387,7 +387,7 @@ public class MainActivity extends Activity {
     loadingTextView.setText(EMPTY);
   }
 
-  private void notifyResumePauseButton() {
+  private void updateResumePauseButton() {
     if (isPlaying) {
       resumePauseButton.setImageResource(R.drawable.ic_action_pause);
     } else {
