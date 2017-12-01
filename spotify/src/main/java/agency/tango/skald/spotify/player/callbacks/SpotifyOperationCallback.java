@@ -6,6 +6,7 @@ import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Player;
 
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
+import agency.tango.skald.spotify.exceptions.SpotifyException;
 
 public class SpotifyOperationCallback implements Player.OperationCallback {
   private static final String TAG = SpotifyOperationCallback.class.getSimpleName();
@@ -27,6 +28,6 @@ public class SpotifyOperationCallback implements Player.OperationCallback {
   @Override
   public void onError(Error error) {
     Log.e(TAG, String.format("Operation failed %s", error.toString()));
-    skaldOperationCallback.onError();
+    skaldOperationCallback.onError(new SpotifyException(error));
   }
 }

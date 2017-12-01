@@ -16,11 +16,13 @@ import java.util.List;
 
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
+import agency.tango.skald.spotify.exceptions.PlayerInitializationException;
 import agency.tango.skald.spotify.player.callbacks.SpotifyConnectionStateCallback;
 import agency.tango.skald.spotify.player.callbacks.SpotifyNotificationCallback;
 import agency.tango.skald.spotify.player.callbacks.SpotifyOperationCallback;
@@ -40,11 +42,11 @@ public class SkaldSpotifyPlayer implements Player {
   private SpotifyPlayer spotifyPlayer;
 
   public SkaldSpotifyPlayer(final Context context, final SpotifyAuthData spotifyAuthData,
-      final SpotifyProvider spotifyProvider) {
+      final SpotifyProvider spotifyProvider, final OnErrorListener onErrorListener) {
     this.context = context;
     mainHandler = new Handler(context.getMainLooper());
     connectionStateCallback = new SpotifyConnectionStateCallback(context, this,
-        onPlayerReadyListeners, spotifyProvider, spotifyAuthData);
+        onPlayerReadyListeners, onErrorListener, spotifyProvider, spotifyAuthData);
     notificationCallback = new SpotifyNotificationCallback(this, mainHandler, onPlaybackListeners);
 
     final Config playerConfig = new Config(context, spotifyAuthData.getOauthToken(),
@@ -61,6 +63,9 @@ public class SkaldSpotifyPlayer implements Player {
           @Override
           public void onError(Throwable throwable) {
             Log.e(TAG, "Could not initialize player", throwable);
+            onErrorListener.onError(
+                new PlayerInitializationException("Could not initialize spotify player",
+                    throwable));
           }
         });
 
@@ -125,8 +130,8 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlayerReadyListener() {
-    onPlayerReadyListeners.remove(0);
+  public void removeOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+    onPlayerReadyListeners.remove(onPlayerReadyListener);
   }
 
   @Override
@@ -135,8 +140,8 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlaybackListener() {
-    onPlaybackListeners.remove(0);
+  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+    onPlaybackListeners.remove(onPlaybackListener);
   }
 
   @Override
@@ -145,8 +150,8 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void removeOnLoadingListener() {
-    onLoadingListeners.remove(0);
+  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+    onLoadingListeners.remove(onLoadingListener);
   }
 
   public SpotifyPlayer getPlayer() {

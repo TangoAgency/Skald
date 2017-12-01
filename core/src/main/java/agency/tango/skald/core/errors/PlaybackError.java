@@ -1,13 +1,13 @@
 package agency.tango.skald.core.errors;
 
 public class PlaybackError {
-  private String message;
+  private Exception exception;
 
-  public PlaybackError(String message) {
-    this.message = message;
+  public PlaybackError(Exception exception) {
+    this.exception = exception;
   }
 
-  public String getMessage() {
-    return message;
+  public Exception getException() {
+    return exception;
   }
 }

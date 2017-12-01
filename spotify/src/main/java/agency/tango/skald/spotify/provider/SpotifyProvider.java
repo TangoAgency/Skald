@@ -9,6 +9,7 @@ import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
@@ -87,9 +88,9 @@ public class SpotifyProvider extends Provider {
     }
 
     @Override
-    public Player getPlayer() throws AuthException {
+    public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
       SpotifyAuthData spotifyAuthData = (SpotifyAuthData) skaldAuthDataStore.restore(context);
-      return new SkaldSpotifyPlayer(context, spotifyAuthData, spotifyProvider);
+      return new SkaldSpotifyPlayer(context, spotifyAuthData, spotifyProvider, onErrorListener);
     }
   }
 
