@@ -24,6 +24,7 @@ import java.util.List;
 
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -38,7 +39,7 @@ public class SkaldExoPlayer implements Player {
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
 
-  public SkaldExoPlayer(Context context) {
+  public SkaldExoPlayer(Context context, OnErrorListener onErrorListener) {
     Handler mainHandler = new Handler(context.getMainLooper());
 
     BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -54,7 +55,8 @@ public class SkaldExoPlayer implements Player {
     extractorsFactory = new DefaultExtractorsFactory();
 
     exoPlayer.addListener(
-        new PlayerEventsListener(mainHandler, onPlaybackListeners, onLoadingListeners));
+        new PlayerEventsListener(mainHandler, onPlaybackListeners, onLoadingListeners,
+            onErrorListener));
   }
 
   @Override
@@ -109,8 +111,8 @@ public class SkaldExoPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlayerReadyListener() {
-    onPlayerReadyListeners.remove(0);
+  public void removeOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+    onPlayerReadyListeners.remove(onPlayerReadyListener);
   }
 
   @Override
@@ -119,8 +121,8 @@ public class SkaldExoPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlaybackListener() {
-    onPlaybackListeners.remove(0);
+  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+    onPlaybackListeners.remove(onPlaybackListener);
   }
 
   @Override
@@ -129,7 +131,7 @@ public class SkaldExoPlayer implements Player {
   }
 
   @Override
-  public void removeOnLoadingListener() {
-    onLoadingListeners.remove(0);
+  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+    onLoadingListeners.remove(onLoadingListener);
   }
 }

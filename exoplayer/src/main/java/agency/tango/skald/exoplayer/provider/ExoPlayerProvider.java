@@ -7,6 +7,7 @@ import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
@@ -54,8 +55,8 @@ public class ExoPlayerProvider extends Provider {
     }
 
     @Override
-    public Player getPlayer() throws AuthException {
-      return new SkaldExoPlayer(context);
+    public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
+      return new SkaldExoPlayer(context, onErrorListener);
     }
   }
 }

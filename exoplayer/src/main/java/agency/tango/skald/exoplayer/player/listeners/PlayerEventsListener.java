@@ -12,6 +12,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 
 import java.util.List;
 
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.TrackMetadata;
@@ -20,12 +21,14 @@ public class PlayerEventsListener implements Player.EventListener {
   private final Handler mainHandler;
   private final List<OnPlaybackListener> onPlaybackListeners;
   private final List<OnLoadingListener> onLoadingListeners;
+  private final OnErrorListener onErrorListener;
 
   public PlayerEventsListener(Handler mainHandler, List<OnPlaybackListener> onPlaybackListeners,
-      List<OnLoadingListener> onLoadingListeners) {
+      List<OnLoadingListener> onLoadingListeners, OnErrorListener onErrorListener) {
     this.mainHandler = mainHandler;
     this.onPlaybackListeners = onPlaybackListeners;
     this.onLoadingListeners = onLoadingListeners;
+    this.onErrorListener = onErrorListener;
   }
 
   @Override
@@ -70,7 +73,7 @@ public class PlayerEventsListener implements Player.EventListener {
 
   @Override
   public void onPlayerError(ExoPlaybackException error) {
-
+    onErrorListener.onError(error);
   }
 
   @Override
