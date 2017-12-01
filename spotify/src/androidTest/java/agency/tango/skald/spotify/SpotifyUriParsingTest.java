@@ -17,7 +17,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
-public class UriParsingTest {
+public class SpotifyUriParsingTest {
   private SpotifyProvider spotifyProvider;
 
   @Before
@@ -45,16 +45,22 @@ public class UriParsingTest {
   public void parse_uriSchemeIsNotValid_shouldReturnFalse() {
     SkaldPlayableEntity skaldTrack = new SkaldTrack(
         Uri.parse("skald1://spotify/track/spotify_uri"));
+    SkaldPlayableEntity skaldPlaylist = new SkaldPlaylist(
+        Uri.parse("viking://spotify/track/spotify_uri"));
 
     assertFalse(spotifyProvider.canHandle(skaldTrack));
+    assertFalse(spotifyProvider.canHandle(skaldPlaylist));
   }
 
   @Test
   public void parse_uriAuthorityIsNotValid_shouldReturnFalse() {
     SkaldPlayableEntity skaldTrack = new SkaldTrack(
         Uri.parse("skald://soptify/track/spotify_uri"));
+    SkaldPlayableEntity skaldPlaylist = new SkaldPlaylist(
+        Uri.parse("skald://skald/track/spotify_uri"));
 
     assertFalse(spotifyProvider.canHandle(skaldTrack));
+    assertFalse(spotifyProvider.canHandle(skaldPlaylist));
   }
 
   @Test
