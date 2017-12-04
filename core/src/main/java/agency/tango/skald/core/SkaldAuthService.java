@@ -3,8 +3,8 @@ package agency.tango.skald.core;
 import android.content.Context;
 
 import agency.tango.skald.core.authentication.SkaldAuthStore;
-import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.bus.LoginEvent;
+import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.provider.Provider;
@@ -41,7 +41,6 @@ public class SkaldAuthService {
     try {
       getSkaldAuthStore(getProviderByName(providerName)).restore(context);
     } catch (AuthException authException) {
-      authException.printStackTrace();
       return false;
     }
     return true;

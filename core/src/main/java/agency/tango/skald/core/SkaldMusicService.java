@@ -3,6 +3,7 @@ package agency.tango.skald.core;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class SkaldMusicService {
   public static final String INTENT_ACTION_ERROR = "auth_action_error";
   public static final String EXTRA_AUTH_DATA = "auth_data";
   public static final String EXTRA_PROVIDER_NAME = "provider_name";
+  private static final String TAG = SkaldMusicService.class.getSimpleName();
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
 
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
@@ -128,8 +130,7 @@ public class SkaldMusicService {
       try {
         tracks.add(getSearchService(provider).searchForTracks(query));
       } catch (AuthException authException) {
-        //method just returns tracks from authenticated services
-        //if none of services is authenticated, method returns an empty list
+        Log.w(TAG, String.format("%s is not authenticated", provider.getClass().getSimpleName()));
       }
     }
     return mergeLists(tracks);
@@ -141,21 +142,19 @@ public class SkaldMusicService {
       try {
         playlists.add(getSearchService(provider).searchForPlaylists(query));
       } catch (AuthException authException) {
-        //method just returns playlists from authenticated services
-        //if none of services is authenticated, method returns an empty list
+        Log.w(TAG, String.format("%s is not authenticated", provider.getClass().getSimpleName()));
       }
     }
     return mergeLists(playlists);
   }
 
-  public Single<List<SkaldUser>> getCurrentUser() {
+  public Single<List<SkaldUser>> getCurrentUsers() {
     List<Single<SkaldUser>> users = new ArrayList<>();
     for (Provider provider : providers) {
       try {
         users.add(getUser(provider));
       } catch (AuthException authException) {
-        //method just returns users from authenticated services
-        //if none of services is authenticated, method returns an empty list
+        Log.w(TAG, String.format("%s is not authenticated", provider.getClass().getSimpleName()));
       }
     }
     return Single.merge(users)
@@ -201,13 +200,7 @@ public class SkaldMusicService {
 
   private <T> Single<List<T>> mergeLists(List<Single<List<T>>> singlesList) {
     return Single.merge(singlesList)
-        .toList()
-        .map(lists -> {
-          List<T> mergedList = new ArrayList<>();
-          for (List<T> list : lists) {
-            mergedList.addAll(list);
-          }
-          return mergedList;
-        });
+        .flatMapIterable(list -> list)
+        .toList();
   }
 }

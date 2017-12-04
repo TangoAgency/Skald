@@ -152,7 +152,7 @@ public class MainActivity extends Activity {
 
     setSpotifyButtonText();
     setDeezerButtonText();
-    getUserAndUpdateUserViews();
+    getUsersAndUpdateUserViews();
   }
 
   @Override
@@ -236,13 +236,13 @@ public class MainActivity extends Activity {
       updateUserViews(EMPTY, null);
       userName.setText(R.string.hello_exc_mark);
     } else {
-      getUserAndUpdateUserViews();
+      getUsersAndUpdateUserViews();
     }
   }
 
-  private void getUserAndUpdateUserViews() {
+  private void getUsersAndUpdateUserViews() {
     if (isUserLoggedIn()) {
-      skaldMusicService.getCurrentUser()
+      skaldMusicService.getCurrentUsers()
           .subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(new DisposableSingleObserver<List<SkaldUser>>() {
