@@ -12,6 +12,7 @@ import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
+import agency.tango.skald.core.provider.UriHandler;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
 import agency.tango.skald.spotify.authentication.SpotifyAuthStore;
 import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
@@ -27,6 +28,7 @@ public class SpotifyProvider extends Provider {
   private final String clientId;
   private final String redirectUri;
   private final String clientSecret;
+  private final UriHandler uriHandler;
 
   public SpotifyProvider(Context context, String clientId, String redirectUri,
       String clientSecret) {
@@ -34,6 +36,7 @@ public class SpotifyProvider extends Provider {
     this.clientId = clientId;
     this.redirectUri = redirectUri;
     this.clientSecret = clientSecret;
+    uriHandler = new UriHandler();
   }
 
   @Override
@@ -58,9 +61,7 @@ public class SpotifyProvider extends Provider {
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return skaldPlayableEntity.verifyScheme() &&
-        skaldPlayableEntity.getUri().getAuthority().equals(NAME.getName()) &&
-        skaldPlayableEntity.verifyPath();
+    return uriHandler.isUriValid(skaldPlayableEntity, NAME.getName());
   }
 
   public String getClientId() {

@@ -6,10 +6,11 @@ public abstract class SkaldPlayableEntity {
   public static final String SKALD_SCHEME = "skald";
 
   protected final Uri uri;
-  private String imageUrl;
+  private final String imageUrl;
 
   public SkaldPlayableEntity(Uri uri) {
     this.uri = uri;
+    imageUrl = "";
   }
 
   public SkaldPlayableEntity(Uri uri, String imageUrl) {
@@ -25,13 +26,11 @@ public abstract class SkaldPlayableEntity {
     return imageUrl;
   }
 
-  public void setImageUrl(String imageUrl) {
-    this.imageUrl = imageUrl;
+  public String getScheme() {
+    return uri.getScheme();
   }
 
-  public boolean verifyScheme() {
-    return uri.getScheme().equals(SkaldPlayableEntity.SKALD_SCHEME);
+  public String getPath() {
+    return uri.getPathSegments().get(0)!=null ? uri.getPathSegments().get(0) : "";
   }
-
-  public abstract boolean verifyPath();
 }

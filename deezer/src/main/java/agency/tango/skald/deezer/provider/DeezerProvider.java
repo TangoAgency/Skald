@@ -12,6 +12,7 @@ import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
+import agency.tango.skald.core.provider.UriHandler;
 import agency.tango.skald.deezer.authentication.DeezerAuthData;
 import agency.tango.skald.deezer.authentication.DeezerAuthStore;
 import agency.tango.skald.deezer.player.SkaldDeezerPlayer;
@@ -23,10 +24,12 @@ public class DeezerProvider extends Provider {
 
   private final Context context;
   private final String clientId;
+  private final UriHandler uriHandler;
 
   public DeezerProvider(Context context, String clientId) {
     this.context = context;
     this.clientId = clientId;
+    uriHandler = new UriHandler();
   }
 
   @Override
@@ -51,9 +54,7 @@ public class DeezerProvider extends Provider {
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return skaldPlayableEntity.verifyScheme() &&
-        skaldPlayableEntity.getUri().getAuthority().equals(NAME.getName()) &&
-        skaldPlayableEntity.verifyPath();
+    return uriHandler.isUriValid(skaldPlayableEntity, NAME.getName());
   }
 
   public String getClientId() {

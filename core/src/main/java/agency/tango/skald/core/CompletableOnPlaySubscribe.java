@@ -2,13 +2,13 @@ package agency.tango.skald.core;
 
 import android.util.Log;
 
+import java.net.URISyntaxException;
 import java.util.List;
 
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.exceptions.AuthException;
-import agency.tango.skald.core.exceptions.UriException;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
@@ -88,10 +88,8 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   }
 
   private void play(@NonNull CompletableEmitter emitter) {
-    boolean canHandle = false;
     for (Provider provider : providers) {
       if (provider.canHandle(skaldPlayableEntity)) {
-        canHandle = true;
         ProviderName providerName = provider.getProviderName();
         Player player = playerCache.get(providerName);
         if (player != null) {
@@ -99,10 +97,9 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
         } else {
           initializePlayerAndPlay(emitter, provider, providerName);
         }
+        break;
       }
-      if (providers.indexOf(provider) == providers.size() - 1 && !canHandle) {
-        emitter.onError(new UriException("Wrong Uri"));
-      }
+      emitter.onError(new URISyntaxException(skaldPlayableEntity.getUri().toString(), "Wrong uri"));
     }
   }
 
