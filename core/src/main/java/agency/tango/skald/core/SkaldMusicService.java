@@ -192,11 +192,11 @@ public class SkaldMusicService {
   }
 
   private SearchService getSearchService(Provider provider) throws AuthException {
-    return provider.getServicesFactory().getSearchService();
+    return provider.getSearchServiceFactory().getSearchService();
   }
 
   private UserService getUserService(Provider provider) throws AuthException {
-    return provider.getServicesFactory().getUserService();
+    return provider.getUserServiceFactory().getUserService();
   }
 
   private <T> Single<List<T>> mergeLists(List<Single<List<T>>> singlesList) {

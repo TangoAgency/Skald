@@ -8,8 +8,9 @@ import agency.tango.skald.core.UserService;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
-import agency.tango.skald.core.factories.ServicesFactory;
+import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
+import agency.tango.skald.core.factories.UserServiceFactory;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
@@ -27,10 +28,12 @@ public class DeezerProvider extends Provider {
 
   private final Context context;
   private final String clientId;
+  private final DeezerAuthStore deezerAuthStore;
 
   public DeezerProvider(Context context, String clientId) {
     this.context = context;
     this.clientId = clientId;
+    deezerAuthStore = new DeezerAuthStore(this);
   }
 
   @Override
@@ -40,7 +43,7 @@ public class DeezerProvider extends Provider {
 
   @Override
   public PlayerFactory getPlayerFactory() {
-    return new DeezerPlayerFactory(context, this);
+    return new DeezerPlayerFactory(context, deezerAuthStore);
   }
 
   @Override
@@ -49,10 +52,13 @@ public class DeezerProvider extends Provider {
   }
 
   @Override
-  public ServicesFactory getServicesFactory() throws AuthException {
-    SkaldAuthStore skaldAuthStore = new DeezerAuthStore(this);
-    DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
-    return new DeezerServicesFactory(deezerAuthData);
+  public SearchServiceFactory getSearchServiceFactory() {
+    return new DeezerSearchServiceFactory(context, deezerAuthStore);
+  }
+
+  @Override
+  public UserServiceFactory getUserServiceFactory() {
+    return new DeezerUserServiceFactory(context, deezerAuthStore);
   }
 
   @Override
@@ -67,16 +73,16 @@ public class DeezerProvider extends Provider {
 
   private static class DeezerPlayerFactory extends PlayerFactory {
     private final Context context;
-    private final SkaldAuthStore skaldAuthStore;
+    private final DeezerAuthStore deezerAuthStore;
 
-    private DeezerPlayerFactory(Context context, DeezerProvider deezerProvider) {
+    private DeezerPlayerFactory(Context context, DeezerAuthStore deezerAuthStore) {
       this.context = context;
-      this.skaldAuthStore = new DeezerAuthStore(deezerProvider);
+      this.deezerAuthStore = deezerAuthStore;
     }
 
     @Override
     public Player getPlayer() throws AuthException {
-      DeezerAuthData deezerAuthData = (DeezerAuthData) skaldAuthStore.restore(context);
+      DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);
       return new SkaldDeezerPlayer(context, deezerAuthData);
     }
   }
@@ -94,20 +100,34 @@ public class DeezerProvider extends Provider {
     }
   }
 
-  private static class DeezerServicesFactory extends ServicesFactory {
-    private final DeezerAuthData deezerAuthData;
+  private static class DeezerSearchServiceFactory extends SearchServiceFactory {
+    private final Context context;
+    private final DeezerAuthStore deezerAuthStore;
 
-    private DeezerServicesFactory(DeezerAuthData deezerAuthData) {
-      this.deezerAuthData = deezerAuthData;
+    private DeezerSearchServiceFactory(Context context, DeezerAuthStore deezerAuthStore) {
+      this.context = context;
+      this.deezerAuthStore = deezerAuthStore;
     }
 
     @Override
-    public SearchService getSearchService() {
+    public SearchService getSearchService() throws AuthException {
+      DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);
       return new DeezerSearchService(deezerAuthData.getDeezerConnect());
     }
+  }
+
+  private static class DeezerUserServiceFactory extends UserServiceFactory {
+    private final Context context;
+    private final DeezerAuthStore deezerAuthStore;
+
+    private DeezerUserServiceFactory(Context context, DeezerAuthStore deezerAuthStore) {
+      this.context = context;
+      this.deezerAuthStore = deezerAuthStore;
+    }
 
     @Override
-    public UserService getUserService() {
+    public UserService getUserService() throws AuthException {
+      DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);
       return new DeezerUserService(deezerAuthData.getDeezerConnect());
     }
   }

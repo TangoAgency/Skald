@@ -59,8 +59,8 @@ public interface SpotifyApi {
   class SpotifyApiImpl implements SpotifyApi {
 
     private String token;
-    final SpotifyApi spotifyApi;
     private String refreshToken;
+    private final SpotifyApi spotifyApi;
     private final SpotifyProvider spotifyProvider;
     private final Context context;
     private final TokenService tokenService;
