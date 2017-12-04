@@ -25,12 +25,4 @@ public abstract class SkaldPlayableEntity {
   public String getImageUrl() {
     return imageUrl;
   }
-
-  public String getScheme() {
-    return uri.getScheme();
-  }
-
-  public String getPath() {
-    return uri.getPathSegments().get(0)!=null ? uri.getPathSegments().get(0) : "";
-  }
 }

@@ -24,12 +24,10 @@ public class DeezerProvider extends Provider {
 
   private final Context context;
   private final String clientId;
-  private final UriHandler uriHandler;
 
   public DeezerProvider(Context context, String clientId) {
     this.context = context;
     this.clientId = clientId;
-    uriHandler = new UriHandler();
   }
 
   @Override
@@ -54,7 +52,7 @@ public class DeezerProvider extends Provider {
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return uriHandler.isUriValid(skaldPlayableEntity, NAME.getName());
+    return UriHandler.isUriValid(skaldPlayableEntity, NAME.getName());
   }
 
   public String getClientId() {

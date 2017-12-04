@@ -28,7 +28,6 @@ public class SpotifyProvider extends Provider {
   private final String clientId;
   private final String redirectUri;
   private final String clientSecret;
-  private final UriHandler uriHandler;
 
   public SpotifyProvider(Context context, String clientId, String redirectUri,
       String clientSecret) {
@@ -36,7 +35,6 @@ public class SpotifyProvider extends Provider {
     this.clientId = clientId;
     this.redirectUri = redirectUri;
     this.clientSecret = clientSecret;
-    uriHandler = new UriHandler();
   }
 
   @Override
@@ -61,7 +59,7 @@ public class SpotifyProvider extends Provider {
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return uriHandler.isUriValid(skaldPlayableEntity, NAME.getName());
+    return UriHandler.isUriValid(skaldPlayableEntity, NAME.getName());
   }
 
   public String getClientId() {

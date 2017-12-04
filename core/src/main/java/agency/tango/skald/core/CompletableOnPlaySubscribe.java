@@ -2,7 +2,6 @@ package agency.tango.skald.core;
 
 import android.util.Log;
 
-import java.net.URISyntaxException;
 import java.util.List;
 
 import agency.tango.skald.core.cache.TLruCache;
@@ -99,7 +98,8 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
         }
         break;
       }
-      emitter.onError(new URISyntaxException(skaldPlayableEntity.getUri().toString(), "Wrong uri"));
+      //todo not supported entity
+      emitter.onError(new Exception());
     }
   }
 
