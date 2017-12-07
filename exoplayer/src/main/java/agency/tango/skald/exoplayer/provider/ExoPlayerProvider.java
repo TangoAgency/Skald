@@ -2,7 +2,10 @@ package agency.tango.skald.exoplayer.provider;
 
 import android.content.Context;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import agency.tango.skald.core.Player;
+import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
@@ -18,16 +21,23 @@ public class ExoPlayerProvider extends Provider {
   public static final ProviderName NAME = new ExoPlayerProviderName();
 
   private final Context context;
+  private final SearchService searchService;
   private final OkHttpClient okHttpClient;
 
-  public ExoPlayerProvider(Context context, OkHttpClient okHttpClient) {
+  public ExoPlayerProvider(Context context, SearchService searchService,
+      OkHttpClient okHttpClient) {
     this.context = context;
+    this.searchService = searchService;
     this.okHttpClient = okHttpClient;
   }
 
-  public ExoPlayerProvider(Context context) {
+  public ExoPlayerProvider(Context context, SearchService searchService) {
     this.context = context;
-    this.okHttpClient = new OkHttpClient.Builder().build();
+    this.searchService = searchService;
+    this.okHttpClient = new OkHttpClient
+        .Builder()
+        .addNetworkInterceptor(new StethoInterceptor())
+        .build();
   }
 
   @Override
@@ -47,12 +57,26 @@ public class ExoPlayerProvider extends Provider {
 
   @Override
   public SearchServiceFactory getSearchServiceFactory() {
-    return null;
+    return new ExoPlayerSearchServiceFactory(searchService);
   }
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return skaldPlayableEntity.getUri().getScheme().contains("http");
+    return skaldPlayableEntity.getUri().getScheme().contains("http") ||
+        skaldPlayableEntity.getUri().toString().contains("file");
+  }
+
+  private static class ExoPlayerSearchServiceFactory extends SearchServiceFactory {
+    private final SearchService searchService;
+
+    public ExoPlayerSearchServiceFactory(SearchService searchService) {
+      this.searchService = searchService;
+    }
+
+    @Override
+    public SearchService getSearchService() throws AuthException {
+      return searchService;
+    }
   }
 
   private static class SkaldExoPlayerFactory extends PlayerFactory {

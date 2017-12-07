@@ -116,6 +116,10 @@ ext.deps = [// Android
             rxJavaAdapter         : 'com.squareup.retrofit2:adapter-rxjava2:2.3.0',
             gson                  : "com.squareup.retrofit2:converter-gson:2.3.0",
 
+            //Stetho
+            stetho                : 'com.facebook.stetho:stetho:1.5.0',
+            stethoOkHttp          : 'com.facebook.stetho:stetho-okhttp3:1.5.0',
+
             // Third Party
             javaparser            : 'com.github.javaparser:javaparser-core:2.4.0',
             javax                 : 'javax.inject:javax.inject:1',

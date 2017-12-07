@@ -51,6 +51,7 @@ dependencies {
   implementation deps.dagger
   implementation deps.appCompat
   implementation deps.spotifyPlayer
+  implementation deps.stetho
 
   testImplementation deps.junit
 }
