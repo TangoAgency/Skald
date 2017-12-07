@@ -30,6 +30,7 @@ dependencies {
 
   implementation deps.appCompat
   implementation deps.exoplayer
+  implementation deps.okhttpExoplayer
 
   testImplementation 'junit:junit:4.12'
 }

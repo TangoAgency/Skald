@@ -97,6 +97,7 @@ ext.deps = [// Android
 
             //ExoPlayer
             exoplayer             : 'com.google.android.exoplayer:exoplayer:r2.5.4',
+            okhttpExoplayer       : 'com.google.android.exoplayer:extension-okhttp:r2.5.4',
 
             // Google Services
             googlePlayServicesMaps: "com.google.android.gms:play-services-maps:$googlePlayServicesVersion",
