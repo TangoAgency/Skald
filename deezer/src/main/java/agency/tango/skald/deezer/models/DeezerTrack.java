@@ -8,11 +8,7 @@ import agency.tango.skald.core.models.SkaldTrack;
 
 public class DeezerTrack extends SkaldTrack {
   public DeezerTrack(Track track) {
-    this(Uri.parse(String.format("skald://deezer/track/%s", track.getId())),
+    super(Uri.parse(String.format("skald://deezer/track/%s", track.getId())),
         track.getAlbum().getImageUrl(), track.getArtist().getName(), track.getTitle());
-  }
-
-  private DeezerTrack(Uri uri, String imageUrl, String artistName, String title) {
-    super(uri, imageUrl, artistName, title);
   }
 }

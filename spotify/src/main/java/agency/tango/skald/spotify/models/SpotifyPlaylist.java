@@ -12,17 +12,12 @@ public class SpotifyPlaylist extends SkaldPlaylist {
   private static final String EMPTY = "";
 
   public SpotifyPlaylist(Playlist playlist) {
-    this(Uri.parse(String.format("skald://spotify/playlist/%s", playlist.getUri())),
+    super(Uri.parse(String.format("skald://spotify/playlist/%s", playlist.getUri())),
         getImageUrl(playlist), playlist.getName());
   }
 
-  private SpotifyPlaylist(Uri uri, String imageUrl, String name) {
-    super(uri, imageUrl, name);
-  }
-
   private static String getImageUrl(Playlist playlist) {
-    List<Image> images = playlist.getImages();
-    return getImageUrlIfListIsNotEmpty(images);
+    return getImageUrlIfListIsNotEmpty(playlist.getImages());
   }
 
   private static String getImageUrlIfListIsNotEmpty(List<Image> images) {

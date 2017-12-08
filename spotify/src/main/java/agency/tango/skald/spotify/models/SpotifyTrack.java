@@ -14,23 +14,17 @@ public class SpotifyTrack extends SkaldTrack {
   private static final String EMPTY = "";
 
   public SpotifyTrack(Track track) {
-    this(Uri.parse(String.format("skald://spotify/track/%s", track.getUri())),
+    super(Uri.parse(String.format("skald://spotify/track/%s", track.getUri())),
         getImageUrl(track), getArtistName(track),
         track.getTitle());
   }
 
-  private SpotifyTrack(Uri uri, String imageUrl, String artistName, String title) {
-    super(uri, imageUrl, artistName, title);
-  }
-
   private static String getArtistName(Track track) {
-    List<Artist> artists = track.getArtists();
-    return getArtistNameIfListIsNotEmpty(artists);
+    return getArtistNameIfListIsNotEmpty(track.getArtists());
   }
 
   private static String getImageUrl(Track track) {
-    List<Image> images = track.getAlbum().getImages();
-    return getImageUrlIfListIsNotEmpty(images);
+    return getImageUrlIfListIsNotEmpty(track.getAlbum().getImages());
   }
 
   private static String getImageUrlIfListIsNotEmpty(List<Image> images) {
