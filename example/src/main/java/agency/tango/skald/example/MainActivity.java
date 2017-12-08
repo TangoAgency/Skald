@@ -267,10 +267,7 @@ public class MainActivity extends Activity {
 
   private void updateUserViews(String message, String imageUrl) {
     userName.setText(message);
-    Picasso
-        .with(MainActivity.this)
-        .load(imageUrl)
-        .into(userAvatar);
+    drawAnImage(imageUrl, userAvatar);
   }
 
   private void setSpotifyButtonText() {
@@ -341,13 +338,17 @@ public class MainActivity extends Activity {
   }
 
   private void updateSongViews(TrackMetadata trackMetadata) {
-    Picasso
-        .with(this)
-        .load(trackMetadata.getImageUrl())
-        .into(trackImage);
+    drawAnImage(trackMetadata.getImageUrl(), trackImage);
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());
     loadingTextView.setText(EMPTY);
+  }
+
+  private void drawAnImage(String imageUrl, ImageView imageView) {
+    Picasso
+        .with(this)
+        .load(imageUrl)
+        .into(imageView);
   }
 
   private void updateResumePauseButton() {

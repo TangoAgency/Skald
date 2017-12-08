@@ -58,13 +58,13 @@ public interface SpotifyApi {
 
   class SpotifyApiImpl implements SpotifyApi {
 
-    private String token;
-    private String refreshToken;
     private final SpotifyApi spotifyApi;
     private final SpotifyProvider spotifyProvider;
     private final Context context;
     private final TokenService tokenService;
     private final SpotifyAuthStore spotifyAuthStore;
+    private String token;
+    private String refreshToken;
 
     public SpotifyApiImpl(Context context, SpotifyProvider spotifyProvider) {
       this.context = context;

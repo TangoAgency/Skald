@@ -130,7 +130,7 @@ public class SkaldMusicService {
       try {
         tracks.add(getSearchService(provider).searchForTracks(query));
       } catch (AuthException authException) {
-        Log.w(TAG, String.format("%s is not authenticated", provider.getClass().getSimpleName()));
+        logProviderNotAuthenticatedWarning(provider);
       }
     }
     return mergeLists(tracks);
@@ -142,7 +142,7 @@ public class SkaldMusicService {
       try {
         playlists.add(getSearchService(provider).searchForPlaylists(query));
       } catch (AuthException authException) {
-        Log.w(TAG, String.format("%s is not authenticated", provider.getClass().getSimpleName()));
+        logProviderNotAuthenticatedWarning(provider);
       }
     }
     return mergeLists(playlists);
@@ -154,7 +154,7 @@ public class SkaldMusicService {
       try {
         users.add(getUser(provider));
       } catch (AuthException authException) {
-        Log.w(TAG, String.format("%s is not authenticated", provider.getClass().getSimpleName()));
+        logProviderNotAuthenticatedWarning(provider);
       }
     }
     return Single.merge(users)
@@ -196,6 +196,10 @@ public class SkaldMusicService {
 
   private UserService getUserService(Provider provider) throws AuthException {
     return provider.getUserServiceFactory().getUserService();
+  }
+
+  private void logProviderNotAuthenticatedWarning(Provider provider) {
+    Log.w(TAG, String.format("%s is not authenticated", provider.getProviderName().getName()));
   }
 
   private <T> Single<List<T>> mergeLists(List<Single<List<T>>> singlesList) {
