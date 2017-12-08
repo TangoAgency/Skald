@@ -9,8 +9,7 @@ public abstract class SkaldPlayableEntity {
   private final String imageUrl;
 
   public SkaldPlayableEntity(Uri uri) {
-    this.uri = uri;
-    imageUrl = "";
+    this(uri, "");
   }
 
   public SkaldPlayableEntity(Uri uri, String imageUrl) {

@@ -9,9 +9,7 @@ public class SkaldTrack extends SkaldPlayableEntity {
   private final String title;
 
   public SkaldTrack(Uri uri) {
-    super(uri);
-    artistName = "";
-    title = "";
+    this(uri,"", "", "");
   }
 
   public SkaldTrack(Uri uri, String imageUrl, String artistName, String title) {

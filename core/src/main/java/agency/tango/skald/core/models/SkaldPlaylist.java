@@ -8,8 +8,7 @@ public class SkaldPlaylist extends SkaldPlayableEntity {
   private final String name;
 
   public SkaldPlaylist(Uri uri) {
-    super(uri);
-    name = "";
+    this(uri, "", "");
   }
 
   public SkaldPlaylist(Uri uri, String imageUrl, String name) {

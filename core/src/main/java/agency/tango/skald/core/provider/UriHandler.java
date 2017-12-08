@@ -11,6 +11,7 @@ import agency.tango.skald.core.models.SkaldTrack;
 
 public class UriHandler {
   private static final Map<Class, String> entitiesMap;
+  private static final String EMPTY = "";
 
   static {
     entitiesMap = new HashMap<>();
@@ -25,13 +26,17 @@ public class UriHandler {
     boolean isAuthorityValid = uri.getAuthority().equals(authorityName);
 
     String pathFromMap = entitiesMap.get(skaldPlayableEntity.getClass());
-    if(pathFromMap == null) {
+    if (pathFromMap == null) {
       pathFromMap = entitiesMap.get(skaldPlayableEntity.getClass().getSuperclass());
     }
 
-    String pathFromUri = !uri.getPathSegments().isEmpty() ? uri.getPathSegments().get(0) : "";
+    String pathFromUri = getPathFromUri(uri);
     boolean isPathValid = pathFromMap.equals(pathFromUri);
 
     return isSchemeValid && isAuthorityValid && isPathValid;
+  }
+
+  private static String getPathFromUri(Uri uri) {
+    return !uri.getPathSegments().isEmpty() ? uri.getPathSegments().get(0) : EMPTY;
   }
 }
