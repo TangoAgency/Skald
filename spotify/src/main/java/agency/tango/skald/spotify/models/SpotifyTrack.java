@@ -10,7 +10,6 @@ import agency.tango.skald.spotify.api.models.Image;
 import agency.tango.skald.spotify.api.models.Track;
 
 public class SpotifyTrack extends SkaldTrack {
-
   private static final String EMPTY = "";
 
   public SpotifyTrack(Track track) {
@@ -20,18 +19,12 @@ public class SpotifyTrack extends SkaldTrack {
   }
 
   private static String getArtistName(Track track) {
-    return getArtistNameIfListIsNotEmpty(track.getArtists());
+    List<Artist> artists = track.getArtists();
+    return !artists.isEmpty() ? artists.get(0).getName() : EMPTY;
   }
 
   private static String getImageUrl(Track track) {
-    return getImageUrlIfListIsNotEmpty(track.getAlbum().getImages());
-  }
-
-  private static String getImageUrlIfListIsNotEmpty(List<Image> images) {
+    List<Image> images = track.getAlbum().getImages();
     return !images.isEmpty() ? images.get(0).getUrl() : EMPTY;
-  }
-
-  private static String getArtistNameIfListIsNotEmpty(List<Artist> artists) {
-    return !artists.isEmpty() ? artists.get(0).getName() : EMPTY;
   }
 }

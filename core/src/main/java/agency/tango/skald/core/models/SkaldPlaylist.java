@@ -3,7 +3,7 @@ package agency.tango.skald.core.models;
 import android.net.Uri;
 
 public class SkaldPlaylist extends SkaldPlayableEntity {
-  public static final String PATH = "playlist";
+  public static final String URI_FIRST_PATH_SEGMENT = "playlist";
 
   private final String name;
 

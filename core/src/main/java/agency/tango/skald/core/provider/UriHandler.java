@@ -15,8 +15,8 @@ public class UriHandler {
 
   static {
     entitiesMap = new HashMap<>();
-    entitiesMap.put(SkaldTrack.class, SkaldTrack.PATH);
-    entitiesMap.put(SkaldPlaylist.class, SkaldPlaylist.PATH);
+    entitiesMap.put(SkaldTrack.class, SkaldTrack.URI_FIRST_PATH_SEGMENT);
+    entitiesMap.put(SkaldPlaylist.class, SkaldPlaylist.URI_FIRST_PATH_SEGMENT);
   }
 
   public static boolean isUriValid(SkaldPlayableEntity skaldPlayableEntity, String authorityName) {

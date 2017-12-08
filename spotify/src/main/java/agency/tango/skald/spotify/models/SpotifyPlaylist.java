@@ -17,10 +17,7 @@ public class SpotifyPlaylist extends SkaldPlaylist {
   }
 
   private static String getImageUrl(Playlist playlist) {
-    return getImageUrlIfListIsNotEmpty(playlist.getImages());
-  }
-
-  private static String getImageUrlIfListIsNotEmpty(List<Image> images) {
+    List<Image> images = playlist.getImages();
     return !images.isEmpty() ? images.get(0).getUrl() : EMPTY;
   }
 }
