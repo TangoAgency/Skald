@@ -6,6 +6,7 @@ import android.os.Handler;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -22,13 +23,16 @@ public class PlayerEventsListener implements Player.EventListener {
   private final List<OnPlaybackListener> onPlaybackListeners;
   private final List<OnLoadingListener> onLoadingListeners;
   private final OnErrorListener onErrorListener;
+  private final SimpleExoPlayer exoPlayer;
 
   public PlayerEventsListener(Handler mainHandler, List<OnPlaybackListener> onPlaybackListeners,
-      List<OnLoadingListener> onLoadingListeners, OnErrorListener onErrorListener) {
+      List<OnLoadingListener> onLoadingListeners, OnErrorListener onErrorListener,
+      SimpleExoPlayer exoPlayer) {
     this.mainHandler = mainHandler;
     this.onPlaybackListeners = onPlaybackListeners;
     this.onLoadingListeners = onLoadingListeners;
     this.onErrorListener = onErrorListener;
+    this.exoPlayer = exoPlayer;
   }
 
   @Override
@@ -46,7 +50,7 @@ public class PlayerEventsListener implements Player.EventListener {
 
   @Override
   public void onLoadingChanged(boolean isLoading) {
-    if (isLoading) {
+    if (isLoading && exoPlayer.getPlaybackState()!=PlaybackState.STATE_PLAYING) {
       notifyLoadingEvent();
     }
   }

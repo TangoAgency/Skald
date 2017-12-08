@@ -65,7 +65,7 @@ public class SkaldExoPlayer implements Player {
 
     exoPlayer.addListener(
         new PlayerEventsListener(mainHandler, onPlaybackListeners, onLoadingListeners,
-            onErrorListener));
+            onErrorListener, exoPlayer));
   }
 
   @Override
@@ -79,11 +79,13 @@ public class SkaldExoPlayer implements Player {
     if (!isPlaying()) {
       exoPlayer.setPlayWhenReady(true);
     }
+    skaldOperationCallback.onSuccess();
   }
 
   @Override
   public void stop(SkaldOperationCallback skaldOperationCallback) {
     exoPlayer.stop();
+    skaldOperationCallback.onSuccess();
   }
 
   @Override
@@ -91,6 +93,7 @@ public class SkaldExoPlayer implements Player {
     if (isPlaying()) {
       exoPlayer.setPlayWhenReady(false);
     }
+    skaldOperationCallback.onSuccess();
   }
 
   @Override
@@ -98,6 +101,7 @@ public class SkaldExoPlayer implements Player {
     if (!isPlaying()) {
       exoPlayer.setPlayWhenReady(true);
     }
+    skaldOperationCallback.onSuccess();
   }
 
   @Override
