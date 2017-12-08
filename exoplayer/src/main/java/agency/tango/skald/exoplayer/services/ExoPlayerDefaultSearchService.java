@@ -42,7 +42,7 @@ public class ExoPlayerDefaultSearchService implements SearchService {
         .map(new Function<File, SkaldTrack>() {
           @Override
           public SkaldTrack apply(File file) throws Exception {
-            return new SkaldTrack(Uri.parse(file.toURI().toString()), "TESTOWY UTWÓR", "TESTOWY UTWÓR", "");
+            return new SkaldTrack(Uri.fromFile(file), "TESTOWY UTWÓR", "TESTOWY UTWÓR", "");
           }
         })
         .toList();
@@ -50,6 +50,7 @@ public class ExoPlayerDefaultSearchService implements SearchService {
 
   @Override
   public Single<List<SkaldPlaylist>> searchForPlaylists(String query) {
-    return null;
+    List<SkaldPlaylist> emptyList = new ArrayList<>();
+    return Single.just(emptyList);
   }
 }
