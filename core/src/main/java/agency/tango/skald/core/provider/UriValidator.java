@@ -9,7 +9,7 @@ import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 
-public class UriHandler {
+public class UriValidator {
   private static final Map<Class, String> entitiesMap;
   private static final String EMPTY = "";
 

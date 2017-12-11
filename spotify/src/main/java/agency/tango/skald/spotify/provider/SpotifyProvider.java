@@ -13,7 +13,7 @@ import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
-import agency.tango.skald.core.provider.UriHandler;
+import agency.tango.skald.core.provider.UriValidator;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
 import agency.tango.skald.spotify.authentication.SpotifyAuthStore;
 import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
@@ -60,7 +60,7 @@ public class SpotifyProvider extends Provider {
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return UriHandler.isUriValid(skaldPlayableEntity, NAME.getName());
+    return UriValidator.isUriValid(skaldPlayableEntity, NAME.getName());
   }
 
   public String getClientId() {
