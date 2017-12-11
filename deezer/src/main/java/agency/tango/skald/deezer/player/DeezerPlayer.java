@@ -191,7 +191,7 @@ class DeezerPlayer {
   }
 
   private void addOnPlayerStateChangeListener() {
-    currentPlayer.addOnPlayerStateChangeListener((playerState, timePosition) -> {
+    currentPlayer.addOnPlayerStateChangeListener((playerState, elapsedTime) -> {
       if (playerState == PlayerState.PLAYING) {
         if (!isPlayEvent) {
           notifyResumeEvent();

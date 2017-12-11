@@ -155,9 +155,8 @@ public interface SpotifyApi {
           return refreshToken()
               .toFlowable()
               .doOnNext(this::saveTokens);
-        } else {
-          return Flowable.error(error);
         }
+        return Flowable.error(error);
       });
     }
 
