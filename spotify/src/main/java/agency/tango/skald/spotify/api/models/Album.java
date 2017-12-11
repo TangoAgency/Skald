@@ -1,7 +1,6 @@
 package agency.tango.skald.spotify.api.models;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 
 public class Album {

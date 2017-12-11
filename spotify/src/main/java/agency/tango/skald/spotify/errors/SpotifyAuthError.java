@@ -2,7 +2,6 @@ package agency.tango.skald.spotify.errors;
 
 import android.content.Context;
 import android.content.Intent;
-
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.spotify.authentication.SpotifyAuthActivity;
 

@@ -1,9 +1,7 @@
 package agency.tango.skald.deezer.models;
 
 import android.net.Uri;
-
 import com.deezer.sdk.model.Playlist;
-
 import agency.tango.skald.core.models.SkaldPlaylist;
 
 public class DeezerPlaylist extends SkaldPlaylist {

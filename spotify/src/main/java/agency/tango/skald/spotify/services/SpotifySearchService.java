@@ -1,10 +1,8 @@
 package agency.tango.skald.spotify.services;
 
 import android.support.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;

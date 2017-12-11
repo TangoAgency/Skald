@@ -1,7 +1,6 @@
 package agency.tango.skald.deezer.services.listeners;
 
 import com.deezer.sdk.network.request.event.JsonRequestListener;
-
 import io.reactivex.SingleEmitter;
 
 public abstract class DeezerRequestListener<T> extends JsonRequestListener {

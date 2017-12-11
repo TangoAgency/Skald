@@ -2,9 +2,7 @@ package agency.tango.skald.spotify.authentication;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
 import com.google.gson.Gson;
-
 import agency.tango.skald.core.authentication.SkaldAuthData;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
 import agency.tango.skald.core.exceptions.AuthException;

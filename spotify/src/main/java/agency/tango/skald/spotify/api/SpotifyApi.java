@@ -2,11 +2,8 @@ package agency.tango.skald.spotify.api;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-
 import org.reactivestreams.Publisher;
-
 import java.net.HttpURLConnection;
-
 import agency.tango.skald.spotify.api.models.BrowseCategories;
 import agency.tango.skald.spotify.api.models.BrowsePlaylists;
 import agency.tango.skald.spotify.api.models.Category;

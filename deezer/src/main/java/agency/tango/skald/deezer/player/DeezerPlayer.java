@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
-
 import com.deezer.sdk.network.connect.DeezerConnect;
 import com.deezer.sdk.network.request.event.DeezerError;
 import com.deezer.sdk.player.PlayerWrapper;
@@ -13,10 +12,8 @@ import com.deezer.sdk.player.TrackPlayer;
 import com.deezer.sdk.player.event.PlayerState;
 import com.deezer.sdk.player.exception.TooManyPlayersExceptions;
 import com.deezer.sdk.player.networkcheck.WifiAndMobileNetworkStateChecker;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.errors.PlaybackError;

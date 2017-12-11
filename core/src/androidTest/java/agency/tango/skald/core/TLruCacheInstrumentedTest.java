@@ -1,13 +1,10 @@
 package agency.tango.skald.core;
 
 import android.support.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 
@@ -158,12 +155,9 @@ public class TLruCacheInstrumentedTest {
     final Object key = new Object();
     final Object value = new Object();
     SkaldLruCache.CacheItemRemovedListener<Object, Object> cacheItemRemovedListener =
-        new SkaldLruCache.CacheItemRemovedListener<Object, Object>() {
-          @Override
-          public void release(Object keyToRelease, Object valueToRelease) {
-            assertSame(keyToRelease, key);
-            assertSame(valueToRelease, value);
-          }
+        (keyToRelease, valueToRelease) -> {
+          assertSame(keyToRelease, key);
+          assertSame(valueToRelease, value);
         };
     TLruCache<Object, Object> cache = new TLruCache<>(2, cacheItemRemovedListener);
     cache.put(key, value);

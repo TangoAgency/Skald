@@ -1,7 +1,6 @@
 package agency.tango.skald.example;
 
 import android.app.Application;
-
 import agency.tango.skald.core.Skald;
 import agency.tango.skald.deezer.provider.DeezerProvider;
 import agency.tango.skald.spotify.provider.SpotifyProvider;

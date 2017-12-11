@@ -10,9 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.squareup.picasso.Picasso;
-
 import agency.tango.skald.R;
 import agency.tango.skald.core.models.SkaldTrack;
 
@@ -31,8 +29,8 @@ public class TracksAdapter extends ArrayAdapter<SkaldTrack> {
     if (convertView == null) {
       convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_layout, parent, false);
     }
-    ImageView imageView = (ImageView) convertView.findViewById(R.id.image_list_cover);
-    TextView textView = (TextView) convertView.findViewById(R.id.text_track_info);
+    ImageView imageView = convertView.findViewById(R.id.image_list_cover);
+    TextView textView = convertView.findViewById(R.id.text_track_info);
     if (track != null) {
       if (!track.getImageUrl().isEmpty()) {
         Picasso

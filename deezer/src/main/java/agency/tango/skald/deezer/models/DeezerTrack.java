@@ -1,9 +1,7 @@
 package agency.tango.skald.deezer.models;
 
 import android.net.Uri;
-
 import com.deezer.sdk.model.Track;
-
 import agency.tango.skald.core.models.SkaldTrack;
 
 public class DeezerTrack extends SkaldTrack {

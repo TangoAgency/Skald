@@ -3,9 +3,7 @@ package agency.tango.skald.core;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
 import java.util.List;
-
 import agency.tango.skald.core.authentication.SkaldAuthData;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
 import agency.tango.skald.core.provider.Provider;

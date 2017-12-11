@@ -1,9 +1,7 @@
 package agency.tango.skald.core;
 
 import android.util.Log;
-
 import java.util.List;
-
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
@@ -11,7 +9,6 @@ import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerPlaybackListener;
-import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
@@ -112,22 +109,16 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
     try {
       initializedPlayer = provider.getPlayerFactory().getPlayer();
       initializedPlayer.addOnPlaybackListener(new OnPlayerPlaybackListener(onPlaybackListeners));
-      initializedPlayer.addOnLoadingListener(new OnLoadingListener() {
-        @Override
-        public void onLoading() {
-          for (OnLoadingListener onLoadingListener : onLoadingListeners) {
-            onLoadingListener.onLoading();
-          }
+      initializedPlayer.addOnLoadingListener(() -> {
+        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
+          onLoadingListener.onLoading();
         }
       });
-      initializedPlayer.addOnPlayerReadyListener(new OnPlayerReadyListener() {
-        @Override
-        public void onPlayerReady(Player player) {
-          playerInitialized = true;
-          playerCache.put(provider.getProviderName(), initializedPlayer);
-          player.play(skaldPlayableEntity, new SkaldCoreOperationCallback(emitter));
-          skaldMusicService.setCurrentProviderName(providerName);
-        }
+      initializedPlayer.addOnPlayerReadyListener(player -> {
+        playerInitialized = true;
+        playerCache.put(provider.getProviderName(), initializedPlayer);
+        player.play(skaldPlayableEntity, new SkaldCoreOperationCallback(emitter));
+        skaldMusicService.setCurrentProviderName(providerName);
       });
     } catch (AuthException authException) {
       emitter.onError(authException);

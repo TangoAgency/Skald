@@ -6,11 +6,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
-
 import agency.tango.skald.spotify.api.models.Tokens;
 import agency.tango.skald.spotify.services.TokenService;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -41,7 +39,7 @@ public class SpotifyAuthActivity extends Activity {
     redirectUri = getIntent().getStringExtra(EXTRA_REDIRECT_URI);
 
     AuthenticationRequest request = new AuthenticationRequest.Builder(clientId, CODE, redirectUri)
-        .setScopes(new String[] { "user-read-private", "streaming" })
+        .setScopes(new String[] {"user-read-private", "streaming"})
         .build();
 
     AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);

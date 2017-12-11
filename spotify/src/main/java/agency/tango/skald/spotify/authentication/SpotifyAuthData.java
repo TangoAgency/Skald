@@ -2,7 +2,6 @@ package agency.tango.skald.spotify.authentication;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import agency.tango.skald.core.authentication.SkaldAuthData;
 
 public class SpotifyAuthData extends SkaldAuthData {

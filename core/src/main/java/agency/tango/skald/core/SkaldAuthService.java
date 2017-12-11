@@ -1,7 +1,6 @@
 package agency.tango.skald.core;
 
 import android.content.Context;
-
 import agency.tango.skald.core.authentication.SkaldAuthStore;
 import agency.tango.skald.core.bus.LoginEvent;
 import agency.tango.skald.core.bus.SkaldBus;

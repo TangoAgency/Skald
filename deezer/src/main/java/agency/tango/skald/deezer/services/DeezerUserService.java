@@ -4,7 +4,6 @@ import com.deezer.sdk.model.User;
 import com.deezer.sdk.network.connect.DeezerConnect;
 import com.deezer.sdk.network.request.DeezerRequest;
 import com.deezer.sdk.network.request.DeezerRequestFactory;
-
 import agency.tango.skald.core.UserService;
 import agency.tango.skald.core.models.SkaldUser;
 import agency.tango.skald.deezer.services.listeners.DeezerRequestListener;

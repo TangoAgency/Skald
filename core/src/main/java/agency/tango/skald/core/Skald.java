@@ -2,7 +2,6 @@ package agency.tango.skald.core;
 
 import java.util.Arrays;
 import java.util.List;
-
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 

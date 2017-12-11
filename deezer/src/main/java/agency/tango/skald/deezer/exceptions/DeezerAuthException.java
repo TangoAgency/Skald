@@ -1,7 +1,7 @@
 package agency.tango.skald.deezer.exceptions;
 
-import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.errors.AuthError;
+import agency.tango.skald.core.exceptions.AuthException;
 
 public class DeezerAuthException extends AuthException {
   public DeezerAuthException(AuthError authError) {

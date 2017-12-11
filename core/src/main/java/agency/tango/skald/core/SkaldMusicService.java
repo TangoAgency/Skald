@@ -4,13 +4,11 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-
 import agency.tango.skald.core.bus.LoginEvent;
 import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.cache.TLruCache;

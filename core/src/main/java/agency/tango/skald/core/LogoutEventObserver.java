@@ -1,7 +1,6 @@
 package agency.tango.skald.core;
 
 import android.util.Log;
-
 import agency.tango.skald.core.bus.LoginEvent;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.provider.ProviderName;

@@ -2,9 +2,7 @@ package agency.tango.skald.deezer.authentication;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.deezer.sdk.network.connect.DeezerConnect;
-
 import agency.tango.skald.core.authentication.SkaldAuthData;
 
 public class DeezerAuthData extends SkaldAuthData {

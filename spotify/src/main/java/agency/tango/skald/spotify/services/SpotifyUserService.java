@@ -1,7 +1,6 @@
 package agency.tango.skald.spotify.services;
 
 import android.support.annotation.NonNull;
-
 import agency.tango.skald.core.UserService;
 import agency.tango.skald.core.models.SkaldUser;
 import agency.tango.skald.spotify.api.SpotifyApi;

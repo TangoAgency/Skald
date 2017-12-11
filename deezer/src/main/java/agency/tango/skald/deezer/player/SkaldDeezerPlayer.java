@@ -1,10 +1,8 @@
 package agency.tango.skald.deezer.player;
 
 import android.content.Context;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.listeners.OnLoadingListener;

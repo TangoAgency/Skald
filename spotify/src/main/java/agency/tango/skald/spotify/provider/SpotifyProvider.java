@@ -1,7 +1,6 @@
 package agency.tango.skald.spotify.provider;
 
 import android.content.Context;
-
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.UserService;
