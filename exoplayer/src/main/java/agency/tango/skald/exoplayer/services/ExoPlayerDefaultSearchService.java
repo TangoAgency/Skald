@@ -6,11 +6,13 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.exoplayer.models.ExoPlayerTrack;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
@@ -42,7 +44,7 @@ public class ExoPlayerDefaultSearchService implements SearchService {
         .map(new Function<File, SkaldTrack>() {
           @Override
           public SkaldTrack apply(File file) throws Exception {
-            return new SkaldTrack(Uri.fromFile(file), "TESTOWY UTWÓR", "TESTOWY UTWÓR", "");
+            return new ExoPlayerTrack(Uri.fromFile(file), "TESTOWY UTWÓR", "TESTOWY UTWÓR", "");
           }
         })
         .toList();
@@ -50,7 +52,6 @@ public class ExoPlayerDefaultSearchService implements SearchService {
 
   @Override
   public Single<List<SkaldPlaylist>> searchForPlaylists(String query) {
-    List<SkaldPlaylist> emptyList = new ArrayList<>();
-    return Single.just(emptyList);
+    return Single.just(Collections.<SkaldPlaylist>emptyList());
   }
 }

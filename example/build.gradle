@@ -52,6 +52,7 @@ dependencies {
   implementation deps.appCompat
   implementation deps.spotifyPlayer
   implementation deps.stetho
+  implementation deps.okhttpExoplayer
 
   testImplementation deps.junit
 }
