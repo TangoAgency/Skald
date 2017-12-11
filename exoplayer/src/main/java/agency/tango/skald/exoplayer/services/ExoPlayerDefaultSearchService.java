@@ -1,13 +1,15 @@
 package agency.tango.skald.exoplayer.services;
 
 import android.net.Uri;
+import android.webkit.MimeTypeMap;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -19,6 +21,8 @@ import io.reactivex.functions.Function;
 
 public class ExoPlayerDefaultSearchService implements SearchService {
 
+  private static final String AUDIO = "audio";
+
   private List<String> directories;
 
   public ExoPlayerDefaultSearchService(String... directories) {
@@ -27,27 +31,40 @@ public class ExoPlayerDefaultSearchService implements SearchService {
 
   @Override
   public Single<List<SkaldTrack>> searchForTracks(final String query) {
-    List<File> musicFiles = new ArrayList<>();
+    return Observable.fromCallable(new Callable<List<File>>() {
+      @Override
+      public List<File> call() throws Exception {
+        List<File> musicFiles = new ArrayList<>();
 
-    for (String directory : directories) {
-      File file = new File(directory);
-      File[] matchingFiles = file.listFiles(new FilenameFilter() {
-        @Override
-        public boolean accept(File dir, String name) {
-          return name.contains(query) && name.endsWith(".mp3");
+        for (String directory : directories) {
+          File file = new File(directory);
+          File[] matchingFiles = file.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+              String fileExtension = MimeTypeMap.getFileExtensionFromUrl(
+                  file.toURI().toString());
+              String mimeType = MimeTypeMap.getSingleton()
+                  .getMimeTypeFromExtension(fileExtension.toLowerCase());
+
+              return file.getName().contains(query) && mimeType != null &&
+                  mimeType.contains(AUDIO);
+            }
+          });
+          musicFiles.addAll(Arrays.asList(matchingFiles));
         }
-      });
-      musicFiles.addAll(Arrays.asList(matchingFiles));
-    }
-
-    return Observable.fromIterable(musicFiles)
-        .map(new Function<File, SkaldTrack>() {
-          @Override
-          public SkaldTrack apply(File file) throws Exception {
-            return new ExoPlayerTrack(Uri.fromFile(file), "TESTOWY UTWÓR", "TESTOWY UTWÓR", "");
-          }
-        })
-        .toList();
+        return musicFiles;
+      }
+    }).flatMapIterable(new Function<List<File>, Iterable<File>>() {
+      @Override
+      public Iterable<File> apply(List<File> files) throws Exception {
+        return files;
+      }
+    }).map(new Function<File, SkaldTrack>() {
+      @Override
+      public SkaldTrack apply(File file) throws Exception {
+        return new ExoPlayerTrack(Uri.fromFile(file), "TESTOWY UTWÓR", "TESTOWY UTWÓR", "");
+      }
+    }).toList();
   }
 
   @Override
