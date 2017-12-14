@@ -7,10 +7,10 @@ import agency.tango.skald.core.provider.ProviderName;
 
 public class Skald {
   private static volatile Skald instance;
-  private final SkaldUnmodifiableList<Provider> providers;
+  private final List<Provider> providers;
 
   private Skald(List<Provider> providers) {
-    this.providers = new SkaldUnmodifiableList<>(providers);
+    this.providers = CollectionsCompat.unmodifiableList(providers);
   }
 
   public static Skald instance() {
@@ -44,7 +44,7 @@ public class Skald {
     return instance;
   }
 
-  public SkaldUnmodifiableList<Provider> providers() {
+  public List<Provider> providers() {
     return providers;
   }
 
