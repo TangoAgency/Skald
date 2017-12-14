@@ -2,7 +2,6 @@ package agency.tango.skald.exoplayer.player;
 
 import android.content.Context;
 import android.os.Handler;
-
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource;
@@ -13,15 +12,12 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.util.Util;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.listeners.OnErrorListener;
@@ -48,7 +44,7 @@ public class SkaldExoPlayer implements Player {
     final DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
     TrackSelection.Factory trackSelectionFactory =
         new AdaptiveTrackSelection.Factory(bandwidthMeter);
-    TrackSelector trackSelector =
+    DefaultTrackSelector trackSelector =
         new DefaultTrackSelector(trackSelectionFactory);
 
     exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
@@ -65,7 +61,7 @@ public class SkaldExoPlayer implements Player {
 
     exoPlayer.addListener(
         new PlayerEventsListener(mainHandler, onPlaybackListeners, onLoadingListeners,
-            onErrorListener, exoPlayer));
+            onErrorListener, exoPlayer, trackSelector));
   }
 
   @Override

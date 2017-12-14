@@ -3,6 +3,8 @@ package agency.tango.skald.example;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,11 +16,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
-
 import java.util.List;
-
 import agency.tango.skald.R;
 import agency.tango.skald.core.SkaldAuthService;
 import agency.tango.skald.core.SkaldMusicService;
@@ -351,10 +349,17 @@ public class MainActivity extends Activity {
   }
 
   private void notifyViews(TrackMetadata trackMetadata) {
-    Picasso
-        .with(this)
-        .load(trackMetadata.getImageUrl())
-        .into(trackImage);
+    //Picasso
+    //    .with(this)
+    //    .load(trackMetadata.getImageUrl())
+    //    .into(trackImage);
+    byte[] pictureData = trackMetadata.getPictureData();
+    Bitmap bmp = null;
+    if (pictureData != null) {
+      bmp = BitmapFactory.decodeByteArray(pictureData, 0, pictureData.length);
+    }
+    trackImage.setImageBitmap(bmp);
+
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());
     loadingTextView.setText(EMPTY);
