@@ -30,7 +30,7 @@ public class CollectionsCompat {
       this.list = list;
     }
 
-    public boolean equals(Object o) {return o == this || list.equals(o);}
+    public boolean equals(Object object) {return object == this || list.equals(object);}
 
     public int hashCode() {return list.hashCode();}
 
@@ -48,11 +48,11 @@ public class CollectionsCompat {
       throw new UnsupportedOperationException();
     }
 
-    public int indexOf(Object o) {return list.indexOf(o);}
+    public int indexOf(Object object) {return list.indexOf(object);}
 
-    public int lastIndexOf(Object o) {return list.lastIndexOf(o);}
+    public int lastIndexOf(Object object) {return list.lastIndexOf(object);}
 
-    public boolean addAll(int index, Collection<? extends E> c) {
+    public boolean addAll(int index, Collection<? extends E> collection) {
       throw new UnsupportedOperationException();
     }
 
@@ -62,7 +62,7 @@ public class CollectionsCompat {
     }
 
     @Override
-    public void sort(Comparator<? super E> c) {
+    public void sort(Comparator<? super E> comparator) {
       throw new UnsupportedOperationException();
     }
 
@@ -70,20 +70,20 @@ public class CollectionsCompat {
 
     public ListIterator<E> listIterator(final int index) {
       return new ListIterator<E>() {
-        private final ListIterator<? extends E> i
+        private final ListIterator<? extends E> iterator
             = list.listIterator(index);
 
-        public boolean hasNext() {return i.hasNext();}
+        public boolean hasNext() {return iterator.hasNext();}
 
-        public E next() {return i.next();}
+        public E next() {return iterator.next();}
 
-        public boolean hasPrevious() {return i.hasPrevious();}
+        public boolean hasPrevious() {return iterator.hasPrevious();}
 
-        public E previous() {return i.previous();}
+        public E previous() {return iterator.previous();}
 
-        public int nextIndex() {return i.nextIndex();}
+        public int nextIndex() {return iterator.nextIndex();}
 
-        public int previousIndex() {return i.previousIndex();}
+        public int previousIndex() {return iterator.previousIndex();}
 
         public void remove() {
           throw new UnsupportedOperationException();
@@ -100,7 +100,7 @@ public class CollectionsCompat {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public void forEachRemaining(Consumer<? super E> action) {
-          i.forEachRemaining(action);
+          iterator.forEachRemaining(action);
         }
       };
     }
@@ -113,34 +113,34 @@ public class CollectionsCompat {
   static class UnmodifiableCollection<E> implements Collection<E>, Serializable {
     private static final long serialVersionUID = 1820017752578914078L;
 
-    final Collection<? extends E> c;
+    final Collection<? extends E> collection;
 
-    UnmodifiableCollection(Collection<? extends E> c) {
-      if (c == null) {
+    UnmodifiableCollection(Collection<? extends E> collection) {
+      if (collection == null) {
         throw new NullPointerException();
       }
-      this.c = c;
+      this.collection = collection;
     }
 
-    public int size() {return c.size();}
+    public int size() {return collection.size();}
 
-    public boolean isEmpty() {return c.isEmpty();}
+    public boolean isEmpty() {return collection.isEmpty();}
 
-    public boolean contains(Object o) {return c.contains(o);}
+    public boolean contains(Object object) {return collection.contains(object);}
 
-    public Object[] toArray() {return c.toArray();}
+    public Object[] toArray() {return collection.toArray();}
 
-    public <T> T[] toArray(T[] a) {return c.toArray(a);}
+    public <T> T[] toArray(T[] array) {return collection.toArray(array);}
 
-    public String toString() {return c.toString();}
+    public String toString() {return collection.toString();}
 
     public Iterator<E> iterator() {
       return new Iterator<E>() {
-        private final Iterator<? extends E> i = c.iterator();
+        private final Iterator<? extends E> iterator = collection.iterator();
 
-        public boolean hasNext() {return i.hasNext();}
+        public boolean hasNext() {return iterator.hasNext();}
 
-        public E next() {return i.next();}
+        public E next() {return iterator.next();}
 
         public void remove() {
           throw new UnsupportedOperationException();
@@ -149,32 +149,32 @@ public class CollectionsCompat {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         public void forEachRemaining(Consumer<? super E> action) {
-          i.forEachRemaining(action);
+          iterator.forEachRemaining(action);
         }
       };
     }
 
-    public boolean add(E e) {
+    public boolean add(E element) {
       throw new UnsupportedOperationException();
     }
 
-    public boolean remove(Object o) {
+    public boolean remove(Object object) {
       throw new UnsupportedOperationException();
     }
 
-    public boolean containsAll(Collection<?> coll) {
-      return c.containsAll(coll);
+    public boolean containsAll(Collection<?> collection) {
+      return this.collection.containsAll(collection);
     }
 
-    public boolean addAll(Collection<? extends E> coll) {
+    public boolean addAll(Collection<? extends E> collection) {
       throw new UnsupportedOperationException();
     }
 
-    public boolean removeAll(Collection<?> coll) {
+    public boolean removeAll(Collection<?> collection) {
       throw new UnsupportedOperationException();
     }
 
-    public boolean retainAll(Collection<?> coll) {
+    public boolean retainAll(Collection<?> collection) {
       throw new UnsupportedOperationException();
     }
 
@@ -185,7 +185,7 @@ public class CollectionsCompat {
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void forEach(Consumer<? super E> action) {
-      c.forEach(action);
+      collection.forEach(action);
     }
 
     @Override
@@ -197,21 +197,21 @@ public class CollectionsCompat {
     @SuppressWarnings("unchecked")
     @Override
     public Spliterator<E> spliterator() {
-      return (Spliterator<E>) c.spliterator();
+      return (Spliterator<E>) collection.spliterator();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressWarnings("unchecked")
     @Override
     public Stream<E> stream() {
-      return (Stream<E>) c.stream();
+      return (Stream<E>) collection.stream();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressWarnings("unchecked")
     @Override
     public Stream<E> parallelStream() {
-      return (Stream<E>) c.parallelStream();
+      return (Stream<E>) collection.parallelStream();
     }
   }
 }

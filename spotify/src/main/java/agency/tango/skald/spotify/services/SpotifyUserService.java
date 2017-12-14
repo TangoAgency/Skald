@@ -23,7 +23,7 @@ public class SpotifyUserService implements UserService {
   @NonNull
   private SkaldUser mapSpotifyUserToSkaldUser(SpotifyUser spotifyUser) {
     String imageUrl = null;
-    if (spotifyUser.getImages().size() != 0) {
+    if (!spotifyUser.getImages().isEmpty()) {
       imageUrl = spotifyUser.getImages().get(0).getUrl();
     }
     return new SkaldUser(spotifyUser.getDisplayName(), spotifyUser.getDisplayName(),

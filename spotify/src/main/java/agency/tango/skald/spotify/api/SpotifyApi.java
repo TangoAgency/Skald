@@ -54,12 +54,15 @@ public interface SpotifyApi {
       @Query("type") String type);
 
   class SpotifyApiImpl implements SpotifyApi {
+    private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
+    private static final String AUTHORIZATION_HEADER_VALUE = "Bearer %s";
 
     private final SpotifyApi spotifyApi;
     private final SpotifyProvider spotifyProvider;
     private final Context context;
     private final TokenService tokenService;
     private final SpotifyAuthStore spotifyAuthStore;
+
     private String token;
     private String refreshToken;
 
@@ -76,7 +79,7 @@ public interface SpotifyApi {
           .addInterceptor(chain -> {
             Request request = chain.request()
                 .newBuilder()
-                .header("Authorization", String.format("Bearer %s", token))
+                .header(AUTHORIZATION_HEADER_NAME, String.format(AUTHORIZATION_HEADER_VALUE, token))
                 .build();
 
             return chain.proceed(request);

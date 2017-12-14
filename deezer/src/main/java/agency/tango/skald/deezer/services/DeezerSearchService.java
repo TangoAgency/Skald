@@ -33,7 +33,7 @@ public class DeezerSearchService implements SearchService {
           new DeezerRequestListener<List<SkaldTrack>>(emitter) {
             @Override
             public void onResult(Object result, Object requestId) {
-              if (requestId.equals(SEARCH_TRACK_REQUEST_ID)) {
+              if (SEARCH_TRACK_REQUEST_ID.equals(requestId)) {
                 List<Track> tracks = (List<Track>) result;
                 List<SkaldTrack> skaldTracks = mapDeezerTracksToSkaldTracks(tracks);
                 emitter.onSuccess(skaldTracks);
@@ -52,7 +52,7 @@ public class DeezerSearchService implements SearchService {
           new DeezerRequestListener<List<SkaldPlaylist>>(emitter) {
             @Override
             public void onResult(Object result, Object requestId) {
-              if (requestId.equals(SEARCH_PLAYLIST_REQUEST_ID)) {
+              if (SEARCH_PLAYLIST_REQUEST_ID.equals(requestId)) {
                 List<Playlist> playlists = (List<Playlist>) result;
                 List<SkaldPlaylist> skaldPlaylists = mapDeezerPlaylistsToSkaldPlaylists(
                     playlists);

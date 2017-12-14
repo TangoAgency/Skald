@@ -26,7 +26,7 @@ public class DeezerUserService implements UserService {
           new DeezerRequestListener<SkaldUser>(emitter) {
             @Override
             public void onResult(Object result, Object requestId) {
-              if (requestId.equals(CURRENT_USER_REQUEST_ID)) {
+              if (CURRENT_USER_REQUEST_ID.equals(requestId)) {
                 SkaldUser skaldUser = mapDeezerUserToSkaldUser((User) result);
                 emitter.onSuccess(skaldUser);
               }
