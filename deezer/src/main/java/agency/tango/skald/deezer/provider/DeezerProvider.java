@@ -53,7 +53,7 @@ public class DeezerProvider extends Provider {
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return UriValidator.isUriValid(skaldPlayableEntity, NAME.getName());
+    return UriValidator.validate(skaldPlayableEntity, NAME.getName());
   }
 
   public String getClientId() {

@@ -1,9 +1,7 @@
 package agency.tango.skald.spotify.models;
 
 import android.net.Uri;
-
 import java.util.List;
-
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.spotify.api.models.Artist;
 import agency.tango.skald.spotify.api.models.Image;
@@ -14,8 +12,7 @@ public class SpotifyTrack extends SkaldTrack {
 
   public SpotifyTrack(Track track) {
     super(Uri.parse(String.format("skald://spotify/track/%s", track.getUri())),
-        getImageUrl(track), getArtistName(track),
-        track.getTitle());
+        getImageUrl(track), getArtistName(track), track.getTitle());
   }
 
   private static String getArtistName(Track track) {

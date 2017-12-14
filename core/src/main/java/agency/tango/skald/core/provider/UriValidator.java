@@ -1,10 +1,8 @@
 package agency.tango.skald.core.provider;
 
 import android.net.Uri;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
@@ -15,25 +13,32 @@ public class UriValidator {
 
   static {
     entitiesMap = new HashMap<>();
-    entitiesMap.put(SkaldTrack.class, SkaldTrack.URI_FIRST_PATH_SEGMENT);
-    entitiesMap.put(SkaldPlaylist.class, SkaldPlaylist.URI_FIRST_PATH_SEGMENT);
+    entitiesMap.put(SkaldTrack.class, SkaldTrack.URI_PATH_FIRST_SEGMENT);
+    entitiesMap.put(SkaldPlaylist.class, SkaldPlaylist.URI_PATH_FIRST_SEGMENT);
   }
 
-  public static boolean isUriValid(SkaldPlayableEntity skaldPlayableEntity, String authorityName) {
+  public static boolean validate(SkaldPlayableEntity skaldPlayableEntity, String authorityName) {
     Uri uri = skaldPlayableEntity.getUri();
-    boolean isSchemeValid = uri.getScheme().equals(SkaldPlayableEntity.SKALD_SCHEME);
 
-    boolean isAuthorityValid = uri.getAuthority().equals(authorityName);
+    return isSchemeValid(uri) && isAuthorityValid(authorityName, uri) &&
+        isPathValid(skaldPlayableEntity, uri);
+  }
 
+  private static boolean isSchemeValid(Uri uri) {
+    return SkaldPlayableEntity.SKALD_SCHEME.equals(uri.getScheme());
+  }
+
+  private static boolean isAuthorityValid(String authorityName, Uri uri) {
+    return authorityName.equals(uri.getAuthority());
+  }
+
+  private static boolean isPathValid(SkaldPlayableEntity skaldPlayableEntity, Uri uri) {
     String pathFromMap = entitiesMap.get(skaldPlayableEntity.getClass());
     if (pathFromMap == null) {
       pathFromMap = entitiesMap.get(skaldPlayableEntity.getClass().getSuperclass());
     }
 
-    String pathFromUri = getPathFromUri(uri);
-    boolean isPathValid = pathFromMap.equals(pathFromUri);
-
-    return isSchemeValid && isAuthorityValid && isPathValid;
+    return getPathFromUri(uri).equals(pathFromMap);
   }
 
   private static String getPathFromUri(Uri uri) {
