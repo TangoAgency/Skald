@@ -21,8 +21,8 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import java.util.Arrays;
 import java.util.List;
+import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
@@ -57,18 +57,13 @@ public class PlayerEventsListener implements Player.EventListener {
   @Override
   public void onTracksChanged(TrackGroupArray trackGroups,
       TrackSelectionArray trackSelections) {
-    //if (trackGroups.length > 0) {
-    //  notifyPlayEvent();
-    //}
-
     TrackMetadata trackMetadata = null;
     MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
     if (mappedTrackInfo == null) {
-      Log.d(TAG, "Tracks []");
       return;
     }
+
     Log.d(TAG, "Tracks [");
-    // Log tracks associated to renderers.
     for (int rendererIndex = 0; rendererIndex < mappedTrackInfo.length; rendererIndex++) {
       TrackGroupArray rendererTrackGroups = mappedTrackInfo.getTrackGroups(rendererIndex);
       TrackSelection trackSelection = trackSelections.get(rendererIndex);
@@ -79,7 +74,8 @@ public class PlayerEventsListener implements Player.EventListener {
             Metadata metadata = trackSelection.getFormat(selectionIndex).metadata;
             if (metadata != null) {
               Log.d(TAG, "    Metadata [");
-              trackMetadata = printAndGetMetadata(metadata, "      ");
+              printMetadata(metadata, "      ");
+              trackMetadata = getMetadata(metadata);
               Log.d(TAG, "    ]");
               break;
             }
@@ -121,7 +117,7 @@ public class PlayerEventsListener implements Player.EventListener {
 
   @Override
   public void onPlayerError(ExoPlaybackException error) {
-    onErrorListener.onError(error);
+    notifyPlaybackError(new PlaybackError(error));
   }
 
   @Override
@@ -132,6 +128,17 @@ public class PlayerEventsListener implements Player.EventListener {
   @Override
   public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
 
+  }
+
+  private void notifyPlaybackError(final PlaybackError playbackError) {
+    mainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+          onPlaybackListener.onError(playbackError);
+        }
+      }
+    });
   }
 
   private void notifyStopEvent() {
@@ -189,24 +196,13 @@ public class PlayerEventsListener implements Player.EventListener {
     });
   }
 
-  private TrackMetadata printAndGetMetadata(Metadata metadata, String prefix) {
-    String artistName = "";
-    String title = "";
-    byte[] pictureData = null;
-
+  private void printMetadata(Metadata metadata, String prefix) {
     for (int i = 0; i < metadata.length(); i++) {
       Metadata.Entry entry = metadata.get(i);
       if (entry instanceof TextInformationFrame) {
         TextInformationFrame textInformationFrame = (TextInformationFrame) entry;
         Log.d(TAG, prefix + String.format("%s: value=%s", textInformationFrame.id,
             textInformationFrame.value));
-
-        if (textInformationFrame.id.equals("TIT2")) {
-          title = textInformationFrame.value;
-        } else if (textInformationFrame.id.equals("TPE1")) {
-          artistName = textInformationFrame.value;
-        }
-
       } else if (entry instanceof UrlLinkFrame) {
         UrlLinkFrame urlLinkFrame = (UrlLinkFrame) entry;
         Log.d(TAG, prefix + String.format("%s: url=%s", urlLinkFrame.id, urlLinkFrame.url));
@@ -220,12 +216,8 @@ public class PlayerEventsListener implements Player.EventListener {
       } else if (entry instanceof ApicFrame) {
         ApicFrame apicFrame = (ApicFrame) entry;
         Log.d(TAG, prefix + String.format(
-            "%s: mimeType=%s, description=%s, pictureType = %s, pictureData = %s",
-            apicFrame.id, apicFrame.mimeType, apicFrame.description, apicFrame.pictureType,
-            Arrays.toString(apicFrame.pictureData)));
-
-        pictureData = apicFrame.pictureData;
-
+            "%s: mimeType=%s, description=%s", apicFrame.id, apicFrame.mimeType,
+            apicFrame.description));
       } else if (entry instanceof CommentFrame) {
         CommentFrame commentFrame = (CommentFrame) entry;
         Log.d(TAG, prefix + String.format("%s: language=%s, description=%s", commentFrame.id,
@@ -239,7 +231,27 @@ public class PlayerEventsListener implements Player.EventListener {
             eventMessage.schemeIdUri, eventMessage.id, eventMessage.value));
       }
     }
+  }
 
+  private TrackMetadata getMetadata(Metadata metadata) {
+    String artistName = "";
+    String title = "";
+    byte[] pictureData = null;
+
+    for (int i = 0; i < metadata.length(); i++) {
+      Metadata.Entry entry = metadata.get(i);
+      if (entry instanceof TextInformationFrame) {
+        TextInformationFrame textInformationFrame = (TextInformationFrame) entry;
+
+        if (textInformationFrame.id.equals("TIT2")) {
+          title = textInformationFrame.value;
+        } else if (textInformationFrame.id.equals("TPE1")) {
+          artistName = textInformationFrame.value;
+        }
+      } else if (entry instanceof ApicFrame) {
+        pictureData = ((ApicFrame) entry).pictureData;
+      }
+    }
     return new TrackMetadata(artistName, title, new ExoPlayerImage(pictureData));
   }
 }
