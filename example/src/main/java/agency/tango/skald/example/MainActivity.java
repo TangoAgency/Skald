@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.squareup.picasso.Picasso;
 import java.util.List;
 import agency.tango.skald.R;
 import agency.tango.skald.core.SkaldAuthService;
@@ -27,12 +28,15 @@ import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
+import agency.tango.skald.core.models.ServiceImage;
+import agency.tango.skald.core.models.SkaldImage;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.deezer.errors.DeezerAuthError;
 import agency.tango.skald.deezer.provider.DeezerProvider;
+import agency.tango.skald.exoplayer.models.ExoPlayerImage;
 import agency.tango.skald.spotify.errors.SpotifyAuthError;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -349,16 +353,20 @@ public class MainActivity extends Activity {
   }
 
   private void notifyViews(TrackMetadata trackMetadata) {
-    //Picasso
-    //    .with(this)
-    //    .load(trackMetadata.getImageUrl())
-    //    .into(trackImage);
-    byte[] pictureData = trackMetadata.getPictureData();
-    Bitmap bmp = null;
-    if (pictureData != null) {
-      bmp = BitmapFactory.decodeByteArray(pictureData, 0, pictureData.length);
+    SkaldImage skaldImage = trackMetadata.getImage();
+    if (skaldImage instanceof ServiceImage) {
+      Picasso
+          .with(this)
+          .load(((ServiceImage) skaldImage).getImageUrl())
+          .into(trackImage);
+    } else if ((skaldImage instanceof ExoPlayerImage)) {
+      byte[] pictureData = ((ExoPlayerImage) skaldImage).getPictureData();
+      Bitmap bmp = null;
+      if (pictureData != null) {
+        bmp = BitmapFactory.decodeByteArray(pictureData, 0, pictureData.length);
+      }
+      trackImage.setImageBitmap(bmp);
     }
-    trackImage.setImageBitmap(bmp);
 
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());

@@ -15,6 +15,7 @@ import java.util.List;
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
+import agency.tango.skald.core.models.ServiceImage;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.deezer.exceptions.UnparsedResultException;
 
@@ -65,7 +66,7 @@ public class PlayerListener implements PlayerWrapperListener {
         if (requestId.equals(TRACK_REQUEST)) {
           Track track = (Track) result;
           TrackMetadata trackMetadata = new TrackMetadata(track.getArtist().getName(),
-              track.getTitle(), track.getAlbum().getImageUrl());
+              track.getTitle(), new ServiceImage(track.getAlbum().getImageUrl()));
           notifyPlayEvent(trackMetadata);
           deezerPLayer.notifyResumeEvent();
         }

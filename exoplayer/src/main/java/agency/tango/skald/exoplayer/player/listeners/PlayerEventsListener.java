@@ -27,6 +27,7 @@ import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.TrackMetadata;
+import agency.tango.skald.exoplayer.models.ExoPlayerImage;
 
 public class PlayerEventsListener implements Player.EventListener {
   private static final String TAG = PlayerEventsListener.class.getSimpleName();
@@ -239,6 +240,6 @@ public class PlayerEventsListener implements Player.EventListener {
       }
     }
 
-    return new TrackMetadata(artistName, title, pictureData);
+    return new TrackMetadata(artistName, title, new ExoPlayerImage(pictureData));
   }
 }
