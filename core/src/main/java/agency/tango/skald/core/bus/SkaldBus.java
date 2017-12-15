@@ -24,11 +24,11 @@ public class SkaldBus {
 
   public <T> Observable<T> observable(@NonNull final Class<T> eventClass) {
     return bus
-        .filter(object -> eventInstanceOf(eventClass, object))
+        .filter(object -> objectInstanceOf(eventClass, object))
         .cast(eventClass);
   }
 
-  private <T> boolean eventInstanceOf(@NonNull Class<T> eventClass, Object object) {
+  private <T> boolean objectInstanceOf(@NonNull Class<T> eventClass, Object object) {
     return object != null && eventClass.isInstance(object);
   }
 }

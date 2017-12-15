@@ -15,43 +15,61 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public class CollectionsCompat {
-
   public static <T> List<T> unmodifiableList(List<T> list) {
     return new UnmodifiableList<>(list);
   }
 
-  static class UnmodifiableList<E> extends UnmodifiableCollection<E> implements List<E> {
+  private static class UnmodifiableList<E> extends UnmodifiableCollection<E> implements List<E> {
     private static final long serialVersionUID = -283967356065247728L;
 
-    final List<? extends E> list;
+    private final List<? extends E> list;
 
     UnmodifiableList(List<? extends E> list) {
       super(list);
       this.list = list;
     }
 
-    public boolean equals(Object object) {return object == this || list.equals(object);}
+    @Override
+    public boolean equals(Object object) {
+      return object == this || list.equals(object);
+    }
 
-    public int hashCode() {return list.hashCode();}
+    @Override
+    public int hashCode() {
+      return list.hashCode();
+    }
 
-    public E get(int index) {return list.get(index);}
+    @Override
+    public E get(int index) {
+      return list.get(index);
+    }
 
+    @Override
     public E set(int index, E element) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void add(int index, E element) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public E remove(int index) {
       throw new UnsupportedOperationException();
     }
 
-    public int indexOf(Object object) {return list.indexOf(object);}
+    @Override
+    public int indexOf(Object object) {
+      return list.indexOf(object);
+    }
 
-    public int lastIndexOf(Object object) {return list.lastIndexOf(object);}
+    @Override
+    public int lastIndexOf(Object object) {
+      return list.lastIndexOf(object);
+    }
 
+    @Override
     public boolean addAll(int index, Collection<? extends E> collection) {
       throw new UnsupportedOperationException();
     }
@@ -66,34 +84,59 @@ public class CollectionsCompat {
       throw new UnsupportedOperationException();
     }
 
-    public ListIterator<E> listIterator() {return listIterator(0);}
+    @Override
+    public ListIterator<E> listIterator() {
+      return listIterator(0);
+    }
 
+    @Override
     public ListIterator<E> listIterator(final int index) {
       return new ListIterator<E>() {
         private final ListIterator<? extends E> iterator
             = list.listIterator(index);
 
-        public boolean hasNext() {return iterator.hasNext();}
+        @Override
+        public boolean hasNext() {
+          return iterator.hasNext();
+        }
 
-        public E next() {return iterator.next();}
+        @Override
+        public E next() {
+          return iterator.next();
+        }
 
-        public boolean hasPrevious() {return iterator.hasPrevious();}
+        @Override
+        public boolean hasPrevious() {
+          return iterator.hasPrevious();
+        }
 
-        public E previous() {return iterator.previous();}
+        @Override
+        public E previous() {
+          return iterator.previous();
+        }
 
-        public int nextIndex() {return iterator.nextIndex();}
+        @Override
+        public int nextIndex() {
+          return iterator.nextIndex();
+        }
 
-        public int previousIndex() {return iterator.previousIndex();}
+        @Override
+        public int previousIndex() {
+          return iterator.previousIndex();
+        }
 
+        @Override
         public void remove() {
           throw new UnsupportedOperationException();
         }
 
-        public void set(E e) {
+        @Override
+        public void set(E element) {
           throw new UnsupportedOperationException();
         }
 
-        public void add(E e) {
+        @Override
+        public void add(E element) {
           throw new UnsupportedOperationException();
         }
 
@@ -105,15 +148,16 @@ public class CollectionsCompat {
       };
     }
 
+    @Override
     public List<E> subList(int fromIndex, int toIndex) {
       return new UnmodifiableList<>(list.subList(fromIndex, toIndex));
     }
   }
 
-  static class UnmodifiableCollection<E> implements Collection<E>, Serializable {
+  private static class UnmodifiableCollection<E> implements Collection<E>, Serializable {
     private static final long serialVersionUID = 1820017752578914078L;
 
-    final Collection<? extends E> collection;
+    private final Collection<? extends E> collection;
 
     UnmodifiableCollection(Collection<? extends E> collection) {
       if (collection == null) {
@@ -122,26 +166,52 @@ public class CollectionsCompat {
       this.collection = collection;
     }
 
-    public int size() {return collection.size();}
+    @Override
+    public int size() {
+      return collection.size();
+    }
 
-    public boolean isEmpty() {return collection.isEmpty();}
+    @Override
+    public boolean isEmpty() {
+      return collection.isEmpty();
+    }
 
-    public boolean contains(Object object) {return collection.contains(object);}
+    @Override
+    public boolean contains(Object object) {
+      return collection.contains(object);
+    }
 
-    public Object[] toArray() {return collection.toArray();}
+    @Override
+    public Object[] toArray() {
+      return collection.toArray();
+    }
 
-    public <T> T[] toArray(T[] array) {return collection.toArray(array);}
+    @Override
+    public <T> T[] toArray(T[] array) {
+      return collection.toArray(array);
+    }
 
-    public String toString() {return collection.toString();}
+    @Override
+    public String toString() {
+      return collection.toString();
+    }
 
+    @Override
     public Iterator<E> iterator() {
       return new Iterator<E>() {
         private final Iterator<? extends E> iterator = collection.iterator();
 
-        public boolean hasNext() {return iterator.hasNext();}
+        @Override
+        public boolean hasNext() {
+          return iterator.hasNext();
+        }
 
-        public E next() {return iterator.next();}
+        @Override
+        public E next() {
+          return iterator.next();
+        }
 
+        @Override
         public void remove() {
           throw new UnsupportedOperationException();
         }
@@ -154,30 +224,37 @@ public class CollectionsCompat {
       };
     }
 
+    @Override
     public boolean add(E element) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean remove(Object object) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean containsAll(Collection<?> collection) {
       return this.collection.containsAll(collection);
     }
 
+    @Override
     public boolean addAll(Collection<? extends E> collection) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean removeAll(Collection<?> collection) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean retainAll(Collection<?> collection) {
       throw new UnsupportedOperationException();
     }
 
+    @Override
     public void clear() {
       throw new UnsupportedOperationException();
     }

@@ -231,7 +231,7 @@ public class MainActivity extends Activity {
   private void updateViewsAfterLoggingOut() {
     if (!isUserLoggedIn()) {
       updateUserViews(EMPTY, null);
-      userName.setText(R.string.hello_exc_mark);
+      userName.setText(R.string.hello);
     } else {
       getUsersAndUpdateUserViews();
     }
@@ -245,7 +245,8 @@ public class MainActivity extends Activity {
           .subscribe(new DisposableSingleObserver<List<SkaldUser>>() {
             @Override
             public void onSuccess(List<SkaldUser> skaldUsers) {
-              String message = String.format("Hello, %s!", skaldUsers.get(0).getNickName());
+              String message = String.format(getString(R.string.hello_user_name),
+                  skaldUsers.get(0).getNickName());
               updateUserViews(message, skaldUsers.get(0).getImageUrl());
             }
 
