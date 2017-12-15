@@ -41,5 +41,9 @@ dependencies {
   implementation deps.rxAndroid
   implementation deps.rxJavaAdapter
 
+  androidTestImplementation deps.supportAnnotations
+  androidTestImplementation deps.supportTestRunner
+  androidTestImplementation deps.supportTestRules
+
   testImplementation 'junit:junit:4.12'
 }

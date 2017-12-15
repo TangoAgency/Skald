@@ -8,6 +8,7 @@ import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.exceptions.AuthException;
+import agency.tango.skald.core.exceptions.NotSupportedEntityException;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
@@ -103,6 +104,7 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   }
 
   private void play(@NonNull CompletableEmitter emitter) {
+    boolean canHandle = false;
     for (Provider provider : providers) {
       if (provider.canHandle(skaldPlayableEntity)) {
         ProviderName providerName = provider.getProviderName();
@@ -112,7 +114,12 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
         } else {
           initializePlayerAndPlay(emitter, provider, providerName);
         }
+        canHandle = true;
       }
+    }
+    if(!canHandle) {
+      emitter.onError(
+          new NotSupportedEntityException("Tried to play inappropriate entity. Uri may be wrong"));
     }
   }
 
