@@ -22,13 +22,13 @@ public interface Player {
 
   void addOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
 
-  void removeOnPlayerReadyListener();
+  void removeOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener);
 
   void addOnPlaybackListener(OnPlaybackListener onPlaybackListener);
 
-  void removeOnPlaybackListener();
+  void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener);
 
   void addOnLoadingListener(OnLoadingListener onLoadingListener);
 
-  void removeOnLoadingListener();
+  void removeOnLoadingListener(OnLoadingListener onLoadingListener);
 }

@@ -1,5 +1,5 @@
 package agency.tango.skald.core.listeners;
 
 public interface OnErrorListener {
-  void onError();
+  void onError(Exception exception);
 }

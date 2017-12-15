@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
@@ -15,8 +16,9 @@ public class SkaldDeezerPlayer implements Player {
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
   private final DeezerPlayer deezerPlayer;
 
-  public SkaldDeezerPlayer(Context context, DeezerAuthData deezerAuthData) {
-    deezerPlayer = new DeezerPlayer(context, deezerAuthData.getDeezerConnect());
+  public SkaldDeezerPlayer(Context context, DeezerAuthData deezerAuthData,
+      OnErrorListener onErrorListener) {
+    deezerPlayer = new DeezerPlayer(context, deezerAuthData.getDeezerConnect(), onErrorListener);
   }
 
   @Override
@@ -59,8 +61,8 @@ public class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlayerReadyListener() {
-    onPlayerReadyListeners.remove(0);
+  public void removeOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+    onPlayerReadyListeners.remove(onPlayerReadyListener);
   }
 
   @Override
@@ -69,8 +71,8 @@ public class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlaybackListener() {
-    deezerPlayer.removeOnPlayerReadyListener();
+  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+    deezerPlayer.removeOnPlayerReadyListener(onPlaybackListener);
   }
 
   @Override
@@ -79,7 +81,7 @@ public class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void removeOnLoadingListener() {
-    deezerPlayer.removeOnLoadingListener();
+  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+    deezerPlayer.removeOnLoadingListener(onLoadingListener);
   }
 }

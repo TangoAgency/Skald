@@ -10,14 +10,14 @@ import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
 import agency.tango.skald.core.factories.UserServiceFactory;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
+import agency.tango.skald.core.provider.UriValidator;
 import agency.tango.skald.spotify.api.SpotifyApi;
 import agency.tango.skald.spotify.authentication.SpotifyAuthData;
 import agency.tango.skald.spotify.authentication.SpotifyAuthStore;
-import agency.tango.skald.spotify.models.SpotifyPlaylist;
-import agency.tango.skald.spotify.models.SpotifyTrack;
 import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
 import agency.tango.skald.spotify.services.SpotifySearchService;
 import agency.tango.skald.spotify.services.SpotifyUserService;
@@ -71,8 +71,8 @@ public class SpotifyProvider extends Provider {
   }
 
   @Override
-  public boolean canHandle(SkaldPlayableEntity playableEntity) {
-    return playableEntity instanceof SpotifyTrack || playableEntity instanceof SpotifyPlaylist;
+  public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
+    return UriValidator.validate(skaldPlayableEntity, NAME.getName());
   }
 
   public String getClientId() {
@@ -106,9 +106,9 @@ public class SpotifyProvider extends Provider {
     }
 
     @Override
-    public Player getPlayer() throws AuthException {
+    public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
       SpotifyAuthData spotifyAuthData = (SpotifyAuthData) spotifyAuthStore.restore(context);
-      return new SkaldSpotifyPlayer(context, spotifyAuthData, spotifyProvider);
+      return new SkaldSpotifyPlayer(context, spotifyAuthData, spotifyProvider, onErrorListener);
     }
   }
 

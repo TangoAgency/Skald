@@ -5,11 +5,13 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 import agency.tango.skald.R;
@@ -61,16 +63,16 @@ public class MainActivity extends Activity {
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    resumePauseButton = (ImageButton) findViewById(R.id.imageButton_play);
-    stopButton = (ImageButton) findViewById(R.id.imageButton_stop);
-    trackImage = (ImageView) findViewById(R.id.image_cover);
-    artistName = (TextView) findViewById(R.id.text_artist);
-    title = (TextView) findViewById(R.id.text_title);
-    spotifyButton = (Button) findViewById(R.id.button_login_spotify);
-    deezerButton = (Button) findViewById(R.id.button_login_deezer);
-    tracksButton = (Button) findViewById(R.id.button_tracks);
-    playlistButton = (Button) findViewById(R.id.button_playlists);
-    loadingTextView = (TextView) findViewById(R.id.text_loading);
+    resumePauseButton = findViewById(R.id.imageButton_play);
+    stopButton = findViewById(R.id.imageButton_stop);
+    trackImage = findViewById(R.id.image_cover);
+    artistName = findViewById(R.id.text_artist);
+    title = findViewById(R.id.text_title);
+    spotifyButton = findViewById(R.id.button_login_spotify);
+    deezerButton = findViewById(R.id.button_login_deezer);
+    tracksButton = findViewById(R.id.button_tracks);
+    playlistButton = findViewById(R.id.button_playlists);
+    loadingTextView = findViewById(R.id.text_loading);
     userName = findViewById(R.id.text_user_name);
     userAvatar = findViewById(R.id.image_user);
 
@@ -88,7 +90,6 @@ public class MainActivity extends Activity {
     spotifyButton.setOnClickListener(v -> {
       if (!skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
         skaldAuthService.login(SpotifyProvider.NAME);
-        spotifyButton.setText(R.string.logout_from_spotify);
       } else {
         skaldAuthService.logout(SpotifyProvider.NAME);
         spotifyButton.setText(R.string.login_to_spotify);
@@ -98,7 +99,6 @@ public class MainActivity extends Activity {
     deezerButton.setOnClickListener(v -> {
       if (!skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
         skaldAuthService.login(DeezerProvider.NAME);
-        deezerButton.setText(R.string.logout_from_deezer);
       } else {
         skaldAuthService.logout(DeezerProvider.NAME);
         deezerButton.setText(R.string.login_to_deezer);
@@ -162,12 +162,10 @@ public class MainActivity extends Activity {
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    if (requestCode == AUTH_SPOTIFY_REQUEST_CODE || requestCode == AUTH_DEEZER_REQUEST_CODE) {
-      if (resultCode == RESULT_OK) {
-        Log.d(TAG, "Authentication completed");
-      } else {
-        Log.e(TAG, "Authentication went wrong");
-      }
+    if (requestCode == AUTH_SPOTIFY_REQUEST_CODE) {
+      handleAuthenticationResult(resultCode, spotifyButton, R.string.logout_from_spotify);
+    } else if (requestCode == AUTH_DEEZER_REQUEST_CODE) {
+      handleAuthenticationResult(resultCode, deezerButton, R.string.logout_from_deezer);
     }
   }
 
@@ -284,8 +282,20 @@ public class MainActivity extends Activity {
     }
   }
 
+  private void handleAuthenticationResult(int resultCode, Button serviceButton,
+      @StringRes int buttonText) {
+    if (resultCode == RESULT_OK) {
+      serviceButton.setText(buttonText);
+    } else {
+      Log.e(TAG, "Authentication went wrong");
+      Toast.makeText(this, R.string.authentication_error, Toast.LENGTH_LONG)
+          .show();
+    }
+  }
+
   private void addOnErrorListener() {
-    skaldMusicService.addOnErrorListener(() -> Log.e(TAG, "Error in SkaldMusicService occurred"));
+    skaldMusicService.addOnErrorListener(
+        exception -> Log.e(TAG, "Error in SkaldMusicService occurred", exception));
   }
 
   private void addOnPlaybackListener() {
@@ -320,7 +330,7 @@ public class MainActivity extends Activity {
 
       @Override
       public void onError(PlaybackError playbackError) {
-        Log.e(TAG, String.format("Playback error occurred %s", playbackError.getMessage()));
+        Log.e(TAG, "Playback error occurred", playbackError.getException());
       }
     });
   }
@@ -360,12 +370,12 @@ public class MainActivity extends Activity {
   private class PlaybackEventCompletableObserver extends DisposableCompletableObserver {
     @Override
     public void onComplete() {
-
+      Log.d(TAG, "Operation completed");
     }
 
     @Override
     public void onError(@NonNull Throwable e) {
-
+      Log.e(TAG, "Error during playback operation", e);
     }
   }
 }

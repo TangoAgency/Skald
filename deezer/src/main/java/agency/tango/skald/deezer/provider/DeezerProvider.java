@@ -9,14 +9,14 @@ import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
 import agency.tango.skald.core.factories.SkaldAuthStoreFactory;
+import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.factories.UserServiceFactory;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
+import agency.tango.skald.core.provider.UriValidator;
 import agency.tango.skald.deezer.authentication.DeezerAuthData;
 import agency.tango.skald.deezer.authentication.DeezerAuthStore;
-import agency.tango.skald.deezer.models.DeezerPlaylist;
-import agency.tango.skald.deezer.models.DeezerTrack;
 import agency.tango.skald.deezer.player.SkaldDeezerPlayer;
 import agency.tango.skald.deezer.services.DeezerSearchService;
 import agency.tango.skald.deezer.services.DeezerUserService;
@@ -62,8 +62,7 @@ public class DeezerProvider extends Provider {
 
   @Override
   public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
-    return skaldPlayableEntity instanceof DeezerTrack
-        || skaldPlayableEntity instanceof DeezerPlaylist;
+    return UriValidator.validate(skaldPlayableEntity, NAME.getName());
   }
 
   public String getClientId() {
@@ -80,9 +79,9 @@ public class DeezerProvider extends Provider {
     }
 
     @Override
-    public Player getPlayer() throws AuthException {
+    public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);
-      return new SkaldDeezerPlayer(context, deezerAuthData);
+      return new SkaldDeezerPlayer(context, deezerAuthData, onErrorListener);
     }
   }
 
