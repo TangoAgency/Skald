@@ -73,7 +73,7 @@ public class PlayerListener implements PlayerWrapperListener {
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
           onPlaybackListener.onError(
               new PlaybackError(new UnparsedResultException(
-                  String.format("Cannot get track info: %s", requestResponse))));
+                  String.format("Got unparsed track metadata : %s", requestResponse))));
         }
       }
 

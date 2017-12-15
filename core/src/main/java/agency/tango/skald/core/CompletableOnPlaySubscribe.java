@@ -44,12 +44,9 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
     this.providers = providers;
 
     onPlayerPlaybackListener = new OnPlayerPlaybackListener(onPlaybackListeners);
-    onLoadingListener = new OnLoadingListener() {
-      @Override
-      public void onLoading() {
-        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
-          onLoadingListener.onLoading();
-        }
+    onLoadingListener = () -> {
+      for (OnLoadingListener onLoadingListener : onLoadingListeners) {
+        onLoadingListener.onLoading();
       }
     };
   }
@@ -115,7 +112,7 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
         canHandle = true;
       }
     }
-    if(!canHandle) {
+    if (!canHandle) {
       emitter.onError(
           new NotSupportedEntityException("Tried to play inappropriate entity. Uri may be wrong"));
     }
@@ -131,25 +128,19 @@ class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   private void initializePlayerAndPlay(@NonNull final CompletableEmitter emitter,
       final Provider provider, final ProviderName providerName) {
     try {
-      final OnErrorListener onErrorListener = new OnErrorListener() {
-        @Override
-        public void onError(Exception exception) {
-          for (OnErrorListener onErrorListener : onErrorListeners) {
-            onErrorListener.onError(exception);
-          }
+      final OnErrorListener onErrorListener = exception -> {
+        for (OnErrorListener errorListener : onErrorListeners) {
+          errorListener.onError(exception);
         }
       };
       initializedPlayer = provider.getPlayerFactory().getPlayer(onErrorListener);
       initializedPlayer.addOnPlaybackListener(onPlayerPlaybackListener);
       initializedPlayer.addOnLoadingListener(onLoadingListener);
-      onPlayerReadyListener = new OnPlayerReadyListener() {
-        @Override
-        public void onPlayerReady(Player player) {
-          playerInitialized = true;
-          playerCache.put(provider.getProviderName(), initializedPlayer);
-          player.play(skaldPlayableEntity, new SkaldCoreOperationCallback(emitter));
-          skaldMusicService.setCurrentProviderName(providerName);
-        }
+      onPlayerReadyListener = player -> {
+        playerInitialized = true;
+        playerCache.put(provider.getProviderName(), initializedPlayer);
+        player.play(skaldPlayableEntity, new SkaldCoreOperationCallback(emitter));
+        skaldMusicService.setCurrentProviderName(providerName);
       };
       initializedPlayer.addOnPlayerReadyListener(onPlayerReadyListener);
     } catch (AuthException authException) {
