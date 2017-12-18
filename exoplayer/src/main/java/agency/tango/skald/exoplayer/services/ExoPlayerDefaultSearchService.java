@@ -2,7 +2,6 @@ package agency.tango.skald.exoplayer.services;
 
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;

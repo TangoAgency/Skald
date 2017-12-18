@@ -85,6 +85,9 @@ public class PlayerEventsListener implements Player.EventListener {
       }
     }
 
+    if (trackMetadata == null) {
+      trackMetadata = new TrackMetadata("", "", new ExoPlayerImage(null));
+    }
     notifyPlayEvent(trackMetadata);
   }
 
