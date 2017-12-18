@@ -7,6 +7,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
@@ -25,6 +26,10 @@ import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
+import agency.tango.skald.core.models.SkaldPlaylist;
+import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.exoplayer.models.ExoPlayerPlaylist;
+import agency.tango.skald.exoplayer.models.ExoPlayerTrack;
 import agency.tango.skald.exoplayer.player.listeners.PlayerEventsListener;
 import okhttp3.OkHttpClient;
 
@@ -67,10 +72,23 @@ public class SkaldExoPlayer implements Player {
   @Override
   public void play(SkaldPlayableEntity skaldPlayableEntity,
       SkaldOperationCallback skaldOperationCallback) {
-    MediaSource trackSource = new ExtractorMediaSource(skaldPlayableEntity.getUri(),
-        dataSourceFactory, extractorsFactory, null, null);
+    MediaSource mediaSource = null;
+    if (skaldPlayableEntity instanceof SkaldTrack) {
+      mediaSource = new ExtractorMediaSource(skaldPlayableEntity.getUri(),
+          dataSourceFactory, extractorsFactory, null, null);
+    } else if (skaldPlayableEntity instanceof SkaldPlaylist) {
+      List<MediaSource> mediaSources = new ArrayList<>();
+      for (ExoPlayerTrack exoPlayerTrack : ((ExoPlayerPlaylist) skaldPlayableEntity).getTracks()) {
+        mediaSources.add(new ExtractorMediaSource(exoPlayerTrack.getUri(), dataSourceFactory,
+            extractorsFactory, null, null));
+      }
 
-    exoPlayer.prepare(trackSource);
+      MediaSource[] mediaSourcesArray = new MediaSource[mediaSources.size()];
+      mediaSourcesArray = mediaSources.toArray(mediaSourcesArray);
+      mediaSource = new ConcatenatingMediaSource(mediaSourcesArray);
+    }
+
+    exoPlayer.prepare(mediaSource);
 
     if (!isPlaying()) {
       exoPlayer.setPlayWhenReady(true);
