@@ -3,13 +3,16 @@ package agency.tango.skald.example;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.squareup.picasso.Picasso;
@@ -26,10 +29,12 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.SkaldUser;
 import agency.tango.skald.core.models.TrackMetadata;
+import agency.tango.skald.core.provider.ProviderName;
 import agency.tango.skald.deezer.errors.DeezerAuthError;
 import agency.tango.skald.deezer.provider.DeezerProvider;
 import agency.tango.skald.spotify.errors.SpotifyAuthError;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
+import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableCompletableObserver;
@@ -56,6 +61,8 @@ public class MainActivity extends Activity {
   private TextView userName;
   private ImageView userAvatar;
   private ListView listView;
+  private ProgressBar loadingTrackProgressBar;
+  private ProgressBar loadingListProgressBar;
 
   private SkaldEntityAdapter adapter;
   private boolean isPlaying = false;
@@ -79,59 +86,48 @@ public class MainActivity extends Activity {
     listView = findViewById(R.id.list_view_tracks);
     listView.setAdapter(adapter);
     listView.setOnItemClickListener((parent, listView, position, id) -> {
+      loadingTrackProgressBar.setVisibility(View.VISIBLE);
+      setTrackInfoVisibility(false);
       final SkaldPlayableEntity item = (SkaldPlayableEntity) parent.getItemAtPosition(position);
       play(item);
     });
+    loadingTrackProgressBar = findViewById(R.id.loading_track_progress_bar);
+    loadingListProgressBar = findViewById(R.id.loading_list_progress_bar);
 
     skaldAuthService = new SkaldAuthService(getApplicationContext(), this::startAuthActivity);
     skaldMusicService = new SkaldMusicService(getApplicationContext());
 
-    addOnErrorListener();
-    addOnPlaybackListener();
-    skaldMusicService.addOnLoadingListener(() -> {
-      Log.d(TAG, "Loading track...");
-    });
+    skaldMusicService.addOnErrorListener(
+        exception -> Log.e(TAG, "Error in SkaldMusicService occurred", exception));
 
-    spotifyButton.setOnClickListener(v -> {
-      if (!skaldAuthService.isLoggedIn(SpotifyProvider.NAME)) {
-        skaldAuthService.login(SpotifyProvider.NAME);
-      } else {
-        skaldAuthService.logout(SpotifyProvider.NAME);
-        spotifyButton.setText(R.string.login_to_spotify);
-        updateViewsAfterLoggingOut();
-      }
-    });
-    deezerButton.setOnClickListener(v -> {
-      if (!skaldAuthService.isLoggedIn(DeezerProvider.NAME)) {
-        skaldAuthService.login(DeezerProvider.NAME);
-      } else {
-        skaldAuthService.logout(DeezerProvider.NAME);
-        deezerButton.setText(R.string.login_to_deezer);
-        updateViewsAfterLoggingOut();
-      }
-    });
+    addOnPlaybackListener();
+
+    skaldMusicService.addOnLoadingListener(() -> Log.d(TAG, "Loading track..."));
+
+    spotifyButton.setOnClickListener(
+        v -> authenticateProvider(SpotifyProvider.NAME, spotifyButton, R.string.login_to_spotify));
+
+    deezerButton.setOnClickListener(
+        v -> authenticateProvider(DeezerProvider.NAME, deezerButton, R.string.login_to_deezer));
+
 
     tracksButton.setOnClickListener(v -> searchTracks());
-
     playlistButton.setOnClickListener(v -> searchPlaylists());
 
     resumePauseButton.setOnClickListener(v -> {
       if (isPlaying) {
-        skaldMusicService.pause()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        runOnSchedulers(skaldMusicService.pause())
             .subscribe(new PlaybackEventCompletableObserver());
       } else {
-        skaldMusicService.resume()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        runOnSchedulers(skaldMusicService.resume())
             .subscribe(new PlaybackEventCompletableObserver());
       }
     });
-    stopButton.setOnClickListener(v -> skaldMusicService.stop()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+
+    stopButton.setOnClickListener(v -> runOnSchedulers(skaldMusicService.stop())
         .subscribe(new PlaybackEventCompletableObserver()));
+
+    searchTracks();
   }
 
   @Override
@@ -160,19 +156,40 @@ public class MainActivity extends Activity {
     }
   }
 
-  public void play(SkaldPlayableEntity skaldPlayableEntity) {
-    skaldMusicService.play(skaldPlayableEntity)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+  private Completable runOnSchedulers(Completable completable) {
+    return completable.subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread());
+  }
+
+  private void authenticateProvider(final ProviderName providerName, Button button,
+      @StringRes int loginText) {
+    if (!skaldAuthService.isLoggedIn(providerName)) {
+      skaldAuthService.login(providerName);
+    } else {
+      skaldAuthService.logout(providerName);
+      button.setText(loginText);
+      updateViewsAfterLoggingOut();
+    }
+  }
+
+  private void setTrackInfoVisibility(boolean isVisible) {
+    int visibility = isVisible ? View.VISIBLE : View.INVISIBLE;
+    artistName.setVisibility(visibility);
+    title.setVisibility(visibility);
+    trackImage.setVisibility(visibility);
+  }
+
+  private void play(SkaldPlayableEntity skaldPlayableEntity) {
+    runOnSchedulers(skaldMusicService.play(skaldPlayableEntity))
         .subscribe(new DisposableCompletableObserver() {
           @Override
           public void onComplete() {
-            Log.d(TAG, "Played complete");
+            Log.d(TAG, "Play completed");
           }
 
           @Override
           public void onError(Throwable error) {
-            Log.e(TAG, "Error during playing sth", error);
+            Log.e(TAG, "Error occurred when try to play entity", error);
             if (error instanceof AuthException) {
               AuthError authError = ((AuthException) error).getAuthError();
               startAuthActivity(authError);
@@ -181,37 +198,43 @@ public class MainActivity extends Activity {
         });
   }
 
-  public void searchTracks() {
+  private void searchTracks() {
+    adapter.clear();
+    loadingListProgressBar.setVisibility(View.VISIBLE);
     skaldMusicService.searchTracks("rock")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
           @Override
           public void onSuccess(List<SkaldTrack> skaldTracks) {
-            adapter.clear();
+            loadingListProgressBar.setVisibility(View.GONE);
             adapter.addAll(skaldTracks);
           }
 
           @Override
           public void onError(Throwable error) {
+            loadingListProgressBar.setVisibility(View.GONE);
             Log.e(TAG, "Error during searching tracks", error);
           }
         });
   }
 
-  public void searchPlaylists() {
+  private void searchPlaylists() {
+    adapter.clear();
+    loadingListProgressBar.setVisibility(View.VISIBLE);
     skaldMusicService.searchPlayLists("hip-hop")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldPlaylist>>() {
           @Override
           public void onSuccess(List<SkaldPlaylist> skaldPlaylists) {
-            adapter.clear();
+            loadingListProgressBar.setVisibility(View.GONE);
             adapter.addAll(skaldPlaylists);
           }
 
           @Override
           public void onError(Throwable error) {
+            loadingListProgressBar.setVisibility(View.GONE);
             Log.e(TAG, "Error during searching playlists", error);
           }
         });
@@ -219,7 +242,7 @@ public class MainActivity extends Activity {
 
   private void updateViewsAfterLoggingOut() {
     if (!isUserLoggedIn()) {
-      updateUserViews(EMPTY, null);
+      clearUserViews();
       userName.setText(R.string.hello);
     } else {
       getUsersAndUpdateUserViews();
@@ -252,9 +275,13 @@ public class MainActivity extends Activity {
         skaldAuthService.isLoggedIn(DeezerProvider.NAME);
   }
 
+  private void clearUserViews() {
+    updateUserViews(EMPTY, null);
+  }
+
   private void updateUserViews(String message, String imageUrl) {
     userName.setText(message);
-    drawAnImage(imageUrl, userAvatar);
+    drawAnImage(imageUrl, userAvatar, R.drawable.ic_person_24dp_black);
   }
 
   private void setSpotifyButtonText() {
@@ -282,11 +309,6 @@ public class MainActivity extends Activity {
       Toast.makeText(this, R.string.authentication_error, Toast.LENGTH_LONG)
           .show();
     }
-  }
-
-  private void addOnErrorListener() {
-    skaldMusicService.addOnErrorListener(
-        exception -> Log.e(TAG, "Error in SkaldMusicService occurred", exception));
   }
 
   private void addOnPlaybackListener() {
@@ -337,16 +359,18 @@ public class MainActivity extends Activity {
   }
 
   private void updateSongViews(TrackMetadata trackMetadata) {
-    drawAnImage(trackMetadata.getImageUrl(), trackImage);
+    loadingTrackProgressBar.setVisibility(View.GONE);
+    setTrackInfoVisibility(true);
+    drawAnImage(trackMetadata.getImageUrl(), trackImage, R.drawable.ic_track_image_24dp_black);
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());
   }
 
-  private void drawAnImage(String imageUrl, ImageView imageView) {
+  private void drawAnImage(String imageUrl, ImageView imageView, @DrawableRes int drawable) {
     Picasso
         .with(this)
         .load(imageUrl)
-        .placeholder(R.drawable.ic_person_24dp_black)
+        .placeholder(drawable)
         .into(imageView);
   }
 
