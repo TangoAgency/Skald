@@ -1,4 +1,4 @@
-package agency.tango.skald.exoplayer.models;
+package agency.tango.skald.exoplayer.models.reader;
 
 import android.net.Uri;
 import java.io.BufferedReader;

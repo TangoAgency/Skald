@@ -1,7 +1,6 @@
 package agency.tango.skald.deezer.player;
 
 import android.os.Handler;
-
 import com.deezer.sdk.model.PlayableEntity;
 import com.deezer.sdk.model.Track;
 import com.deezer.sdk.network.connect.DeezerConnect;
@@ -9,15 +8,13 @@ import com.deezer.sdk.network.request.DeezerRequest;
 import com.deezer.sdk.network.request.DeezerRequestFactory;
 import com.deezer.sdk.network.request.event.JsonRequestListener;
 import com.deezer.sdk.player.event.PlayerWrapperListener;
-
 import java.util.List;
-
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
-import agency.tango.skald.core.models.ServiceImage;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.deezer.exceptions.UnparsedResultException;
+import agency.tango.skald.deezer.models.DeezerImage;
 
 public class PlayerListener implements PlayerWrapperListener {
   private static final String TRACK_REQUEST = "TRACK_REQUEST";
@@ -66,7 +63,7 @@ public class PlayerListener implements PlayerWrapperListener {
         if (requestId.equals(TRACK_REQUEST)) {
           Track track = (Track) result;
           TrackMetadata trackMetadata = new TrackMetadata(track.getArtist().getName(),
-              track.getTitle(), new ServiceImage(track.getAlbum().getImageUrl()));
+              track.getTitle(), new DeezerImage(track.getAlbum().getImageUrl()));
           notifyPlayEvent(trackMetadata);
           deezerPLayer.notifyResumeEvent();
         }

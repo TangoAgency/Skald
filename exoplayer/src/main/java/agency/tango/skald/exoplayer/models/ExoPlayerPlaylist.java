@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import agency.tango.skald.core.models.SkaldPlaylist;
+import agency.tango.skald.exoplayer.models.reader.PlaylistFileReader;
 
 public class ExoPlayerPlaylist extends SkaldPlaylist {
   private final List<ExoPlayerTrack> tracks;

@@ -28,16 +28,17 @@ import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
-import agency.tango.skald.core.models.ServiceImage;
 import agency.tango.skald.core.models.SkaldImage;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.deezer.errors.DeezerAuthError;
+import agency.tango.skald.deezer.models.DeezerImage;
 import agency.tango.skald.deezer.provider.DeezerProvider;
 import agency.tango.skald.exoplayer.models.ExoPlayerImage;
 import agency.tango.skald.spotify.errors.SpotifyAuthError;
+import agency.tango.skald.spotify.models.SpotifyImage;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -354,11 +355,10 @@ public class MainActivity extends Activity {
 
   private void notifyViews(TrackMetadata trackMetadata) {
     SkaldImage skaldImage = trackMetadata.getImage();
-    if (skaldImage instanceof ServiceImage) {
-      Picasso
-          .with(this)
-          .load(((ServiceImage) skaldImage).getImageUrl())
-          .into(trackImage);
+    if (skaldImage instanceof SpotifyImage) {
+      drawAnImageWithPicasso(((SpotifyImage) skaldImage).getImageUrl());
+    } else if (skaldImage instanceof DeezerImage) {
+      drawAnImageWithPicasso(((DeezerImage) skaldImage).getImageUrl());
     } else if ((skaldImage instanceof ExoPlayerImage)) {
       byte[] pictureData = ((ExoPlayerImage) skaldImage).getPictureData();
       Bitmap bmp = null;
@@ -371,6 +371,13 @@ public class MainActivity extends Activity {
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());
     loadingTextView.setText(EMPTY);
+  }
+
+  private void drawAnImageWithPicasso(String imageUrl) {
+    Picasso
+        .with(this)
+        .load(imageUrl)
+        .into(trackImage);
   }
 
   private void notifyResumePauseButton() {

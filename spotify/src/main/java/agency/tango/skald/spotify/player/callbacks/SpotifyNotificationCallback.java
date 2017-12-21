@@ -8,9 +8,9 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import java.util.List;
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
-import agency.tango.skald.core.models.ServiceImage;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.spotify.exceptions.SpotifyException;
+import agency.tango.skald.spotify.models.SpotifyImage;
 import agency.tango.skald.spotify.player.SkaldSpotifyPlayer;
 
 public class SpotifyNotificationCallback implements Player.NotificationCallback {
@@ -54,7 +54,7 @@ public class SpotifyNotificationCallback implements Player.NotificationCallback 
       @Override
       public void run() {
         TrackMetadata trackMetadata = new TrackMetadata(metadata.currentTrack.artistName,
-            metadata.currentTrack.name, new ServiceImage(metadata.currentTrack.albumCoverWebUrl));
+            metadata.currentTrack.name, new SpotifyImage(metadata.currentTrack.albumCoverWebUrl));
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
           onPlaybackListener.onPlayEvent(trackMetadata);
         }
