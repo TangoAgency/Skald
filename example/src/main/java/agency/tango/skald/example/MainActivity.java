@@ -1,7 +1,6 @@
 package agency.tango.skald.example;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +9,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.squareup.picasso.Picasso;
@@ -53,10 +53,11 @@ public class MainActivity extends Activity {
   private Button deezerButton;
   private Button tracksButton;
   private Button playlistButton;
-  private TextView loadingTextView;
   private TextView userName;
   private ImageView userAvatar;
+  private ListView listView;
 
+  private SkaldEntityAdapter adapter;
   private boolean isPlaying = false;
 
   @Override
@@ -72,19 +73,23 @@ public class MainActivity extends Activity {
     deezerButton = findViewById(R.id.button_login_deezer);
     tracksButton = findViewById(R.id.button_tracks);
     playlistButton = findViewById(R.id.button_playlists);
-    loadingTextView = findViewById(R.id.text_loading);
     userName = findViewById(R.id.text_user_name);
     userAvatar = findViewById(R.id.image_user);
+    adapter = new SkaldEntityAdapter(this);
+    listView = findViewById(R.id.list_view_tracks);
+    listView.setAdapter(adapter);
+    listView.setOnItemClickListener((parent, listView, position, id) -> {
+      final SkaldPlayableEntity item = (SkaldPlayableEntity) parent.getItemAtPosition(position);
+      play(item);
+    });
 
     skaldAuthService = new SkaldAuthService(getApplicationContext(), this::startAuthActivity);
-
     skaldMusicService = new SkaldMusicService(getApplicationContext());
 
     addOnErrorListener();
     addOnPlaybackListener();
     skaldMusicService.addOnLoadingListener(() -> {
       Log.d(TAG, "Loading track...");
-      loadingTextView.setText(R.string.loading);
     });
 
     spotifyButton.setOnClickListener(v -> {
@@ -106,23 +111,9 @@ public class MainActivity extends Activity {
       }
     });
 
-    tracksButton.setOnClickListener(v -> {
-      FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-      TrackListFragment fragment = new TrackListFragment();
-      fragmentTransaction.replace(R.id.fragment_container, fragment);
-      fragmentTransaction.commit();
-      getFragmentManager().executePendingTransactions();
-      fragment.searchTracks();
-    });
+    tracksButton.setOnClickListener(v -> searchTracks());
 
-    playlistButton.setOnClickListener(v -> {
-      FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-      PlaylistListFragment fragment = new PlaylistListFragment();
-      fragmentTransaction.replace(R.id.fragment_container, fragment);
-      fragmentTransaction.commit();
-      getFragmentManager().executePendingTransactions();
-      fragment.searchPlaylists();
-    });
+    playlistButton.setOnClickListener(v -> searchPlaylists());
 
     resumePauseButton.setOnClickListener(v -> {
       if (isPlaying) {
@@ -190,15 +181,15 @@ public class MainActivity extends Activity {
         });
   }
 
-  public void searchTracks(final TracksAdapter tracksAdapter) {
+  public void searchTracks() {
     skaldMusicService.searchTracks("rock")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldTrack>>() {
           @Override
           public void onSuccess(List<SkaldTrack> skaldTracks) {
-            tracksAdapter.clear();
-            tracksAdapter.addAll(skaldTracks);
+            adapter.clear();
+            adapter.addAll(skaldTracks);
           }
 
           @Override
@@ -208,15 +199,15 @@ public class MainActivity extends Activity {
         });
   }
 
-  public void searchPlaylists(final PlaylistAdapter playlistAdapter) {
+  public void searchPlaylists() {
     skaldMusicService.searchPlayLists("hip-hop")
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new DisposableSingleObserver<List<SkaldPlaylist>>() {
           @Override
           public void onSuccess(List<SkaldPlaylist> skaldPlaylists) {
-            playlistAdapter.clear();
-            playlistAdapter.addAll(skaldPlaylists);
+            adapter.clear();
+            adapter.addAll(skaldPlaylists);
           }
 
           @Override
@@ -349,13 +340,13 @@ public class MainActivity extends Activity {
     drawAnImage(trackMetadata.getImageUrl(), trackImage);
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());
-    loadingTextView.setText(EMPTY);
   }
 
   private void drawAnImage(String imageUrl, ImageView imageView) {
     Picasso
         .with(this)
         .load(imageUrl)
+        .placeholder(R.drawable.ic_person_24dp_black)
         .into(imageView);
   }
 
