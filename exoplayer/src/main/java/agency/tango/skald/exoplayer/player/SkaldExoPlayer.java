@@ -34,13 +34,14 @@ import agency.tango.skald.exoplayer.player.listeners.PlayerEventsListener;
 import okhttp3.OkHttpClient;
 
 public class SkaldExoPlayer implements Player {
-  private static final String appName = "Skald";
+  private static final String APP_NAME = "Skald";
   private final SimpleExoPlayer exoPlayer;
   private final DataSource.Factory dataSourceFactory;
   private final ExtractorsFactory extractorsFactory;
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();
   private final List<OnPlaybackListener> onPlaybackListeners = new ArrayList<>();
   private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
+  private SkaldOperationCallback currentOperationCallback;
 
   public SkaldExoPlayer(final Context context, OnErrorListener onErrorListener,
       final OkHttpClient okHttpClient) {
@@ -58,7 +59,7 @@ public class SkaldExoPlayer implements Player {
       @Override
       public DataSource createDataSource() {
         return new DefaultDataSource(context, bandwidthMeter,
-            new OkHttpDataSource(okHttpClient, Util.getUserAgent(context, appName), null,
+            new OkHttpDataSource(okHttpClient, Util.getUserAgent(context, APP_NAME), null,
                 bandwidthMeter));
       }
     };
@@ -66,12 +67,13 @@ public class SkaldExoPlayer implements Player {
 
     exoPlayer.addListener(
         new PlayerEventsListener(mainHandler, onPlaybackListeners, onLoadingListeners,
-            onErrorListener, exoPlayer, trackSelector));
+            onErrorListener, this, trackSelector));
   }
 
   @Override
   public void play(SkaldPlayableEntity skaldPlayableEntity,
       SkaldOperationCallback skaldOperationCallback) {
+    currentOperationCallback = skaldOperationCallback;
     MediaSource mediaSource = null;
     if (skaldPlayableEntity instanceof SkaldTrack) {
       mediaSource = new ExtractorMediaSource(skaldPlayableEntity.getUri(),
@@ -93,29 +95,28 @@ public class SkaldExoPlayer implements Player {
     if (!isPlaying()) {
       exoPlayer.setPlayWhenReady(true);
     }
-    skaldOperationCallback.onSuccess();
   }
 
   @Override
   public void stop(SkaldOperationCallback skaldOperationCallback) {
+    currentOperationCallback = skaldOperationCallback;
     exoPlayer.stop();
-    skaldOperationCallback.onSuccess();
   }
 
   @Override
   public void pause(SkaldOperationCallback skaldOperationCallback) {
+    currentOperationCallback = skaldOperationCallback;
     if (isPlaying()) {
       exoPlayer.setPlayWhenReady(false);
     }
-    skaldOperationCallback.onSuccess();
   }
 
   @Override
   public void resume(SkaldOperationCallback skaldOperationCallback) {
+    currentOperationCallback = skaldOperationCallback;
     if (!isPlaying()) {
       exoPlayer.setPlayWhenReady(true);
     }
-    skaldOperationCallback.onSuccess();
   }
 
   @Override
@@ -160,5 +161,17 @@ public class SkaldExoPlayer implements Player {
   @Override
   public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
     onLoadingListeners.remove(onLoadingListener);
+  }
+
+  public SimpleExoPlayer getExoPlayer() {
+    return exoPlayer;
+  }
+
+  public void notifyOperationSuccess() {
+    currentOperationCallback.onSuccess();
+  }
+
+  public void notifyOperationFailure(Exception exception) {
+    currentOperationCallback.onError(exception);
   }
 }

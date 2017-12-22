@@ -6,7 +6,6 @@ import android.util.Log;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.emsg.EventMessage;
@@ -28,6 +27,7 @@ import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.exoplayer.models.ExoPlayerImage;
+import agency.tango.skald.exoplayer.player.SkaldExoPlayer;
 
 public class PlayerEventsListener implements Player.EventListener {
   private static final String TAG = PlayerEventsListener.class.getSimpleName();
@@ -35,12 +35,12 @@ public class PlayerEventsListener implements Player.EventListener {
   private final List<OnPlaybackListener> onPlaybackListeners;
   private final List<OnLoadingListener> onLoadingListeners;
   private final OnErrorListener onErrorListener;
-  private final SimpleExoPlayer exoPlayer;
+  private final SkaldExoPlayer exoPlayer;
   private final MappingTrackSelector trackSelector;
 
   public PlayerEventsListener(Handler mainHandler, List<OnPlaybackListener> onPlaybackListeners,
       List<OnLoadingListener> onLoadingListeners, OnErrorListener onErrorListener,
-      SimpleExoPlayer exoPlayer, MappingTrackSelector trackSelector) {
+      SkaldExoPlayer exoPlayer, MappingTrackSelector trackSelector) {
     this.mainHandler = mainHandler;
     this.onPlaybackListeners = onPlaybackListeners;
     this.onLoadingListeners = onLoadingListeners;
@@ -93,7 +93,7 @@ public class PlayerEventsListener implements Player.EventListener {
 
   @Override
   public void onLoadingChanged(boolean isLoading) {
-    if (isLoading && exoPlayer.getPlaybackState() != PlaybackState.STATE_PLAYING) {
+    if (isLoading && exoPlayer.getExoPlayer().getPlaybackState() != PlaybackState.STATE_PLAYING) {
       notifyLoadingEvent();
     }
   }
@@ -106,10 +106,13 @@ public class PlayerEventsListener implements Player.EventListener {
       } else {
         notifyPauseEvent();
       }
+      exoPlayer.notifyOperationSuccess();
     } else if (playbackState == PlaybackState.STATE_PAUSED) {
       notifyPauseEvent();
+      exoPlayer.notifyOperationSuccess();
     } else if (playbackState == PlaybackState.STATE_STOPPED) {
       notifyStopEvent();
+      exoPlayer.notifyOperationSuccess();
     }
   }
 
@@ -121,6 +124,7 @@ public class PlayerEventsListener implements Player.EventListener {
   @Override
   public void onPlayerError(ExoPlaybackException error) {
     notifyPlaybackError(new PlaybackError(error));
+    exoPlayer.notifyOperationFailure(error);
   }
 
   @Override
