@@ -2,6 +2,7 @@ package agency.tango.skald.core;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class SkaldMusicService {
 
   private ProviderName currentProviderName;
 
-  public SkaldMusicService(Context context) {
+  public SkaldMusicService(@NonNull Context context) {
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
@@ -63,7 +64,7 @@ public class SkaldMusicService {
         .subscribe(logoutEventObserver);
   }
 
-  public synchronized Completable play(final SkaldPlayableEntity skaldPlayableEntity) {
+  public synchronized Completable play(@NonNull final SkaldPlayableEntity skaldPlayableEntity) {
     return Completable.create(new CompletableOnPlaySubscribe(this, skaldPlayableEntity,
         onPlaybackListeners, onLoadingListeners, onErrorListeners, playerCache, providers));
   }
@@ -98,27 +99,27 @@ public class SkaldMusicService {
     timer.cancel();
   }
 
-  public void addOnErrorListener(OnErrorListener onErrorListener) {
+  public void addOnErrorListener(@NonNull OnErrorListener onErrorListener) {
     onErrorListeners.add(onErrorListener);
   }
 
-  public void removeOnErrorListener(OnErrorListener onErrorListener) {
+  public void removeOnErrorListener(@NonNull OnErrorListener onErrorListener) {
     onErrorListeners.remove(onErrorListener);
   }
 
-  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void addOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void removeOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
-  public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void addOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
-  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void removeOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.remove(onLoadingListener);
   }
 
