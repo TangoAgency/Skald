@@ -47,8 +47,6 @@ public class MainActivity extends Activity {
   private static final int AUTH_DEEZER_REQUEST_CODE = 1656;
   private static final String EMPTY = "";
 
-  private SkaldMusicService skaldMusicService;
-  private SkaldAuthService skaldAuthService;
   private ImageButton resumePauseButton;
   private ImageButton stopButton;
   private ImageView trackImage;
@@ -64,6 +62,8 @@ public class MainActivity extends Activity {
   private ProgressBar loadingTrackProgressBar;
   private ProgressBar loadingListProgressBar;
 
+  private SkaldMusicService skaldMusicService;
+  private SkaldAuthService skaldAuthService;
   private SkaldEntityAdapter adapter;
   private boolean isPlaying = false;
 
@@ -99,17 +99,13 @@ public class MainActivity extends Activity {
 
     skaldMusicService.addOnErrorListener(
         exception -> Log.e(TAG, "Error in SkaldMusicService occurred", exception));
-
     addOnPlaybackListener();
-
     skaldMusicService.addOnLoadingListener(() -> Log.d(TAG, "Loading track..."));
 
     spotifyButton.setOnClickListener(
         v -> authenticateProvider(SpotifyProvider.NAME, spotifyButton, R.string.login_to_spotify));
-
     deezerButton.setOnClickListener(
         v -> authenticateProvider(DeezerProvider.NAME, deezerButton, R.string.login_to_deezer));
-
 
     tracksButton.setOnClickListener(v -> searchTracks());
     playlistButton.setOnClickListener(v -> searchPlaylists());
@@ -123,7 +119,6 @@ public class MainActivity extends Activity {
             .subscribe(new PlaybackEventCompletableObserver());
       }
     });
-
     stopButton.setOnClickListener(v -> runOnSchedulers(skaldMusicService.stop())
         .subscribe(new PlaybackEventCompletableObserver()));
 
@@ -281,7 +276,7 @@ public class MainActivity extends Activity {
 
   private void updateUserViews(String message, String imageUrl) {
     userName.setText(message);
-    drawAnImage(imageUrl, userAvatar, R.drawable.ic_person_24dp_black);
+    setImageUrl(imageUrl, userAvatar, R.drawable.ic_person_24dp_black);
   }
 
   private void setSpotifyButtonText() {
@@ -304,7 +299,7 @@ public class MainActivity extends Activity {
       @StringRes int buttonText) {
     if (resultCode == RESULT_OK) {
       serviceButton.setText(buttonText);
-    } else {
+    } else if (resultCode == RESULT_CANCELED) {
       Log.e(TAG, "Authentication went wrong");
       Toast.makeText(this, R.string.authentication_error, Toast.LENGTH_LONG)
           .show();
@@ -361,12 +356,12 @@ public class MainActivity extends Activity {
   private void updateSongViews(TrackMetadata trackMetadata) {
     loadingTrackProgressBar.setVisibility(View.GONE);
     setTrackInfoVisibility(true);
-    drawAnImage(trackMetadata.getImageUrl(), trackImage, R.drawable.ic_track_image_24dp_black);
+    setImageUrl(trackMetadata.getImageUrl(), trackImage, R.drawable.ic_track_image_24dp_black);
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());
   }
 
-  private void drawAnImage(String imageUrl, ImageView imageView, @DrawableRes int drawable) {
+  private void setImageUrl(String imageUrl, ImageView imageView, @DrawableRes int drawable) {
     Picasso
         .with(this)
         .load(imageUrl)
