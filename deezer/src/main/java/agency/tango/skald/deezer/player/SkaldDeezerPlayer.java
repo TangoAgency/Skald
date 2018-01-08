@@ -1,6 +1,7 @@
 package agency.tango.skald.deezer.player;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import agency.tango.skald.core.Player;
@@ -11,7 +12,6 @@ import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.deezer.authentication.DeezerAuthData;
-import io.reactivex.annotations.NonNull;
 
 public class SkaldDeezerPlayer implements Player {
   private final List<OnPlayerReadyListener> onPlayerReadyListeners = new ArrayList<>();

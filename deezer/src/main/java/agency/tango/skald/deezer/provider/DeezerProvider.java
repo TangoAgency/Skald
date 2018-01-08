@@ -1,6 +1,7 @@
 package agency.tango.skald.deezer.provider;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.UserService;
@@ -20,7 +21,6 @@ import agency.tango.skald.deezer.authentication.DeezerAuthStore;
 import agency.tango.skald.deezer.player.SkaldDeezerPlayer;
 import agency.tango.skald.deezer.services.DeezerSearchService;
 import agency.tango.skald.deezer.services.DeezerUserService;
-import io.reactivex.annotations.NonNull;
 
 public class DeezerProvider extends Provider {
   public static final ProviderName NAME = new DeezerProviderName();

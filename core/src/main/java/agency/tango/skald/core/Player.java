@@ -1,11 +1,11 @@
 package agency.tango.skald.core;
 
+import android.support.annotation.NonNull;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.listeners.OnLoadingListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
-import io.reactivex.annotations.NonNull;
 
 public interface Player {
   void play(@NonNull SkaldPlayableEntity skaldPlayableEntity,
