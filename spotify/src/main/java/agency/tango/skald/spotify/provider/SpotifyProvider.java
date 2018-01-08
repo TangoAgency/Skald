@@ -1,6 +1,7 @@
 package agency.tango.skald.spotify.provider;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.UserService;
@@ -71,7 +72,7 @@ public class SpotifyProvider extends Provider {
   }
 
   @Override
-  public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
+  public boolean canHandle(@NonNull SkaldPlayableEntity skaldPlayableEntity) {
     return UriValidator.validate(skaldPlayableEntity, NAME.getName());
   }
 

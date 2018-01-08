@@ -3,6 +3,7 @@ package agency.tango.skald.core;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class SkaldMusicService {
   private final LogoutEventObserver logoutEventObserver = new LogoutEventObserver(playerCache,
       this);
 
+  @Nullable
   private ProviderName currentProviderName;
 
   public SkaldMusicService(@NonNull Context context) {
@@ -123,7 +125,7 @@ public class SkaldMusicService {
     onLoadingListeners.remove(onLoadingListener);
   }
 
-  public Single<List<SkaldTrack>> searchTracks(String query) {
+  public Single<List<SkaldTrack>> searchTracks(@NonNull String query) {
     List<Single<List<SkaldTrack>>> tracks = new ArrayList<>();
     for (Provider provider : providers) {
       try {
@@ -135,7 +137,7 @@ public class SkaldMusicService {
     return mergeLists(tracks);
   }
 
-  public Single<List<SkaldPlaylist>> searchPlayLists(String query) {
+  public Single<List<SkaldPlaylist>> searchPlayLists(@NonNull String query) {
     List<Single<List<SkaldPlaylist>>> playlists = new ArrayList<>();
     for (Provider provider : providers) {
       try {
@@ -160,11 +162,12 @@ public class SkaldMusicService {
         .toList();
   }
 
+  @Nullable
   ProviderName getCurrentProviderName() {
     return currentProviderName;
   }
 
-  void setCurrentProviderName(ProviderName providerName) {
+  void setCurrentProviderName(@Nullable ProviderName providerName) {
     this.currentProviderName = providerName;
   }
 

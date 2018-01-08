@@ -11,8 +11,12 @@ import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 
 public class SkaldAuthService {
-  @NonNull private final Context context;
-  @NonNull private final OnAuthErrorListener onAuthErrorListener;
+  @NonNull
+  private final Context context;
+
+  @NonNull
+  private final OnAuthErrorListener onAuthErrorListener;
+
   private final SkaldBus skaldBus = SkaldBus.getInstance();
 
   public SkaldAuthService(@NonNull Context context,

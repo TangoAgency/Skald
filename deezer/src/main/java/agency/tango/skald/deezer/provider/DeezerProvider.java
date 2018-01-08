@@ -20,6 +20,7 @@ import agency.tango.skald.deezer.authentication.DeezerAuthStore;
 import agency.tango.skald.deezer.player.SkaldDeezerPlayer;
 import agency.tango.skald.deezer.services.DeezerSearchService;
 import agency.tango.skald.deezer.services.DeezerUserService;
+import io.reactivex.annotations.NonNull;
 
 public class DeezerProvider extends Provider {
   public static final ProviderName NAME = new DeezerProviderName();
@@ -61,7 +62,7 @@ public class DeezerProvider extends Provider {
   }
 
   @Override
-  public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
+  public boolean canHandle(@NonNull SkaldPlayableEntity skaldPlayableEntity) {
     return UriValidator.validate(skaldPlayableEntity, NAME.getName());
   }
 

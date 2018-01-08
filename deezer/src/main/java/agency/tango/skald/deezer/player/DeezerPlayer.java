@@ -23,6 +23,7 @@ import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import io.reactivex.annotations.NonNull;
 
 class DeezerPlayer {
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
@@ -54,7 +55,8 @@ class DeezerPlayer {
     mainHandler = new Handler(context.getMainLooper());
   }
 
-  void play(SkaldPlayableEntity skaldPlayableEntity, SkaldOperationCallback operationCallback) {
+  void play(@NonNull SkaldPlayableEntity skaldPlayableEntity,
+      SkaldOperationCallback operationCallback) {
     currentSkaldOperationCallback = operationCallback;
     if (currentPlayer != null && isPlaying()) {
       currentPlayer.stop();
@@ -91,19 +93,19 @@ class DeezerPlayer {
     playerCache.evictAll();
   }
 
-  void addOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
+  void addOnPlayerReadyListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  void removeOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
+  void removeOnPlayerReadyListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
-  void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+  void addOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
-  void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+  void removeOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.remove(onLoadingListener);
   }
 
