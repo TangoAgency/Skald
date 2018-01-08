@@ -9,7 +9,7 @@ public class SkaldTrack extends SkaldPlayableEntity {
   private final String title;
 
   public SkaldTrack(Uri uri) {
-    this(uri,"", "", "");
+    this(uri, "", "", "");
   }
 
   public SkaldTrack(Uri uri, String imageUrl, String artistName, String title) {
@@ -28,6 +28,7 @@ public class SkaldTrack extends SkaldPlayableEntity {
 
   @Override
   public String toString() {
-    return String.format("%s - %s", artistName, title);
+    return "artist name='" + artistName + '\'' +
+        ", title='" + title + '\'';
   }
 }
