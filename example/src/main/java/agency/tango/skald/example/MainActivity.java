@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
     skaldMusicService.addOnErrorListener(
         exception -> Log.e(TAG, "Error in SkaldMusicService occurred", exception));
     addOnPlaybackListener();
-    skaldMusicService.addOnLoadingListener(() -> Log.d(TAG, "Loading track..."));
+    skaldMusicService.addOnLoadingListener(() -> Log.d(TAG, "Loading skald entity..."));
 
     spotifyButton.setOnClickListener(
         v -> authenticateProvider(SpotifyProvider.NAME, spotifyButton, R.string.login_to_spotify));
@@ -310,8 +310,7 @@ public class MainActivity extends Activity {
     skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
       @Override
       public void onPlayEvent(TrackMetadata trackMetadata) {
-        Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
-            trackMetadata.getTitle()));
+        Log.d(TAG, trackMetadata.toString());
         isPlaying = true;
         updateSongViews(trackMetadata);
       }
@@ -357,7 +356,7 @@ public class MainActivity extends Activity {
     loadingTrackProgressBar.setVisibility(View.GONE);
     setTrackInfoVisibility(true);
     setImageUrl(trackMetadata.getImageUrl(), trackImage, R.drawable.ic_track_image_24dp_black);
-    artistName.setText(trackMetadata.getArtistsName());
+    artistName.setText(trackMetadata.getArtistName());
     title.setText(trackMetadata.getTitle());
   }
 
