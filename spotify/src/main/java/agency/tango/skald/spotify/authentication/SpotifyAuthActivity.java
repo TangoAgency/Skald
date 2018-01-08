@@ -59,6 +59,7 @@ public class SpotifyAuthActivity extends Activity {
           notifyError(response.getError());
           break;
         default:
+          setResult(RESULT_CANCELED);
           this.finish();
       }
     }
