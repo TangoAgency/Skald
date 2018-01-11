@@ -1,6 +1,12 @@
 apply plugin: 'com.android.library'
 apply from: '../jacoco-android.gradle'
 
+repositories {
+  maven {
+    url "https://dl.bintray.com/ijabz/maven/"
+  }
+}
+
 android {
   compileSdkVersion rootProject.ext.compileSdkVersion
   buildToolsVersion rootProject.ext.buildToolsVersion
@@ -21,7 +27,6 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
-
 }
 
 dependencies {
@@ -34,6 +39,7 @@ dependencies {
   implementation deps.stetho
   implementation deps.stethoOkHttp
   implementation deps.rxJava
+  implementation group: 'net.jthink', name: 'jaudiotagger', version: '2.2.3'
 
   testImplementation 'junit:junit:4.12'
 }

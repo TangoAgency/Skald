@@ -5,8 +5,8 @@ import android.net.Uri;
 public class SkaldPlaylist extends SkaldPlayableEntity {
   private final String name;
 
-  public SkaldPlaylist(Uri uri, String name, String imageUrl) {
-    super(uri, imageUrl);
+  public SkaldPlaylist(Uri uri, String name, SkaldImage skaldImage) {
+    super(uri, skaldImage);
     this.name = name;
   }
 

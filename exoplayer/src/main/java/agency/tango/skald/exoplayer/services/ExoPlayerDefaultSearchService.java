@@ -4,6 +4,10 @@ import android.net.Uri;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import com.google.android.exoplayer2.util.MimeTypes;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.images.Artwork;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -13,6 +17,7 @@ import java.util.concurrent.Callable;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.exoplayer.models.ExoPlayerImage;
 import agency.tango.skald.exoplayer.models.ExoPlayerPlaylist;
 import agency.tango.skald.exoplayer.models.ExoPlayerTrack;
 import agency.tango.skald.exoplayer.models.reader.PlaylistM3uFileReader;
@@ -22,9 +27,6 @@ import io.reactivex.Single;
 import io.reactivex.functions.Function;
 
 public class ExoPlayerDefaultSearchService implements SearchService {
-  private static final String AUDIO = "audio";
-  private static final String URL = "url";
-
   private static final String PLAYLIST_PLS = "audio/x-scpls";
 
   private final List<PlaylistReader> playlistReaders = new ArrayList<>();
@@ -47,7 +49,14 @@ public class ExoPlayerDefaultSearchService implements SearchService {
         .map(new Function<File, SkaldTrack>() {
           @Override
           public SkaldTrack apply(File file) throws Exception {
-            return new ExoPlayerTrack(Uri.fromFile(file), "TESTOWY UTWÓR", "TESTOWY UTWÓR", "");
+            Tag tag = AudioFileIO.read(file).getTag();
+            Artwork artwork = tag.getFirstArtwork();
+            byte[] imageBinaryData = null;
+            if (artwork != null) {
+              imageBinaryData = artwork.getBinaryData();
+            }
+            return new ExoPlayerTrack(Uri.fromFile(file), tag.getFirst(FieldKey.ARTIST),
+                tag.getFirst(FieldKey.TITLE), new ExoPlayerImage(imageBinaryData));
           }
         }).toList();
   }
@@ -59,7 +68,8 @@ public class ExoPlayerDefaultSearchService implements SearchService {
           @Override
           public SkaldPlaylist apply(File file) throws Exception {
             List<ExoPlayerTrack> tracks = getTracks(file);
-            return new ExoPlayerPlaylist(Uri.fromFile(file), "TEST", "", tracks);
+            return new ExoPlayerPlaylist(Uri.fromFile(file), "TEST", new ExoPlayerImage(null),
+                tracks);
           }
         })
         .toList();

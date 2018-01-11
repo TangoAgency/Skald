@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import agency.tango.skald.R;
@@ -17,6 +18,7 @@ public class TrackListFragment extends Fragment {
   private TracksAdapter tracksAdapter;
   private ListView listView;
   private Button searchButton;
+  private ImageView trackCover;
 
   @Nullable
   @Override
@@ -39,6 +41,7 @@ public class TrackListFragment extends Fragment {
         searchTracks();
       }
     });
+
     return view;
   }
 

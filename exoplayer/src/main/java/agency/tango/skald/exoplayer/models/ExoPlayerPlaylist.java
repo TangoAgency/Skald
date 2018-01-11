@@ -7,8 +7,9 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 public class ExoPlayerPlaylist extends SkaldPlaylist {
   private final List<ExoPlayerTrack> tracks;
 
-  public ExoPlayerPlaylist(Uri uri, String name, String imageUrl, List<ExoPlayerTrack> tracks) {
-    super(uri, name, imageUrl);
+  public ExoPlayerPlaylist(Uri uri, String name, ExoPlayerImage image,
+      List<ExoPlayerTrack> tracks) {
+    super(uri, name, image);
     this.tracks = tracks;
   }
 

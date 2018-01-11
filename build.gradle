@@ -48,6 +48,9 @@ allprojects {
     jcenter()
     google()
     maven { url 'https://jitpack.io' }
+    maven {
+      url "https://dl.bintray.com/ijabz/maven/"
+    }
     flatDir {
       dirs "libs"
     }

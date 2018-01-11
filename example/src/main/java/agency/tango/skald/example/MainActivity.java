@@ -3,8 +3,6 @@ package agency.tango.skald.example;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,7 +14,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.squareup.picasso.Picasso;
 import java.util.List;
 import agency.tango.skald.R;
 import agency.tango.skald.core.SkaldAuthService;
@@ -34,11 +31,8 @@ import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.core.models.TrackMetadata;
 import agency.tango.skald.deezer.errors.DeezerAuthError;
-import agency.tango.skald.deezer.models.DeezerImage;
 import agency.tango.skald.deezer.provider.DeezerProvider;
-import agency.tango.skald.exoplayer.models.ExoPlayerImage;
 import agency.tango.skald.spotify.errors.SpotifyAuthError;
-import agency.tango.skald.spotify.models.SpotifyImage;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -67,6 +61,7 @@ public class MainActivity extends Activity {
   private Button exoPlayButton;
 
   private boolean isPlaying = false;
+  private Graphics graphics;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -182,10 +177,12 @@ public class MainActivity extends Activity {
         SkaldPlayableEntity skaldTrack = new SkaldTrack(
             Uri.parse(
                 "https://ia800706.us.archive.org/4/items/Sample_Audio_Clips_mp3/KuumbaPodcast1.mp3"),
-            "", "", "");
+            "", "", new SkaldImage() {});
         play(skaldTrack);
       }
     });
+
+    graphics = new Graphics(this);
   }
 
   @Override
@@ -355,29 +352,11 @@ public class MainActivity extends Activity {
 
   private void notifyViews(TrackMetadata trackMetadata) {
     SkaldImage skaldImage = trackMetadata.getImage();
-    if (skaldImage instanceof SpotifyImage) {
-      drawAnImageWithPicasso(((SpotifyImage) skaldImage).getImageUrl());
-    } else if (skaldImage instanceof DeezerImage) {
-      drawAnImageWithPicasso(((DeezerImage) skaldImage).getImageUrl());
-    } else if ((skaldImage instanceof ExoPlayerImage)) {
-      byte[] pictureData = ((ExoPlayerImage) skaldImage).getPictureData();
-      Bitmap bmp = null;
-      if (pictureData != null) {
-        bmp = BitmapFactory.decodeByteArray(pictureData, 0, pictureData.length);
-      }
-      trackImage.setImageBitmap(bmp);
-    }
+    graphics.draw(skaldImage, trackImage);
 
     artistName.setText(trackMetadata.getArtistsName());
     title.setText(trackMetadata.getTitle());
     loadingTextView.setText(EMPTY);
-  }
-
-  private void drawAnImageWithPicasso(String imageUrl) {
-    Picasso
-        .with(this)
-        .load(imageUrl)
-        .into(trackImage);
   }
 
   private void notifyResumePauseButton() {

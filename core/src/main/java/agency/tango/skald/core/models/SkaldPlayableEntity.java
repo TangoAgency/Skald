@@ -4,18 +4,18 @@ import android.net.Uri;
 
 public abstract class SkaldPlayableEntity {
   private final Uri uri;
-  private final String imageUrl;
+  private final SkaldImage skaldImage;
 
-  public SkaldPlayableEntity(Uri uri, String imageUrl) {
+  public SkaldPlayableEntity(Uri uri, SkaldImage skaldImage) {
     this.uri = uri;
-    this.imageUrl = imageUrl;
+    this.skaldImage = skaldImage;
   }
 
   public Uri getUri() {
     return uri;
   }
 
-  public String getImageUrl() {
-    return imageUrl;
+  public SkaldImage getImage() {
+    return skaldImage;
   }
 }

@@ -10,18 +10,17 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
-
 import agency.tango.skald.R;
 import agency.tango.skald.core.models.SkaldPlaylist;
 
 public class PlaylistAdapter extends ArrayAdapter<SkaldPlaylist> {
   private final Context context;
+  private final Graphics graphics;
 
   public PlaylistAdapter(@NonNull Context context, @LayoutRes int resource) {
     super(context, resource);
     this.context = context;
+    this.graphics = new Graphics(context);
   }
 
   @NonNull
@@ -34,12 +33,7 @@ public class PlaylistAdapter extends ArrayAdapter<SkaldPlaylist> {
     ImageView imageView = (ImageView) convertView.findViewById(R.id.image_list_cover);
     TextView textView = (TextView) convertView.findViewById(R.id.text_track_info);
     if (playlist != null) {
-      if (!playlist.getImageUrl().isEmpty()) {
-        Picasso
-            .with(context)
-            .load(playlist.getImageUrl())
-            .into(imageView);
-      }
+      graphics.draw(playlist.getImage(), imageView);
       textView.setText(playlist.getName());
     }
     return convertView;
