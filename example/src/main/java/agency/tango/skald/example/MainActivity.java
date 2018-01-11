@@ -34,7 +34,7 @@ import agency.tango.skald.deezer.errors.DeezerAuthError;
 import agency.tango.skald.deezer.provider.DeezerProvider;
 import agency.tango.skald.spotify.errors.SpotifyAuthError;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
-import io.reactivex.Completable;
+import io.reactivex.CompletableTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableCompletableObserver;
@@ -46,6 +46,11 @@ public class MainActivity extends Activity {
   private static final int AUTH_SPOTIFY_REQUEST_CODE = 1334;
   private static final int AUTH_DEEZER_REQUEST_CODE = 1656;
   private static final String EMPTY = "";
+
+  private final CompletableTransformer schedulersTransformer =
+      completable -> completable
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread());
 
   private ImageButton resumePauseButton;
   private ImageButton stopButton;
@@ -112,14 +117,17 @@ public class MainActivity extends Activity {
 
     resumePauseButton.setOnClickListener(v -> {
       if (isPlaying) {
-        runOnSchedulers(skaldMusicService.pause())
+        skaldMusicService.pause()
+            .compose(schedulersTransformer)
             .subscribe(new PlaybackEventCompletableObserver());
       } else {
-        runOnSchedulers(skaldMusicService.resume())
+        skaldMusicService.resume()
+            .compose(schedulersTransformer)
             .subscribe(new PlaybackEventCompletableObserver());
       }
     });
-    stopButton.setOnClickListener(v -> runOnSchedulers(skaldMusicService.stop())
+    stopButton.setOnClickListener(v -> skaldMusicService.stop()
+        .compose(schedulersTransformer)
         .subscribe(new PlaybackEventCompletableObserver()));
 
     searchTracks();
@@ -151,11 +159,6 @@ public class MainActivity extends Activity {
     }
   }
 
-  private Completable runOnSchedulers(Completable completable) {
-    return completable.subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
-  }
-
   private void authenticateProvider(final ProviderName providerName, Button button,
       @StringRes int loginText) {
     if (!skaldAuthService.isLoggedIn(providerName)) {
@@ -175,7 +178,8 @@ public class MainActivity extends Activity {
   }
 
   private void play(SkaldPlayableEntity skaldPlayableEntity) {
-    runOnSchedulers(skaldMusicService.play(skaldPlayableEntity))
+    skaldMusicService.play(skaldPlayableEntity)
+        .compose(schedulersTransformer)
         .subscribe(new DisposableCompletableObserver() {
           @Override
           public void onComplete() {
