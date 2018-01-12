@@ -32,17 +32,18 @@ public class SkaldEntityAdapter extends ArrayAdapter<SkaldPlayableEntity> {
     }
     ImageView coverImageView = convertView.findViewById(R.id.image_list_cover);
     TextView trackInfoTextView = convertView.findViewById(R.id.text_track_info);
-    if (entity != null) {
-      if (!entity.getImageUrl().isEmpty()) {
-        Picasso
-            .with(context)
-            .load(entity.getImageUrl())
-            .into(coverImageView);
-      }
-
-      trackInfoTextView.setText(getTrackInfo(entity));
+    if (!isImageUrlEmpty(entity)) {
+      Picasso
+          .with(context)
+          .load(entity.getImageUrl())
+          .into(coverImageView);
     }
+    trackInfoTextView.setText(getTrackInfo(entity));
     return convertView;
+  }
+
+  private boolean isImageUrlEmpty(SkaldPlayableEntity entity) {
+    return entity == null || entity.getImageUrl().isEmpty();
   }
 
   private String getTrackInfo(SkaldPlayableEntity entity) {
