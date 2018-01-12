@@ -1,6 +1,7 @@
-package agency.tango.skald.exoplayer.models.reader;
+package agency.tango.skald.exoplayer.models.parser;
 
 import android.net.Uri;
+import android.util.Log;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -11,38 +12,35 @@ import java.util.ArrayList;
 import java.util.List;
 import agency.tango.skald.exoplayer.models.ExoPlayerTrack;
 
-public class PlaylistM3uFileReader extends PlaylistReader {
-  private static final String PLAYLIST_M3U = "audio/mpegurl";
+public abstract class SkaldPlaylistFileParser extends PlaylistParser {
+  private static final String TAG = SkaldPlaylistFileParser.class.getSimpleName();
 
   @Override
-  public boolean canRead(String mimeType) {
-    return mimeType.equals(PLAYLIST_M3U);
-  }
+  public abstract boolean canRead(String mimeType);
 
   @Override
   public List<ExoPlayerTrack> getTracks(Uri uri) {
     try {
-      List<Uri> trackUris = readTrackUrisFromFile(
+      List<Uri> lines = readTrackUrisFromFile(
           new File(new URI(uri.toString())));
 
       List<ExoPlayerTrack> tracks = new ArrayList<>();
-      for (Uri trackUri : trackUris) {
+      for (Uri trackUri : lines) {
         tracks.add(new ExoPlayerTrack(trackUri, "", "", null));
       }
       return tracks;
     } catch (IOException exception) {
-      //TODO handle exceptions
+      Log.e(TAG, exception.getMessage());
       exception.printStackTrace();
     } catch (URISyntaxException exception) {
+      Log.e(TAG, String.format("Cannot parse playlist file uri : %s", exception.getMessage()));
       exception.printStackTrace();
     }
-    return null;
+    return new ArrayList<>();
   }
 
   @Override
-  public String getMimeType() {
-    return PLAYLIST_M3U;
-  }
+  public abstract String getMimeType();
 
   private List<Uri> readTrackUrisFromFile(File file) throws IOException {
     List<Uri> trackUris = new ArrayList<>();
@@ -59,7 +57,5 @@ public class PlaylistM3uFileReader extends PlaylistReader {
     return trackUris;
   }
 
-  private boolean isUriLine(String line) {
-    return !line.startsWith("#") && line.contains("/");
-  }
+  protected abstract boolean isUriLine(String line);
 }

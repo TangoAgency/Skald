@@ -1,6 +1,7 @@
 package agency.tango.skald.exoplayer.services;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import com.google.android.exoplayer2.util.MimeTypes;
@@ -20,27 +21,28 @@ import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.exoplayer.models.ExoPlayerImage;
 import agency.tango.skald.exoplayer.models.ExoPlayerPlaylist;
 import agency.tango.skald.exoplayer.models.ExoPlayerTrack;
-import agency.tango.skald.exoplayer.models.reader.PlaylistM3uFileReader;
-import agency.tango.skald.exoplayer.models.reader.PlaylistReader;
+import agency.tango.skald.exoplayer.models.parser.PlaylistM3uFileParser;
+import agency.tango.skald.exoplayer.models.parser.PlaylistParser;
+import agency.tango.skald.exoplayer.models.parser.PlaylistPlsFileParser;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
 
 public class ExoPlayerDefaultSearchService implements SearchService {
-  private static final String PLAYLIST_PLS = "audio/x-scpls";
-
-  private final List<PlaylistReader> playlistReaders = new ArrayList<>();
+  private final List<PlaylistParser> playlistParsers;
   private final List<String> directories;
 
-  public ExoPlayerDefaultSearchService(String... directories) {
-    this.directories = Arrays.asList(directories);
-    this.playlistReaders.add(new PlaylistM3uFileReader());
-    //TODO implement pls format reader
+  public ExoPlayerDefaultSearchService(@NonNull List<String> directories) {
+    this.directories = directories;
+    this.playlistParsers = new ArrayList<>();
+    this.playlistParsers.add(new PlaylistM3uFileParser());
+    this.playlistParsers.add(new PlaylistPlsFileParser());
   }
 
-  public ExoPlayerDefaultSearchService(PlaylistReader playlistReader, String... directories) {
-    this(directories);
-    this.playlistReaders.add(playlistReader);
+  public ExoPlayerDefaultSearchService(@NonNull List<String> directories,
+      @NonNull List<PlaylistParser> playlistParsers) {
+    this.directories = directories;
+    this.playlistParsers = playlistParsers;
   }
 
   @Override
@@ -68,7 +70,7 @@ public class ExoPlayerDefaultSearchService implements SearchService {
           @Override
           public SkaldPlaylist apply(File file) throws Exception {
             List<ExoPlayerTrack> tracks = getTracks(file);
-            return new ExoPlayerPlaylist(Uri.fromFile(file), "TEST", new ExoPlayerImage(null),
+            return new ExoPlayerPlaylist(Uri.fromFile(file), file.getName(), new ExoPlayerImage(null),
                 tracks);
           }
         })
@@ -76,13 +78,14 @@ public class ExoPlayerDefaultSearchService implements SearchService {
   }
 
   private Observable<File> getAudioFiles(final String query) {
-    return getFiles(query, MimeTypes.AUDIO_MPEG);
+    return getFiles(query, MimeTypes.AUDIO_MPEG, MimeTypes.AUDIO_MP4, MimeTypes.AUDIO_OPUS,
+        MimeTypes.AUDIO_VORBIS);
   }
 
   private Observable<File> getPlaylistFiles(String query) {
     List<String> playlistsMimeTypes = new ArrayList<>();
-    for (PlaylistReader playlistReader : playlistReaders) {
-      playlistsMimeTypes.add(playlistReader.getMimeType());
+    for (PlaylistParser playlistParser : playlistParsers) {
+      playlistsMimeTypes.add(playlistParser.getMimeType());
     }
     return getFiles(query, playlistsMimeTypes.toArray(new String[playlistsMimeTypes.size()]));
   }
@@ -118,9 +121,9 @@ public class ExoPlayerDefaultSearchService implements SearchService {
 
   private List<ExoPlayerTrack> getTracks(File file) {
     String mimeType = getMimeType(file);
-    for (PlaylistReader playlistReader : playlistReaders) {
-      if (playlistReader.canRead(mimeType)) {
-        return playlistReader.getTracks(Uri.fromFile(file));
+    for (PlaylistParser playlistParser : playlistParsers) {
+      if (playlistParser.canRead(mimeType)) {
+        return playlistParser.getTracks(Uri.fromFile(file));
       }
     }
     return new ArrayList<>();

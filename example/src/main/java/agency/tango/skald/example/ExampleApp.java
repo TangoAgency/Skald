@@ -3,9 +3,8 @@ package agency.tango.skald.example;
 import android.app.Application;
 import android.net.Uri;
 import android.os.Environment;
-
 import com.facebook.stetho.Stetho;
-
+import java.util.Arrays;
 import agency.tango.skald.core.Skald;
 import agency.tango.skald.deezer.provider.DeezerProvider;
 import agency.tango.skald.exoplayer.provider.ExoPlayerProvider;
@@ -36,7 +35,7 @@ public class ExampleApp extends Application {
     uri = Uri.withAppendedPath(uri, Environment.DIRECTORY_DOWNLOADS);
 
     ExoPlayerProvider exoPlayerProvider = new ExoPlayerProvider(this,
-        new ExoPlayerDefaultSearchService(uri.getPath()));
+        new ExoPlayerDefaultSearchService(Arrays.asList((uri.getPath()))));
 
     Skald.with(spotifyProvider, deezerProvider, exoPlayerProvider);
   }
