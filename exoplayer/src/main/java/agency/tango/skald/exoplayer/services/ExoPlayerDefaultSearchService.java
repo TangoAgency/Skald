@@ -69,9 +69,8 @@ public class ExoPlayerDefaultSearchService implements SearchService {
         .map(new Function<File, SkaldPlaylist>() {
           @Override
           public SkaldPlaylist apply(File file) throws Exception {
-            List<ExoPlayerTrack> tracks = getTracks(file);
-            return new ExoPlayerPlaylist(Uri.fromFile(file), file.getName(), new ExoPlayerImage(null),
-                tracks);
+            return new ExoPlayerPlaylist(Uri.fromFile(file), getFileNameWithoutExtension(file),
+                new ExoPlayerImage(null), getTracksUris(file));
           }
         })
         .toList();
@@ -119,11 +118,18 @@ public class ExoPlayerDefaultSearchService implements SearchService {
     });
   }
 
-  private List<ExoPlayerTrack> getTracks(File file) {
+  private String getFileNameWithoutExtension(File file) {
+    String extension = MimeTypeMap.getFileExtensionFromUrl(
+        file.toURI().toString());
+    int lastIndex = file.getName().indexOf(extension) - 1;
+    return file.getName().substring(0, lastIndex);
+  }
+
+  private List<Uri> getTracksUris(File file) {
     String mimeType = getMimeType(file);
     for (PlaylistParser playlistParser : playlistParsers) {
       if (playlistParser.canRead(mimeType)) {
-        return playlistParser.getTracks(Uri.fromFile(file));
+        return playlistParser.getTracksUris(Uri.fromFile(file));
       }
     }
     return new ArrayList<>();

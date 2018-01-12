@@ -1,6 +1,7 @@
 package agency.tango.skald.exoplayer.player;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -29,7 +30,6 @@ import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
 import agency.tango.skald.exoplayer.models.ExoPlayerPlaylist;
-import agency.tango.skald.exoplayer.models.ExoPlayerTrack;
 import agency.tango.skald.exoplayer.player.listeners.PlayerEventsListener;
 import okhttp3.OkHttpClient;
 
@@ -80,8 +80,8 @@ public class SkaldExoPlayer implements Player {
           dataSourceFactory, extractorsFactory, null, null);
     } else if (skaldPlayableEntity instanceof SkaldPlaylist) {
       List<MediaSource> mediaSources = new ArrayList<>();
-      for (ExoPlayerTrack exoPlayerTrack : ((ExoPlayerPlaylist) skaldPlayableEntity).getTracks()) {
-        mediaSources.add(new ExtractorMediaSource(exoPlayerTrack.getUri(), dataSourceFactory,
+      for (Uri trackUri : ((ExoPlayerPlaylist) skaldPlayableEntity).getTracksUris()) {
+        mediaSources.add(new ExtractorMediaSource(trackUri, dataSourceFactory,
             extractorsFactory, null, null));
       }
 

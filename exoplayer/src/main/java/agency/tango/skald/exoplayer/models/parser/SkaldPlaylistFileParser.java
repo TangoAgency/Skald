@@ -10,7 +10,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import agency.tango.skald.exoplayer.models.ExoPlayerTrack;
 
 public abstract class SkaldPlaylistFileParser extends PlaylistParser {
   private static final String TAG = SkaldPlaylistFileParser.class.getSimpleName();
@@ -19,16 +18,9 @@ public abstract class SkaldPlaylistFileParser extends PlaylistParser {
   public abstract boolean canRead(String mimeType);
 
   @Override
-  public List<ExoPlayerTrack> getTracks(Uri uri) {
+  public List<Uri> getTracksUris(Uri uri) {
     try {
-      List<Uri> lines = readTrackUrisFromFile(
-          new File(new URI(uri.toString())));
-
-      List<ExoPlayerTrack> tracks = new ArrayList<>();
-      for (Uri trackUri : lines) {
-        tracks.add(new ExoPlayerTrack(trackUri, "", "", null));
-      }
-      return tracks;
+      return readTrackUrisFromFile(new File(new URI(uri.toString())));
     } catch (IOException exception) {
       Log.e(TAG, exception.getMessage());
       exception.printStackTrace();

@@ -5,15 +5,15 @@ import java.util.List;
 import agency.tango.skald.core.models.SkaldPlaylist;
 
 public class ExoPlayerPlaylist extends SkaldPlaylist {
-  private final List<ExoPlayerTrack> tracks;
+  private final List<Uri> tracksUris;
 
   public ExoPlayerPlaylist(Uri uri, String name, ExoPlayerImage image,
-      List<ExoPlayerTrack> tracks) {
+      List<Uri> tracksUris) {
     super(uri, name, image);
-    this.tracks = tracks;
+    this.tracksUris = tracksUris;
   }
 
-  public List<ExoPlayerTrack> getTracks() {
-    return tracks;
+  public List<Uri> getTracksUris() {
+    return tracksUris;
   }
 }
