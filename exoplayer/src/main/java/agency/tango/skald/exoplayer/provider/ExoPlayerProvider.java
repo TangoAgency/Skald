@@ -4,6 +4,8 @@ import android.content.Context;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.SearchService;
+import agency.tango.skald.core.authentication.SkaldAuthData;
+import agency.tango.skald.core.authentication.SkaldAuthStore;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.factories.PlayerFactory;
 import agency.tango.skald.core.factories.SearchServiceFactory;
@@ -67,7 +69,7 @@ public class ExoPlayerProvider extends Provider {
 
   @Override
   public SkaldAuthStoreFactory getSkaldAuthStoreFactory() {
-    return null;
+    return new ExoPlayerAuthStoreFactory();
   }
 
   @Override
@@ -81,25 +83,12 @@ public class ExoPlayerProvider extends Provider {
         skaldPlayableEntity.getUri().getScheme().equals("file");
   }
 
-  private static class ExoPlayerSearchServiceFactory extends SearchServiceFactory {
-    private final SearchService searchService;
-
-    public ExoPlayerSearchServiceFactory(SearchService searchService) {
-      this.searchService = searchService;
-    }
-
-    @Override
-    public SearchService getSearchService() throws AuthException {
-      return searchService;
-    }
-  }
-
   private static class SkaldExoPlayerFactory extends PlayerFactory {
     private final Context context;
     private final OkHttpClient okHttpClient;
     private final Player player;
 
-    public SkaldExoPlayerFactory(Context context, OkHttpClient okHttpClient,
+    private SkaldExoPlayerFactory(Context context, OkHttpClient okHttpClient,
         Player player) {
       this.context = context;
       this.okHttpClient = okHttpClient;
@@ -113,6 +102,42 @@ public class ExoPlayerProvider extends Provider {
       } else {
         return player;
       }
+    }
+  }
+
+  private static class ExoPlayerAuthStoreFactory extends SkaldAuthStoreFactory {
+    @Override
+    public SkaldAuthStore getSkaldAuthStore() {
+      return new SkaldAuthStore() {
+        @Override
+        public void save(Context context, SkaldAuthData skaldAuthData) {
+
+        }
+
+        @Override
+        public SkaldAuthData restore(Context context) throws AuthException {
+          return null;
+        }
+
+        @Override
+        public void clear(Context context) {
+
+        }
+      };
+    }
+  }
+
+  private static class ExoPlayerSearchServiceFactory extends SearchServiceFactory {
+
+    private final SearchService searchService;
+
+    private ExoPlayerSearchServiceFactory(SearchService searchService) {
+      this.searchService = searchService;
+    }
+
+    @Override
+    public SearchService getSearchService() throws AuthException {
+      return searchService;
     }
   }
 }
