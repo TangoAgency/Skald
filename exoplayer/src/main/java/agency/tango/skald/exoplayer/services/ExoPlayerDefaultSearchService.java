@@ -14,6 +14,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.models.SkaldPlaylist;
@@ -172,6 +173,6 @@ public class ExoPlayerDefaultSearchService implements SearchService {
     String fileExtension = MimeTypeMap.getFileExtensionFromUrl(
         file.toURI().toString());
     return MimeTypeMap.getSingleton()
-        .getMimeTypeFromExtension(fileExtension.toLowerCase());
+        .getMimeTypeFromExtension(fileExtension.toLowerCase(Locale.US));
   }
 }

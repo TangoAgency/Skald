@@ -1,0 +1,5 @@
+<lint>
+  <issue id="InvalidPackage">
+    <ignore path="**/jaudiotagger-2.2.3.jar"/>
+  </issue>
+</lint>
