@@ -41,7 +41,7 @@ public abstract class SkaldPlaylistFileParser extends PlaylistParser {
     String line;
     while ((line = br.readLine()) != null) {
       if (isUriLine(line)) {
-        trackUris.add(Uri.parse(line));
+        trackUris.add(getTrackUri(line));
       }
     }
     br.close();
@@ -50,4 +50,6 @@ public abstract class SkaldPlaylistFileParser extends PlaylistParser {
   }
 
   protected abstract boolean isUriLine(String line);
+
+  protected abstract Uri getTrackUri(String line);
 }

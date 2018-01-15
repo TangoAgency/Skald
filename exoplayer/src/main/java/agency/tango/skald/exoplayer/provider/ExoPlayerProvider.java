@@ -1,9 +1,7 @@
 package agency.tango.skald.exoplayer.provider;
 
 import android.content.Context;
-
 import com.facebook.stetho.okhttp3.StethoInterceptor;
-
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.exceptions.AuthException;
@@ -25,6 +23,8 @@ public class ExoPlayerProvider extends Provider {
   private final ExoPlayerSearchService searchService;
   private final OkHttpClient okHttpClient;
 
+  private Player player;
+
   public ExoPlayerProvider(Context context, OkHttpClient okHttpClient,
       SearchService... searchServices) {
     this.context = context;
@@ -33,6 +33,12 @@ public class ExoPlayerProvider extends Provider {
     for (SearchService searchService : searchServices) {
       this.searchService.add(searchService);
     }
+  }
+
+  public ExoPlayerProvider(Context context, OkHttpClient okHttpClient, Player player,
+      SearchService... searchServices) {
+    this(context, okHttpClient, searchServices);
+    this.player = player;
   }
 
   public ExoPlayerProvider(Context context, SearchService... searchServices) {
@@ -44,6 +50,11 @@ public class ExoPlayerProvider extends Provider {
         searchServices);
   }
 
+  public ExoPlayerProvider(Context context, Player player, SearchService... searchServices) {
+    this(context, searchServices);
+    this.player = player;
+  }
+
   @Override
   public ProviderName getProviderName() {
     return NAME;
@@ -51,7 +62,7 @@ public class ExoPlayerProvider extends Provider {
 
   @Override
   public PlayerFactory getPlayerFactory() {
-    return new SkaldExoPlayerFactory(context, okHttpClient);
+    return new SkaldExoPlayerFactory(context, okHttpClient, player);
   }
 
   @Override
@@ -86,15 +97,22 @@ public class ExoPlayerProvider extends Provider {
   private static class SkaldExoPlayerFactory extends PlayerFactory {
     private final Context context;
     private final OkHttpClient okHttpClient;
+    private final Player player;
 
-    public SkaldExoPlayerFactory(Context context, OkHttpClient okHttpClient) {
+    public SkaldExoPlayerFactory(Context context, OkHttpClient okHttpClient,
+        Player player) {
       this.context = context;
       this.okHttpClient = okHttpClient;
+      this.player = player;
     }
 
     @Override
     public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
-      return new SkaldExoPlayer(context, onErrorListener, okHttpClient);
+      if (player == null) {
+        return new SkaldExoPlayer(context, onErrorListener, okHttpClient);
+      } else {
+        return player;
+      }
     }
   }
 }

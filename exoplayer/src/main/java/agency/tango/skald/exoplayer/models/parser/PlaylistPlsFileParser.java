@@ -1,5 +1,7 @@
 package agency.tango.skald.exoplayer.models.parser;
 
+import android.net.Uri;
+
 public class PlaylistPlsFileParser extends SkaldPlaylistFileParser {
   private static final String PLAYLIST_PLS = "audio/x-scpls";
 
@@ -16,5 +18,11 @@ public class PlaylistPlsFileParser extends SkaldPlaylistFileParser {
   @Override
   protected boolean isUriLine(String line) {
     return line.contains("File");
+  }
+
+  @Override
+  protected Uri getTrackUri(String line) {
+    int startingIndex = line.indexOf("=") + 1;
+    return Uri.parse(line.substring(startingIndex));
   }
 }

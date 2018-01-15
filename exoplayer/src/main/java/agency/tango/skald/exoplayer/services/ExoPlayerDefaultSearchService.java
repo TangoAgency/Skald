@@ -25,24 +25,42 @@ import agency.tango.skald.exoplayer.models.parser.PlaylistM3uFileParser;
 import agency.tango.skald.exoplayer.models.parser.PlaylistParser;
 import agency.tango.skald.exoplayer.models.parser.PlaylistPlsFileParser;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 public class ExoPlayerDefaultSearchService implements SearchService {
   private final List<PlaylistParser> playlistParsers;
   private final List<String> directories;
+  private final Scheduler scheduler;
 
   public ExoPlayerDefaultSearchService(@NonNull List<String> directories) {
     this.directories = directories;
     this.playlistParsers = new ArrayList<>();
-    this.playlistParsers.add(new PlaylistM3uFileParser());
-    this.playlistParsers.add(new PlaylistPlsFileParser());
+    fulfilParsersList();
+    this.scheduler = Schedulers.io();
+  }
+
+  public ExoPlayerDefaultSearchService(@NonNull List<String> directories, Scheduler scheduler) {
+    this.directories = directories;
+    this.playlistParsers = new ArrayList<>();
+    fulfilParsersList();
+    this.scheduler = scheduler;
   }
 
   public ExoPlayerDefaultSearchService(@NonNull List<String> directories,
       @NonNull List<PlaylistParser> playlistParsers) {
     this.directories = directories;
     this.playlistParsers = playlistParsers;
+    this.scheduler = Schedulers.io();
+  }
+
+  public ExoPlayerDefaultSearchService(@NonNull List<String> directories,
+      @NonNull List<PlaylistParser> playlistParsers, Scheduler scheduler) {
+    this.directories = directories;
+    this.playlistParsers = playlistParsers;
+    this.scheduler = scheduler;
   }
 
   @Override
@@ -74,6 +92,11 @@ public class ExoPlayerDefaultSearchService implements SearchService {
           }
         })
         .toList();
+  }
+
+  private void fulfilParsersList() {
+    this.playlistParsers.add(new PlaylistM3uFileParser());
+    this.playlistParsers.add(new PlaylistPlsFileParser());
   }
 
   private Observable<File> getAudioFiles(final String query) {
@@ -115,7 +138,8 @@ public class ExoPlayerDefaultSearchService implements SearchService {
       public Iterable<File> apply(List<File> files) throws Exception {
         return files;
       }
-    });
+    })
+        .subscribeOn(scheduler);
   }
 
   private String getFileNameWithoutExtension(File file) {
