@@ -36,26 +36,31 @@ public class DeezerProvider extends Provider {
     deezerAuthStore = new DeezerAuthStore(this);
   }
 
+  @NonNull
   @Override
   public ProviderName getProviderName() {
     return NAME;
   }
 
+  @NonNull
   @Override
   public PlayerFactory getPlayerFactory() {
     return new DeezerPlayerFactory(context, deezerAuthStore);
   }
 
+  @NonNull
   @Override
   public SkaldAuthStoreFactory getSkaldAuthStoreFactory() {
     return new DeezerAuthStoreFactory(this);
   }
 
+  @NonNull
   @Override
   public SearchServiceFactory getSearchServiceFactory() {
     return new DeezerSearchServiceFactory(context, deezerAuthStore);
   }
 
+  @NonNull
   @Override
   public UserServiceFactory getUserServiceFactory() {
     return new DeezerUserServiceFactory(context, deezerAuthStore);
@@ -79,6 +84,7 @@ public class DeezerProvider extends Provider {
       this.deezerAuthStore = deezerAuthStore;
     }
 
+    @NonNull
     @Override
     public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);
@@ -93,6 +99,7 @@ public class DeezerProvider extends Provider {
       this.deezerProvider = deezerProvider;
     }
 
+    @NonNull
     @Override
     public SkaldAuthStore getSkaldAuthStore() {
       return new DeezerAuthStore(deezerProvider);
@@ -108,6 +115,7 @@ public class DeezerProvider extends Provider {
       this.deezerAuthStore = deezerAuthStore;
     }
 
+    @NonNull
     @Override
     public SearchService getSearchService() throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);
@@ -124,6 +132,7 @@ public class DeezerProvider extends Provider {
       this.deezerAuthStore = deezerAuthStore;
     }
 
+    @NonNull
     @Override
     public UserService getUserService() throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);

@@ -171,7 +171,7 @@ public class SkaldMusicService {
     this.currentProviderName = providerName;
   }
 
-  boolean shouldPlayerBeChanged(SkaldPlayableEntity skaldPlayableEntity) {
+  boolean shouldPlayerBeChanged(@NonNull SkaldPlayableEntity skaldPlayableEntity) {
     for (Provider provider : providers) {
       if (provider.canHandle(skaldPlayableEntity)) {
         return !provider.getProviderName().equals(currentProviderName);
@@ -188,14 +188,17 @@ public class SkaldMusicService {
     return playerCache.get(currentProviderName);
   }
 
+  @NonNull
   private Single<SkaldUser> getUser(Provider provider) throws AuthException {
     return getUserService(provider).getUser();
   }
 
+  @NonNull
   private SearchService getSearchService(Provider provider) throws AuthException {
     return provider.getSearchServiceFactory().getSearchService();
   }
 
+  @NonNull
   private UserService getUserService(Provider provider) throws AuthException {
     return provider.getUserServiceFactory().getUserService();
   }

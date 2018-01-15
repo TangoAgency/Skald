@@ -46,26 +46,31 @@ public class SpotifyProvider extends Provider {
     spotifyAuthStore = new SpotifyAuthStore(this);
   }
 
+  @NonNull
   @Override
   public ProviderName getProviderName() {
     return NAME;
   }
 
+  @NonNull
   @Override
   public PlayerFactory getPlayerFactory() {
     return new SpotifyPlayerFactory(context, this, spotifyAuthStore);
   }
 
+  @NonNull
   @Override
   public SkaldAuthStoreFactory getSkaldAuthStoreFactory() {
     return new SpotifyAuthStoreFactory(this);
   }
 
+  @NonNull
   @Override
   public SearchServiceFactory getSearchServiceFactory() {
     return new SpotifySearchServiceFactory(this);
   }
 
+  @NonNull
   @Override
   public UserServiceFactory getUserServiceFactory() {
     return new SpotifyUserServiceFactory(this);
@@ -106,6 +111,7 @@ public class SpotifyProvider extends Provider {
       this.spotifyAuthStore = spotifyAuthStore;
     }
 
+    @NonNull
     @Override
     public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
       SpotifyAuthData spotifyAuthData = (SpotifyAuthData) spotifyAuthStore.restore(context);
@@ -120,6 +126,7 @@ public class SpotifyProvider extends Provider {
       this.spotifyProvider = spotifyProvider;
     }
 
+    @NonNull
     @Override
     public SkaldAuthStore getSkaldAuthStore() {
       return new SpotifyAuthStore(spotifyProvider);
@@ -133,6 +140,7 @@ public class SpotifyProvider extends Provider {
       this.spotifyProvider = spotifyProvider;
     }
 
+    @NonNull
     @Override
     public SearchService getSearchService() throws AuthException {
       return new SpotifySearchService(spotifyProvider.getSpotifyApi());
@@ -146,6 +154,7 @@ public class SpotifyProvider extends Provider {
       this.spotifyProvider = spotifyProvider;
     }
 
+    @NonNull
     @Override
     public UserService getUserService() throws AuthException {
       return new SpotifyUserService(spotifyProvider.getSpotifyApi());
