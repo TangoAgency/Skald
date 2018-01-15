@@ -47,4 +47,17 @@ public class SkaldUser {
   public String getBirthDate() {
     return birthDate;
   }
+
+  @Override
+  public String toString() {
+    return "SkaldUser{" +
+        "firstName='" + firstName + '\'' +
+        ", lastName='" + lastName + '\'' +
+        ", nickName='" + nickName + '\'' +
+        ", imageUrl='" + imageUrl + '\'' +
+        ", email='" + email + '\'' +
+        ", country='" + country + '\'' +
+        ", birthDate='" + birthDate + '\'' +
+        '}';
+  }
 }

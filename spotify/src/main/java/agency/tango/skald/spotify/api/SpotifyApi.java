@@ -151,7 +151,7 @@ public interface SpotifyApi {
     @NonNull
     private synchronized Function<Flowable<Throwable>, Publisher<Object>> isTokenExpired() {
       return errors -> errors.flatMap(error -> {
-        if (isTokenExpired(error)) {
+        if (isHttpUnauthorizedException(error)) {
           return refreshToken()
               .toFlowable()
               .doOnNext(this::saveTokens);
@@ -160,7 +160,7 @@ public interface SpotifyApi {
       });
     }
 
-    private boolean isTokenExpired(Throwable throwable) {
+    private boolean isHttpUnauthorizedException(Throwable throwable) {
       return throwable instanceof HttpException
           && ((HttpException) throwable).code() == HttpURLConnection.HTTP_UNAUTHORIZED;
     }
