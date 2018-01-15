@@ -35,6 +35,7 @@ public class SkaldTrack extends SkaldPlayableEntity {
 
   @Override
   public String toString() {
-    return String.format("%s - %s", artistName, title);
+    return "artist name='" + artistName + '\'' +
+        ", title='" + title + '\'';
   }
 }

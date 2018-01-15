@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 public class TrackMetadata {
   @NonNull
-  private String artistsName;
+  private String artistName;
 
   @NonNull
   private String title;
@@ -12,14 +12,14 @@ public class TrackMetadata {
   private String imageUrl;
 
   public TrackMetadata(@NonNull String artistsName, @NonNull String title, String imageUrl) {
-    this.artistsName = artistsName;
+    this.artistName = artistsName;
     this.title = title;
     this.imageUrl = imageUrl;
   }
 
   @NonNull
-  public String getArtistsName() {
-    return artistsName;
+  public String getArtistName() {
+    return artistName;
   }
 
   @NonNull
@@ -27,8 +27,13 @@ public class TrackMetadata {
     return title;
   }
 
-  @NonNull
   public String getImageUrl() {
     return imageUrl;
+  }
+
+  @Override
+  public String toString() {
+    return "artist name='" + artistName + '\'' +
+        ", title='" + title + '\'';
   }
 }

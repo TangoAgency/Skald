@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
     addOnErrorListener();
     addOnPlaybackListener();
     skaldMusicService.addOnLoadingListener(() -> {
-      Log.d(TAG, "Loading track...");
+      Log.d(TAG, "Loading skald entity...");
       loadingTextView.setText(R.string.loading);
     });
 
@@ -302,8 +302,7 @@ public class MainActivity extends Activity {
     skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
       @Override
       public void onPlayEvent(TrackMetadata trackMetadata) {
-        Log.d(TAG, String.format("%s - %s", trackMetadata.getArtistsName(),
-            trackMetadata.getTitle()));
+        Log.d(TAG, trackMetadata.toString());
         isPlaying = true;
         updateSongViews(trackMetadata);
       }
@@ -347,7 +346,7 @@ public class MainActivity extends Activity {
 
   private void updateSongViews(TrackMetadata trackMetadata) {
     drawAnImage(trackMetadata.getImageUrl(), trackImage);
-    artistName.setText(trackMetadata.getArtistsName());
+    artistName.setText(trackMetadata.getArtistName());
     title.setText(trackMetadata.getTitle());
     loadingTextView.setText(EMPTY);
   }
