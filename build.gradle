@@ -37,7 +37,7 @@ subprojects { project ->
     dependencies {
       classpath 'com.android.tools.build:gradle:3.0.1'
       classpath 'gradle.plugin.com.kageiit:lintrules:1.1.2'
-      classpath 'com.novoda:bintray-release:0.3.4'
+      classpath 'com.novoda:bintray-release:0.5.0'
       classpath 'com.dicedmelon.gradle:jacoco-android:0.1.1'
     }
   }
@@ -61,16 +61,16 @@ task clean(type: Delete) {
 
 ext {
   minSdkVersion = 15
-  targetSdkVersion = 25
-  compileSdkVersion = 26
-  buildToolsVersion = '26.0.2'
+  targetSdkVersion = 27
+  compileSdkVersion = 27
+  buildToolsVersion = '27.0.3'
   sourceCompatibilityVersion = JavaVersion.VERSION_1_8
   targetCompatibilityVersion = JavaVersion.VERSION_1_8
 }
 
-def androidToolsVersion = '25.2.0'
+def androidToolsVersion = '25.3.0'
 def supportLibraryVersion = '26.1.0'
-def googlePlayServicesVersion = '10.0.1'
+def googlePlayServicesVersion = '11.8.0'
 ext.deps = [// Android
             android               : 'com.google.android:android:4.1.1.4',
             supportCompat         : "com.android.support:support-compat:$supportLibraryVersion",
