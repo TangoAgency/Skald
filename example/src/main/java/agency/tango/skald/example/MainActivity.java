@@ -1,22 +1,5 @@
 package agency.tango.skald.example;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-import com.squareup.picasso.Picasso;
-import java.util.List;
 import agency.tango.skald.R;
 import agency.tango.skald.core.SkaldAuthService;
 import agency.tango.skald.core.SkaldMusicService;
@@ -34,12 +17,30 @@ import agency.tango.skald.deezer.errors.DeezerAuthError;
 import agency.tango.skald.deezer.provider.DeezerProvider;
 import agency.tango.skald.spotify.errors.SpotifyAuthError;
 import agency.tango.skald.spotify.provider.SpotifyProvider;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.squareup.picasso.Picasso;
 import io.reactivex.CompletableTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+
+import java.util.List;
 
 public class MainActivity extends Activity {
   private static final String TAG = MainActivity.class.getSimpleName();

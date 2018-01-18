@@ -1,7 +1,7 @@
 package agency.tango.skald.core.bus;
 
 import io.reactivex.Observable;
-import io.reactivex.annotations.NonNull;
+import android.support.annotation.NonNull;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 

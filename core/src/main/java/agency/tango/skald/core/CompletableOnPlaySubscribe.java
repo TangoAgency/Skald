@@ -1,7 +1,5 @@
 package agency.tango.skald.core;
 
-import android.util.Log;
-import java.util.List;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
@@ -15,10 +13,13 @@ import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableOnSubscribe;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
+
+import java.util.List;
 
 class CompletableOnPlaySubscribe implements CompletableOnSubscribe {
   private final SkaldMusicService skaldMusicService;

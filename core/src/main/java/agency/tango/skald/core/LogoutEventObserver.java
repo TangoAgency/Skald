@@ -4,7 +4,7 @@ import android.util.Log;
 import agency.tango.skald.core.bus.LoginEvent;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.provider.ProviderName;
-import io.reactivex.annotations.NonNull;
+import android.support.annotation.NonNull;
 import io.reactivex.observers.DisposableObserver;
 
 public class LogoutEventObserver extends DisposableObserver<LoginEvent> {

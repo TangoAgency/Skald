@@ -37,7 +37,7 @@ subprojects { project ->
     dependencies {
       classpath 'com.android.tools.build:gradle:3.0.1'
       classpath 'gradle.plugin.com.kageiit:lintrules:1.1.2'
-      classpath 'com.novoda:bintray-release:0.5.0'
+      classpath 'com.novoda:bintray-release:0.7.0'
       classpath 'com.dicedmelon.gradle:jacoco-android:0.1.1'
     }
   }
@@ -69,8 +69,23 @@ ext {
 }
 
 def androidToolsVersion = '25.3.0'
-def supportLibraryVersion = '26.1.0'
+def supportLibraryVersion = '27.0.2'
 def googlePlayServicesVersion = '11.8.0'
+
+
+allprojects {
+  configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+      def requested = details.requested
+      if (requested.group == 'com.android.support') {
+        if (!requested.name.startsWith("multidex")) {
+          details.useVersion supportLibraryVersion
+        }
+      }
+    }
+  }
+}
+
 ext.deps = [// Android
             android               : 'com.google.android:android:4.1.1.4',
             supportCompat         : "com.android.support:support-compat:$supportLibraryVersion",
