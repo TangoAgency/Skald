@@ -1,6 +1,7 @@
 package agency.tango.skald.deezer.provider;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.SearchService;
 import agency.tango.skald.core.UserService;
@@ -35,33 +36,38 @@ public class DeezerProvider extends Provider {
     deezerAuthStore = new DeezerAuthStore(this);
   }
 
+  @NonNull
   @Override
   public ProviderName getProviderName() {
     return NAME;
   }
 
+  @NonNull
   @Override
   public PlayerFactory getPlayerFactory() {
     return new DeezerPlayerFactory(context, deezerAuthStore);
   }
 
+  @NonNull
   @Override
   public SkaldAuthStoreFactory getSkaldAuthStoreFactory() {
     return new DeezerAuthStoreFactory(this);
   }
 
+  @NonNull
   @Override
   public SearchServiceFactory getSearchServiceFactory() {
     return new DeezerSearchServiceFactory(context, deezerAuthStore);
   }
 
+  @NonNull
   @Override
   public UserServiceFactory getUserServiceFactory() {
     return new DeezerUserServiceFactory(context, deezerAuthStore);
   }
 
   @Override
-  public boolean canHandle(SkaldPlayableEntity skaldPlayableEntity) {
+  public boolean canHandle(@NonNull SkaldPlayableEntity skaldPlayableEntity) {
     return UriValidator.validate(skaldPlayableEntity, NAME.getName());
   }
 
@@ -78,6 +84,7 @@ public class DeezerProvider extends Provider {
       this.deezerAuthStore = deezerAuthStore;
     }
 
+    @NonNull
     @Override
     public Player getPlayer(OnErrorListener onErrorListener) throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);
@@ -92,6 +99,7 @@ public class DeezerProvider extends Provider {
       this.deezerProvider = deezerProvider;
     }
 
+    @NonNull
     @Override
     public SkaldAuthStore getSkaldAuthStore() {
       return new DeezerAuthStore(deezerProvider);
@@ -107,6 +115,7 @@ public class DeezerProvider extends Provider {
       this.deezerAuthStore = deezerAuthStore;
     }
 
+    @NonNull
     @Override
     public SearchService getSearchService() throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);
@@ -123,6 +132,7 @@ public class DeezerProvider extends Provider {
       this.deezerAuthStore = deezerAuthStore;
     }
 
+    @NonNull
     @Override
     public UserService getUserService() throws AuthException {
       DeezerAuthData deezerAuthData = (DeezerAuthData) deezerAuthStore.restore(context);

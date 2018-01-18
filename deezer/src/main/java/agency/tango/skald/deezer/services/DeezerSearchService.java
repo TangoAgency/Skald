@@ -1,5 +1,6 @@
 package agency.tango.skald.deezer.services;
 
+import android.support.annotation.NonNull;
 import com.deezer.sdk.model.Playlist;
 import com.deezer.sdk.model.Track;
 import com.deezer.sdk.network.connect.DeezerConnect;
@@ -25,7 +26,7 @@ public class DeezerSearchService implements SearchService {
   }
 
   @Override
-  public Single<List<SkaldTrack>> searchForTracks(final String query) {
+  public Single<List<SkaldTrack>> searchForTracks(@NonNull final String query) {
     return Single.create(emitter -> {
       final DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchTracks(query);
       deezerRequest.setId(SEARCH_TRACK_REQUEST_ID);
@@ -44,7 +45,7 @@ public class DeezerSearchService implements SearchService {
   }
 
   @Override
-  public Single<List<SkaldPlaylist>> searchForPlaylists(final String query) {
+  public Single<List<SkaldPlaylist>> searchForPlaylists(@NonNull final String query) {
     return Single.create(emitter -> {
       DeezerRequest deezerRequest = DeezerRequestFactory.requestSearchPlaylists(query);
       deezerRequest.setId(SEARCH_PLAYLIST_REQUEST_ID);

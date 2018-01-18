@@ -26,13 +26,13 @@ public class SpotifySearchService implements SearchService {
   }
 
   @Override
-  public Single<List<SkaldTrack>> searchForTracks(final String query) {
+  public Single<List<SkaldTrack>> searchForTracks(@NonNull final String query) {
     return spotifyApi.getTracksForQuery(query, TRACK_TYPE)
         .map(this::mapSpotifyTracksToSkaldTracks);
   }
 
   @Override
-  public Single<List<SkaldPlaylist>> searchForPlaylists(final String query) {
+  public Single<List<SkaldPlaylist>> searchForPlaylists(@NonNull final String query) {
     return spotifyApi.getPlaylistsForQuery(query, PLAYLIST_TYPE)
         .map(this::mapSpotifyPlaylistsToSkaldPlaylists);
   }

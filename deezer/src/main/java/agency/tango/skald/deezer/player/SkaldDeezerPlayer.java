@@ -1,6 +1,7 @@
 package agency.tango.skald.deezer.player;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import agency.tango.skald.core.Player;
@@ -22,7 +23,8 @@ public class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void play(SkaldPlayableEntity playableEntity, SkaldOperationCallback operationCallback) {
+  public void play(@NonNull SkaldPlayableEntity playableEntity,
+      SkaldOperationCallback operationCallback) {
     deezerPlayer.play(playableEntity, operationCallback);
   }
 
@@ -52,7 +54,7 @@ public class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void addOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+  public void addOnPlayerReadyListener(@NonNull OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
 
     for (OnPlayerReadyListener onPlayerReadyExistingListener : onPlayerReadyListeners) {
@@ -61,27 +63,27 @@ public class SkaldDeezerPlayer implements Player {
   }
 
   @Override
-  public void removeOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+  public void removeOnPlayerReadyListener(@NonNull OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.remove(onPlayerReadyListener);
   }
 
   @Override
-  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void addOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     deezerPlayer.addOnPlayerReadyListener(onPlaybackListener);
   }
 
   @Override
-  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void removeOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     deezerPlayer.removeOnPlayerReadyListener(onPlaybackListener);
   }
 
   @Override
-  public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void addOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     deezerPlayer.addOnLoadingListener(onLoadingListener);
   }
 
   @Override
-  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void removeOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     deezerPlayer.removeOnLoadingListener(onLoadingListener);
   }
 }

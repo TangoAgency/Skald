@@ -1,5 +1,6 @@
 package agency.tango.skald.core;
 
+import android.support.annotation.NonNull;
 import java.util.Arrays;
 import java.util.List;
 import agency.tango.skald.core.provider.Provider;
@@ -20,7 +21,7 @@ public class Skald {
     return instance;
   }
 
-  public static Skald with(Provider... providers) {
+  public static Skald with(@NonNull Provider... providers) {
     if (instance == null) {
       synchronized (Skald.class) {
         if (instance == null) {
@@ -33,7 +34,7 @@ public class Skald {
     return instance;
   }
 
-  public static Skald with(Skald skald) {
+  public static Skald with(@NonNull Skald skald) {
     if (instance == null) {
       synchronized (Skald.class) {
         if (instance == null) {
@@ -44,6 +45,7 @@ public class Skald {
     return instance;
   }
 
+  @NonNull
   public List<Provider> providers() {
     return providers;
   }
@@ -54,7 +56,7 @@ public class Skald {
         return provider;
       }
     }
-    return null;
+    throw new IllegalStateException("Cannot use not added or not supported provider");
   }
 
   private static void setSkald(Skald skald) {
@@ -64,7 +66,7 @@ public class Skald {
   public static class Builder {
     private Provider[] providers;
 
-    public Skald.Builder providers(Provider... providers) {
+    public Skald.Builder providers(@NonNull Provider... providers) {
       if (this.providers != null) {
         throw new IllegalArgumentException("Providers already set");
       } else {

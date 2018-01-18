@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import com.deezer.sdk.network.connect.DeezerConnect;
 import com.deezer.sdk.network.request.event.DeezerError;
 import com.deezer.sdk.player.PlayerWrapper;
@@ -54,7 +55,8 @@ class DeezerPlayer {
     mainHandler = new Handler(context.getMainLooper());
   }
 
-  void play(SkaldPlayableEntity skaldPlayableEntity, SkaldOperationCallback operationCallback) {
+  void play(@NonNull SkaldPlayableEntity skaldPlayableEntity,
+      SkaldOperationCallback operationCallback) {
     currentSkaldOperationCallback = operationCallback;
     if (currentPlayer != null && isPlaying()) {
       currentPlayer.stop();
@@ -91,19 +93,19 @@ class DeezerPlayer {
     playerCache.evictAll();
   }
 
-  void addOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
+  void addOnPlayerReadyListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  void removeOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
+  void removeOnPlayerReadyListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
-  void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+  void addOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
-  void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+  void removeOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.remove(onLoadingListener);
   }
 

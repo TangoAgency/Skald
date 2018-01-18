@@ -2,6 +2,8 @@ package agency.tango.skald.core;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import java.util.ArrayList;
@@ -45,9 +47,10 @@ public class SkaldMusicService {
   private final LogoutEventObserver logoutEventObserver = new LogoutEventObserver(playerCache,
       this);
 
+  @Nullable
   private ProviderName currentProviderName;
 
-  public SkaldMusicService(Context context) {
+  public SkaldMusicService(@NonNull Context context) {
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
@@ -63,7 +66,7 @@ public class SkaldMusicService {
         .subscribe(logoutEventObserver);
   }
 
-  public synchronized Completable play(final SkaldPlayableEntity skaldPlayableEntity) {
+  public synchronized Completable play(@NonNull final SkaldPlayableEntity skaldPlayableEntity) {
     return Completable.create(new CompletableOnPlaySubscribe(this, skaldPlayableEntity,
         onPlaybackListeners, onLoadingListeners, onErrorListeners, playerCache, providers));
   }
@@ -98,31 +101,31 @@ public class SkaldMusicService {
     timer.cancel();
   }
 
-  public void addOnErrorListener(OnErrorListener onErrorListener) {
+  public void addOnErrorListener(@NonNull OnErrorListener onErrorListener) {
     onErrorListeners.add(onErrorListener);
   }
 
-  public void removeOnErrorListener(OnErrorListener onErrorListener) {
+  public void removeOnErrorListener(@NonNull OnErrorListener onErrorListener) {
     onErrorListeners.remove(onErrorListener);
   }
 
-  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void addOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void removeOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
-  public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void addOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
-  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void removeOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.remove(onLoadingListener);
   }
 
-  public Single<List<SkaldTrack>> searchTracks(String query) {
+  public Single<List<SkaldTrack>> searchTracks(@NonNull String query) {
     List<Single<List<SkaldTrack>>> tracks = new ArrayList<>();
     for (Provider provider : providers) {
       try {
@@ -134,7 +137,7 @@ public class SkaldMusicService {
     return mergeLists(tracks);
   }
 
-  public Single<List<SkaldPlaylist>> searchPlayLists(String query) {
+  public Single<List<SkaldPlaylist>> searchPlayLists(@NonNull String query) {
     List<Single<List<SkaldPlaylist>>> playlists = new ArrayList<>();
     for (Provider provider : providers) {
       try {
@@ -159,15 +162,16 @@ public class SkaldMusicService {
         .toList();
   }
 
+  @Nullable
   ProviderName getCurrentProviderName() {
     return currentProviderName;
   }
 
-  void setCurrentProviderName(ProviderName providerName) {
+  void setCurrentProviderName(@Nullable ProviderName providerName) {
     this.currentProviderName = providerName;
   }
 
-  boolean shouldPlayerBeChanged(SkaldPlayableEntity skaldPlayableEntity) {
+  boolean shouldPlayerBeChanged(@NonNull SkaldPlayableEntity skaldPlayableEntity) {
     for (Provider provider : providers) {
       if (provider.canHandle(skaldPlayableEntity)) {
         return !provider.getProviderName().equals(currentProviderName);
@@ -184,14 +188,17 @@ public class SkaldMusicService {
     return playerCache.get(currentProviderName);
   }
 
+  @NonNull
   private Single<SkaldUser> getUser(Provider provider) throws AuthException {
     return getUserService(provider).getUser();
   }
 
+  @NonNull
   private SearchService getSearchService(Provider provider) throws AuthException {
     return provider.getSearchServiceFactory().getSearchService();
   }
 
+  @NonNull
   private UserService getUserService(Provider provider) throws AuthException {
     return provider.getUserServiceFactory().getUserService();
   }
