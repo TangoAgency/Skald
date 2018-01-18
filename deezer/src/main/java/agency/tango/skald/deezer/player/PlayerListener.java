@@ -1,7 +1,6 @@
 package agency.tango.skald.deezer.player;
 
 import android.os.Handler;
-
 import com.deezer.sdk.model.PlayableEntity;
 import com.deezer.sdk.model.Track;
 import com.deezer.sdk.network.connect.DeezerConnect;
@@ -9,9 +8,7 @@ import com.deezer.sdk.network.request.DeezerRequest;
 import com.deezer.sdk.network.request.DeezerRequestFactory;
 import com.deezer.sdk.network.request.event.JsonRequestListener;
 import com.deezer.sdk.player.event.PlayerWrapperListener;
-
 import java.util.List;
-
 import agency.tango.skald.core.errors.PlaybackError;
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlaybackListener;
@@ -76,7 +73,7 @@ public class PlayerListener implements PlayerWrapperListener {
         for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
           onPlaybackListener.onError(
               new PlaybackError(new UnparsedResultException(
-                  String.format("Cannot get track info: %s", requestResponse))));
+                  String.format("Got unparsed track metadata : %s", requestResponse))));
         }
       }
 
@@ -90,12 +87,9 @@ public class PlayerListener implements PlayerWrapperListener {
   }
 
   private void notifyPlayEvent(final TrackMetadata trackMetadata) {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPlayEvent(trackMetadata);
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onPlayEvent(trackMetadata);
       }
     });
   }

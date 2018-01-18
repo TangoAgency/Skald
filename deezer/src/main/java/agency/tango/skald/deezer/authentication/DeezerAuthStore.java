@@ -1,10 +1,8 @@
 package agency.tango.skald.deezer.authentication;
 
 import android.content.Context;
-
 import com.deezer.sdk.network.connect.DeezerConnect;
 import com.deezer.sdk.network.connect.SessionStore;
-
 import agency.tango.skald.core.authentication.SkaldAuthData;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
 import agency.tango.skald.core.exceptions.AuthException;

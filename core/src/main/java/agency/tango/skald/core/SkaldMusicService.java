@@ -2,17 +2,17 @@ package agency.tango.skald.core;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-
 import agency.tango.skald.core.bus.LoginEvent;
 import agency.tango.skald.core.bus.SkaldBus;
-import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldCoreOperationCallback;
 import agency.tango.skald.core.exceptions.AuthException;
@@ -22,20 +22,18 @@ import agency.tango.skald.core.listeners.OnPlaybackListener;
 import agency.tango.skald.core.models.SkaldPlayableEntity;
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.core.models.SkaldTrack;
+import agency.tango.skald.core.models.SkaldUser;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 import io.reactivex.Completable;
-import io.reactivex.CompletableEmitter;
-import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Single;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Function;
 
 public class SkaldMusicService {
   public static final String INTENT_ACTION = "auth_action";
   public static final String INTENT_ACTION_ERROR = "auth_action_error";
   public static final String EXTRA_AUTH_DATA = "auth_data";
   public static final String EXTRA_PROVIDER_NAME = "provider_name";
+  private static final String TAG = SkaldMusicService.class.getSimpleName();
   private static final int MAX_NUMBER_OF_PLAYERS = 2;
 
   private final List<OnErrorListener> onErrorListeners = new ArrayList<>();
@@ -45,18 +43,14 @@ public class SkaldMusicService {
   private final Timer timer = new Timer();
   private final SkaldBus skaldBus = SkaldBus.getInstance();
   private final TLruCache<ProviderName, Player> playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-      new SkaldLruCache.CacheItemRemovedListener<ProviderName, Player>() {
-        @Override
-        public void release(ProviderName key, Player player) {
-          player.release();
-        }
-      });
+      (key, player) -> player.release());
   private final LogoutEventObserver logoutEventObserver = new LogoutEventObserver(playerCache,
       this);
 
+  @Nullable
   private ProviderName currentProviderName;
 
-  public SkaldMusicService(Context context) {
+  public SkaldMusicService(@NonNull Context context) {
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
@@ -72,40 +66,31 @@ public class SkaldMusicService {
         .subscribe(logoutEventObserver);
   }
 
-  public synchronized Completable play(final SkaldPlayableEntity skaldPlayableEntity) {
+  public synchronized Completable play(@NonNull final SkaldPlayableEntity skaldPlayableEntity) {
     return Completable.create(new CompletableOnPlaySubscribe(this, skaldPlayableEntity,
         onPlaybackListeners, onLoadingListeners, onErrorListeners, playerCache, providers));
   }
 
   public Completable pause() {
-    return Completable.create(new CompletableOnSubscribe() {
-      @Override
-      public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentProviderName != null) {
-          getCurrentPlayer().pause(new SkaldCoreOperationCallback(emitter));
-        }
+    return Completable.create(emitter -> {
+      if (currentProviderName != null) {
+        getCurrentPlayer().pause(new SkaldCoreOperationCallback(emitter));
       }
     });
   }
 
   public Completable resume() {
-    return Completable.create(new CompletableOnSubscribe() {
-      @Override
-      public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentProviderName != null) {
-          getCurrentPlayer().resume(new SkaldCoreOperationCallback(emitter));
-        }
+    return Completable.create(emitter -> {
+      if (currentProviderName != null) {
+        getCurrentPlayer().resume(new SkaldCoreOperationCallback(emitter));
       }
     });
   }
 
   public Completable stop() {
-    return Completable.create(new CompletableOnSubscribe() {
-      @Override
-      public void subscribe(@NonNull CompletableEmitter emitter) throws Exception {
-        if (currentProviderName != null) {
-          getCurrentPlayer().stop(new SkaldCoreOperationCallback(emitter));
-        }
+    return Completable.create(emitter -> {
+      if (currentProviderName != null) {
+        getCurrentPlayer().stop(new SkaldCoreOperationCallback(emitter));
       }
     });
   }
@@ -116,63 +101,77 @@ public class SkaldMusicService {
     timer.cancel();
   }
 
-  public void addOnErrorListener(OnErrorListener onErrorListener) {
+  public void addOnErrorListener(@NonNull OnErrorListener onErrorListener) {
     onErrorListeners.add(onErrorListener);
   }
 
-  public void removeOnErrorListener(OnErrorListener onErrorListener) {
+  public void removeOnErrorListener(@NonNull OnErrorListener onErrorListener) {
     onErrorListeners.remove(onErrorListener);
   }
 
-  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void addOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void removeOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
-  public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void addOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
-  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void removeOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.remove(onLoadingListener);
   }
 
-  public Single<List<SkaldTrack>> searchTracks(String query) {
-    List<Single<List<SkaldTrack>>> singles = new ArrayList<>();
+  public Single<List<SkaldTrack>> searchTracks(@NonNull String query) {
+    List<Single<List<SkaldTrack>>> tracks = new ArrayList<>();
     for (Provider provider : providers) {
       try {
-        singles.add(getSearchService(provider).searchForTracks(query));
+        tracks.add(getSearchService(provider).searchForTracks(query));
       } catch (AuthException authException) {
-        authException.printStackTrace();
+        logProviderNotAuthenticatedWarning(provider);
       }
     }
-    return mergeLists(singles);
+    return mergeLists(tracks);
   }
 
-  public Single<List<SkaldPlaylist>> searchPlayLists(String query) {
-    List<Single<List<SkaldPlaylist>>> singles = new ArrayList<>();
+  public Single<List<SkaldPlaylist>> searchPlayLists(@NonNull String query) {
+    List<Single<List<SkaldPlaylist>>> playlists = new ArrayList<>();
     for (Provider provider : providers) {
       try {
-        singles.add(getSearchService(provider).searchForPlaylists(query));
+        playlists.add(getSearchService(provider).searchForPlaylists(query));
       } catch (AuthException authException) {
-        authException.printStackTrace();
+        logProviderNotAuthenticatedWarning(provider);
       }
     }
-    return mergeLists(singles);
+    return mergeLists(playlists);
   }
 
+  public Single<List<SkaldUser>> getCurrentUsers() {
+    List<Single<SkaldUser>> users = new ArrayList<>();
+    for (Provider provider : providers) {
+      try {
+        users.add(getUser(provider));
+      } catch (AuthException authException) {
+        logProviderNotAuthenticatedWarning(provider);
+      }
+    }
+    return Single.merge(users)
+        .toList();
+  }
+
+  @Nullable
   ProviderName getCurrentProviderName() {
     return currentProviderName;
   }
 
-  void setCurrentProviderName(ProviderName providerName) {
+  void setCurrentProviderName(@Nullable ProviderName providerName) {
     this.currentProviderName = providerName;
   }
 
-  boolean shouldPlayerBeChanged(SkaldPlayableEntity skaldPlayableEntity) {
+  boolean shouldPlayerBeChanged(@NonNull SkaldPlayableEntity skaldPlayableEntity) {
     for (Provider provider : providers) {
       if (provider.canHandle(skaldPlayableEntity)) {
         return !provider.getProviderName().equals(currentProviderName);
@@ -189,22 +188,28 @@ public class SkaldMusicService {
     return playerCache.get(currentProviderName);
   }
 
+  @NonNull
+  private Single<SkaldUser> getUser(Provider provider) throws AuthException {
+    return getUserService(provider).getUser();
+  }
+
+  @NonNull
   private SearchService getSearchService(Provider provider) throws AuthException {
     return provider.getSearchServiceFactory().getSearchService();
   }
 
+  @NonNull
+  private UserService getUserService(Provider provider) throws AuthException {
+    return provider.getUserServiceFactory().getUserService();
+  }
+
+  private void logProviderNotAuthenticatedWarning(Provider provider) {
+    Log.w(TAG, String.format("%s is not authenticated", provider.getProviderName().getName()));
+  }
+
   private <T> Single<List<T>> mergeLists(List<Single<List<T>>> singlesList) {
     return Single.merge(singlesList)
-        .toList()
-        .map(new Function<List<List<T>>, List<T>>() {
-          @Override
-          public List<T> apply(@NonNull List<List<T>> lists) throws Exception {
-            List<T> mergedList = new ArrayList<>();
-            for (List<T> list : lists) {
-              mergedList.addAll(list);
-            }
-            return mergedList;
-          }
-        });
+        .flatMapIterable(list -> list)
+        .toList();
   }
 }

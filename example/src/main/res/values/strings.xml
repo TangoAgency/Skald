@@ -11,4 +11,6 @@
   <string name="get_playlists">Get playlists</string>
   <string name="loading">Loading...</string>
   <string name="authentication_error">Authentication went wrong. Try again</string>
+  <string name="hello">Hello!</string>
+  <string name="hello_user_name">Hello, %s!</string>
 </resources>

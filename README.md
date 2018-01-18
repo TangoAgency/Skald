@@ -22,6 +22,7 @@ dependencies {
     //necessary dependencies for Skald
     implementation "com.github.TangoAgency.Skald:core:{latest_release}"
 
+    implementation "com.google.code.gson:gson:{latest_release}",
     implementation "com.squareup.retrofit2:converter-gson:{latest_release}"
     implementation 'io.reactivex.rxjava2:rxandroid:{latest_release}'
     implementation 'io.reactivex.rxjava2:rxjava:{latest_release}'
@@ -68,16 +69,14 @@ public class App extends Application {
 static final int AUTH_REQUEST_CODE = 1234;
 
 public void login() {
-    SkaldAuthService skaldAuthService = new SkaldAuthService(getApplicationContext(), new OnAuthErrorListener() {
-        @Override
-        public void onAuthError(AuthError authError) {
+    SkaldAuthService skaldAuthService = new SkaldAuthService(getApplicationContext(),
+        authError -> {
             if (authError.hasResolution()) {
                 startActivityForResult(authError.getResolution(), AUTH_REQUEST_CODE);
             }
-        }
-    });
+        });
 
-    skaldAuthService.login(SpotifyProvider.NAME)
+    skaldAuthService.login(SpotifyProvider.NAME);
 }
 ```
 
@@ -98,11 +97,10 @@ public void playExampleTrack() {
     static final int AUTH_REQUEST_CODE = 1234;
     SkaldMusicService skaldMusicService = new SkaldMusicService(getApplicationContext());
 
-    SkaldPlayableEntity spotifyTrack = new SpotifyTrack(
-        Uri.parse("skald://spotify/track/spotify:track:0tKcYR2II1VCQWT79i5NrW"), "artist_name", "song_title",
-        "image_url");
+    SkaldPlayableEntity skaldTrack = new SkaldTrack(
+        Uri.parse("skald://spotify/track/spotify:track:0tKcYR2II1VCQWT79i5NrW"));
 
-    skaldMusicService.play(spotifyTrack)
+    skaldMusicService.play(skaldTrack)
         .subscribe(new DisposableCompletableObserver() {
             @Override
             public void onComplete() {
@@ -128,7 +126,7 @@ public void playExampleTrack() {
 ```
 #### Explanation of creating playable entity and playing music:
   - ```SkaldPlayableEntity``` &#8702; base class for SkaldTrack and SkaldPlaylist
-  - ```SpotifyTrack``` &#8702; subclass of SkaldTrack for playing Spotify tracks (you can also use DeezerTrack)
+  - ```SkaldTrack``` &#8702; class for tracks you can play
   - ```skald://spotify/track/0tKcYR2II1VCQWT79i5NrW``` &#8702; Skald uri format (skald://{service_name}}/{type_of_playable_entity}/{uri_from_service})
   - ```error instanceof AuthException``` &#8702; if a user is not authenticated, you can force him to do it
 
@@ -193,8 +191,8 @@ private void play(SkaldPlayableEntity skaldPlayableEntity) {
   }
 ```
 
-#### Additional info:
-These methods (searchTracks and searchPlaylists) returns merged lists of tracks or playlists from authenticated services. Order of entities in final list is determined by the order in which you added providers in a static ```Skald.with``` method.
+#### Additional information:
+These methods (searchTracks and searchPlaylists) returns merged lists of tracks or playlists from authenticated services.
 
 ### Get track information
 #### In order to get TrackMetadata which contains useful track information, use playback listener
@@ -236,6 +234,33 @@ skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
 });
 ```
 
+
+### Get current users account data
+```java
+private void getCurrentUsers() {
+    skaldMusicService.getCurrentUsers()
+        .subscribe(new DisposableSingleObserver<List<SkaldUser>>() {
+            @Override
+            public void onSuccess(List<SkaldUser> skaldUsers) {
+                if(!skaldUsers.isEmtpy()) {
+                    Log.d(TAG, skaldUsers.get(0).getNickName());
+
+                    //e.g. you can use Picasso to draw an user image
+                    Picasso
+                        .with(this)
+                        .load(skaldUsers.get(0).getImageUrl())
+                        .into(userImage);
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "Error during getting user");
+            }
+        });
+}
+```
+
 ### Methods in SkaldMusicService
   - ```play(SkaldPlayableEntity skaldPlayableEntity)``` &#8702; plays music
   - ```pause()``` &#8702; pauses music
@@ -250,6 +275,7 @@ skaldMusicService.addOnPlaybackListener(new OnPlaybackListener() {
   - ```removeOnLoadingListener()``` &#8702; removes OnLoadingListener
   - ```searchTracks(String query)``` &#8702; returns founded tracks by the provided query
   - ```searchPlayLists(String query)``` &#8702; returns founded playlists by the provided query
+  - ```getCurrentUsers()``` &#8702; returns logged in users
 
 ## Getting Help
 

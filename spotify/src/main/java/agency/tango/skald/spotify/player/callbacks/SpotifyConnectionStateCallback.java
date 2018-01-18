@@ -2,12 +2,9 @@ package agency.tango.skald.spotify.player.callbacks;
 
 import android.content.Context;
 import android.util.Log;
-
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Error;
-
 import java.util.List;
-
 import agency.tango.skald.core.listeners.OnErrorListener;
 import agency.tango.skald.core.listeners.OnPlayerReadyListener;
 import agency.tango.skald.spotify.api.models.Tokens;

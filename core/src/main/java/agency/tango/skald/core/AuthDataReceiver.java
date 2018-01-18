@@ -3,9 +3,8 @@ package agency.tango.skald.core;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-
+import android.os.Bundle;
 import java.util.List;
-
 import agency.tango.skald.core.authentication.SkaldAuthData;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
 import agency.tango.skald.core.provider.Provider;
@@ -22,11 +21,14 @@ public class AuthDataReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    SkaldAuthData skaldAuthData = intent.getExtras().getParcelable(EXTRA_AUTH_DATA);
-    String providerName = intent.getStringExtra(EXTRA_PROVIDER_NAME);
-    for (Provider provider : providers) {
-      if (provider.getProviderName().getName().equals(providerName)) {
-        getSkaldAuthStore(provider).save(context, skaldAuthData);
+    Bundle extras = intent.getExtras();
+    if (extras != null) {
+      SkaldAuthData skaldAuthData = extras.getParcelable(EXTRA_AUTH_DATA);
+      String providerName = intent.getStringExtra(EXTRA_PROVIDER_NAME);
+      for (Provider provider : providers) {
+        if (provider.getProviderName().getName().equals(providerName)) {
+          getSkaldAuthStore(provider).save(context, skaldAuthData);
+        }
       }
     }
   }

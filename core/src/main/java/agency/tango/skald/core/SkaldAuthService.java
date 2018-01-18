@@ -1,26 +1,31 @@
 package agency.tango.skald.core;
 
 import android.content.Context;
-
+import android.support.annotation.NonNull;
 import agency.tango.skald.core.authentication.SkaldAuthStore;
-import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.bus.LoginEvent;
+import agency.tango.skald.core.bus.SkaldBus;
 import agency.tango.skald.core.exceptions.AuthException;
 import agency.tango.skald.core.listeners.OnAuthErrorListener;
 import agency.tango.skald.core.provider.Provider;
 import agency.tango.skald.core.provider.ProviderName;
 
 public class SkaldAuthService {
+  @NonNull
   private final Context context;
+
+  @NonNull
   private final OnAuthErrorListener onAuthErrorListener;
+
   private final SkaldBus skaldBus = SkaldBus.getInstance();
 
-  public SkaldAuthService(Context context, OnAuthErrorListener onAuthErrorListener) {
+  public SkaldAuthService(@NonNull Context context,
+      @NonNull OnAuthErrorListener onAuthErrorListener) {
     this.context = context;
     this.onAuthErrorListener = onAuthErrorListener;
   }
 
-  public boolean login(ProviderName providerName) {
+  public boolean login(@NonNull ProviderName providerName) {
     try {
       getSkaldAuthStore(getProviderByName(providerName)).restore(context);
     } catch (AuthException authException) {
@@ -32,16 +37,15 @@ public class SkaldAuthService {
     return false;
   }
 
-  public void logout(ProviderName providerName) {
+  public void logout(@NonNull ProviderName providerName) {
     getSkaldAuthStore(getProviderByName(providerName)).clear(context);
     skaldBus.post(new LoginEvent(providerName));
   }
 
-  public boolean isLoggedIn(ProviderName providerName) {
+  public boolean isLoggedIn(@NonNull ProviderName providerName) {
     try {
       getSkaldAuthStore(getProviderByName(providerName)).restore(context);
     } catch (AuthException authException) {
-      authException.printStackTrace();
       return false;
     }
     return true;

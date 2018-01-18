@@ -1,7 +1,6 @@
 package agency.tango.skald.core.authentication;
 
 import android.content.Context;
-
 import agency.tango.skald.core.exceptions.AuthException;
 
 public interface SkaldAuthStore {

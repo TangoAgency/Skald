@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
 import com.deezer.sdk.model.Permissions;
 import com.deezer.sdk.network.connect.DeezerConnect;
 import com.deezer.sdk.network.connect.event.DialogListener;

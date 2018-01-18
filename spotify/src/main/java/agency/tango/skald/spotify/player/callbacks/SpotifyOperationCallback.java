@@ -1,10 +1,8 @@
 package agency.tango.skald.spotify.player.callbacks;
 
 import android.util.Log;
-
 import com.spotify.sdk.android.player.Error;
 import com.spotify.sdk.android.player.Player;
-
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.spotify.exceptions.SpotifyException;
 

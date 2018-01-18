@@ -1,9 +1,7 @@
 package agency.tango.skald.spotify.models;
 
 import android.net.Uri;
-
 import java.util.List;
-
 import agency.tango.skald.core.models.SkaldPlaylist;
 import agency.tango.skald.spotify.api.models.Image;
 import agency.tango.skald.spotify.api.models.Playlist;

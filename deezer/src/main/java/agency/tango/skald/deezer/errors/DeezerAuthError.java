@@ -2,7 +2,6 @@ package agency.tango.skald.deezer.errors;
 
 import android.content.Context;
 import android.content.Intent;
-
 import agency.tango.skald.core.errors.AuthError;
 import agency.tango.skald.deezer.authentication.DeezerAuthActivity;
 

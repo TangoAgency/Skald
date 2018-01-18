@@ -4,23 +4,17 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
-
+import android.support.annotation.NonNull;
 import com.deezer.sdk.network.connect.DeezerConnect;
 import com.deezer.sdk.network.request.event.DeezerError;
 import com.deezer.sdk.player.PlayerWrapper;
 import com.deezer.sdk.player.PlaylistPlayer;
 import com.deezer.sdk.player.TrackPlayer;
-import com.deezer.sdk.player.event.OnBufferErrorListener;
-import com.deezer.sdk.player.event.OnPlayerErrorListener;
-import com.deezer.sdk.player.event.OnPlayerStateChangeListener;
 import com.deezer.sdk.player.event.PlayerState;
 import com.deezer.sdk.player.exception.TooManyPlayersExceptions;
 import com.deezer.sdk.player.networkcheck.WifiAndMobileNetworkStateChecker;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import agency.tango.skald.core.cache.SkaldLruCache;
 import agency.tango.skald.core.cache.TLruCache;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.errors.PlaybackError;
@@ -39,16 +33,13 @@ class DeezerPlayer {
   private final List<OnLoadingListener> onLoadingListeners = new ArrayList<>();
   private final OnErrorListener onErrorListener;
   private final TLruCache<Class, PlayerWrapper> playerCache = new TLruCache<>(MAX_NUMBER_OF_PLAYERS,
-      new SkaldLruCache.CacheItemRemovedListener<Class, PlayerWrapper>() {
-        @Override
-        public void release(Class key, PlayerWrapper playerWrapper) {
-          PlayerState playerState = playerWrapper.getPlayerState();
-          if (playerState == PlayerState.PLAYING) {
-            playerWrapper.stop();
-          }
-          if (playerState != PlayerState.RELEASED) {
-            playerWrapper.release();
-          }
+      (key, playerWrapper) -> {
+        PlayerState playerState = playerWrapper.getPlayerState();
+        if (playerState == PlayerState.PLAYING) {
+          playerWrapper.stop();
+        }
+        if (playerState != PlayerState.RELEASED) {
+          playerWrapper.release();
         }
       });
   private final Handler mainHandler;
@@ -64,7 +55,8 @@ class DeezerPlayer {
     mainHandler = new Handler(context.getMainLooper());
   }
 
-  void play(SkaldPlayableEntity skaldPlayableEntity, SkaldOperationCallback operationCallback) {
+  void play(@NonNull SkaldPlayableEntity skaldPlayableEntity,
+      SkaldOperationCallback operationCallback) {
     currentSkaldOperationCallback = operationCallback;
     if (currentPlayer != null && isPlaying()) {
       currentPlayer.stop();
@@ -101,29 +93,26 @@ class DeezerPlayer {
     playerCache.evictAll();
   }
 
-  void addOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
+  void addOnPlayerReadyListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
-  void removeOnPlayerReadyListener(OnPlaybackListener onPlaybackListener) {
+  void removeOnPlayerReadyListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
-  void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+  void addOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
-  void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+  void removeOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.remove(onLoadingListener);
   }
 
   void notifyResumeEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onResumeEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onResumeEvent();
       }
     });
   }
@@ -196,74 +185,54 @@ class DeezerPlayer {
   }
 
   private void notifyLoadingEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
-          onLoadingListener.onLoading();
-        }
+    mainHandler.post(() -> {
+      for (OnLoadingListener onLoadingListener : onLoadingListeners) {
+        onLoadingListener.onLoading();
       }
     });
   }
 
   private void addOnPlayerStateChangeListener() {
-    currentPlayer.addOnPlayerStateChangeListener(new OnPlayerStateChangeListener() {
-      @Override
-      public void onPlayerStateChange(PlayerState playerState, long timePosition) {
-        if (playerState == PlayerState.PLAYING) {
-          if (!isPlayEvent) {
-            notifyResumeEvent();
-          }
-          isPlayEvent = false;
-          currentSkaldOperationCallback.onSuccess();
-        } else if (playerState == PlayerState.WAITING_FOR_DATA) {
-          isPlayEvent = true;
-        } else if (playerState == PlayerState.PAUSED) {
-          notifyPauseEvent();
-          currentSkaldOperationCallback.onSuccess();
-        } else if (playerState == PlayerState.STOPPED) {
-          notifyPauseEvent();
-          notifyStopEvent();
-          currentSkaldOperationCallback.onSuccess();
+    currentPlayer.addOnPlayerStateChangeListener((playerState, timePosition) -> {
+      if (playerState == PlayerState.PLAYING) {
+        if (!isPlayEvent) {
+          notifyResumeEvent();
         }
+        isPlayEvent = false;
+        currentSkaldOperationCallback.onSuccess();
+      } else if (playerState == PlayerState.WAITING_FOR_DATA) {
+        isPlayEvent = true;
+      } else if (playerState == PlayerState.PAUSED) {
+        notifyPauseEvent();
+        currentSkaldOperationCallback.onSuccess();
+      } else if (playerState == PlayerState.STOPPED) {
+        notifyPauseEvent();
+        notifyStopEvent();
+        currentSkaldOperationCallback.onSuccess();
       }
     });
   }
 
   private void addPlayerErrorListeners() {
-    currentPlayer.addOnPlayerErrorListener(new OnPlayerErrorListener() {
-      @Override
-      public void onPlayerError(Exception exception, long timePosition) {
-        onErrorListener.onError(exception);
-      }
-    });
+    currentPlayer.addOnPlayerErrorListener(
+        (exception, timePosition) -> onErrorListener.onError(exception));
 
-    currentPlayer.addOnBufferErrorListener(new OnBufferErrorListener() {
-      @Override
-      public void onBufferError(Exception exception, double percent) {
-        onErrorListener.onError(exception);
-      }
-    });
+    currentPlayer.addOnBufferErrorListener(
+        (exception, percent) -> onErrorListener.onError(exception));
   }
 
   private void notifyPauseEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onPauseEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onPauseEvent();
       }
     });
   }
 
   private void notifyStopEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onStopEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onStopEvent();
       }
     });
   }

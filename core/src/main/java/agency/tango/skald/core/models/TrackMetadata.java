@@ -1,25 +1,39 @@
 package agency.tango.skald.core.models;
 
+import android.support.annotation.NonNull;
+
 public class TrackMetadata {
-  private String artistsName;
+  @NonNull
+  private String artistName;
+
+  @NonNull
   private String title;
+
   private String imageUrl;
 
-  public TrackMetadata(String artistsName, String title, String imageUrl) {
-    this.artistsName = artistsName;
+  public TrackMetadata(@NonNull String artistsName, @NonNull String title, String imageUrl) {
+    this.artistName = artistsName;
     this.title = title;
     this.imageUrl = imageUrl;
   }
 
-  public String getArtistsName() {
-    return artistsName;
+  @NonNull
+  public String getArtistName() {
+    return artistName;
   }
 
+  @NonNull
   public String getTitle() {
     return title;
   }
 
   public String getImageUrl() {
     return imageUrl;
+  }
+
+  @Override
+  public String toString() {
+    return "artist name='" + artistName + '\'' +
+        ", title='" + title + '\'';
   }
 }

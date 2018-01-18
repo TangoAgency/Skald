@@ -3,17 +3,15 @@ package agency.tango.skald.spotify.player;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.util.Log;
-
 import com.spotify.sdk.android.player.Config;
 import com.spotify.sdk.android.player.ConnectionStateCallback;
 import com.spotify.sdk.android.player.Player.NotificationCallback;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import agency.tango.skald.core.Player;
 import agency.tango.skald.core.callbacks.SkaldOperationCallback;
 import agency.tango.skald.core.listeners.OnErrorListener;
@@ -73,7 +71,8 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void play(SkaldPlayableEntity playableEntity, SkaldOperationCallback operationCallback) {
+  public void play(@NonNull SkaldPlayableEntity playableEntity,
+      SkaldOperationCallback operationCallback) {
     notifyLoadingEvent();
     spotifyPlayer.playUri(new SpotifyOperationCallback(operationCallback),
         getUriToPlay(playableEntity.getUri()), 0, 0);
@@ -125,32 +124,32 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   @Override
-  public void addOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+  public void addOnPlayerReadyListener(@NonNull OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.add(onPlayerReadyListener);
   }
 
   @Override
-  public void removeOnPlayerReadyListener(OnPlayerReadyListener onPlayerReadyListener) {
+  public void removeOnPlayerReadyListener(@NonNull OnPlayerReadyListener onPlayerReadyListener) {
     onPlayerReadyListeners.remove(onPlayerReadyListener);
   }
 
   @Override
-  public void addOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void addOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.add(onPlaybackListener);
   }
 
   @Override
-  public void removeOnPlaybackListener(OnPlaybackListener onPlaybackListener) {
+  public void removeOnPlaybackListener(@NonNull OnPlaybackListener onPlaybackListener) {
     onPlaybackListeners.remove(onPlaybackListener);
   }
 
   @Override
-  public void addOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void addOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.add(onLoadingListener);
   }
 
   @Override
-  public void removeOnLoadingListener(OnLoadingListener onLoadingListener) {
+  public void removeOnLoadingListener(@NonNull OnLoadingListener onLoadingListener) {
     onLoadingListeners.remove(onLoadingListener);
   }
 
@@ -163,23 +162,17 @@ public class SkaldSpotifyPlayer implements Player {
   }
 
   private void notifyLoadingEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnLoadingListener onLoadingListener : onLoadingListeners) {
-          onLoadingListener.onLoading();
-        }
+    mainHandler.post(() -> {
+      for (OnLoadingListener onLoadingListener : onLoadingListeners) {
+        onLoadingListener.onLoading();
       }
     });
   }
 
   private void notifyStopEvent() {
-    mainHandler.post(new Runnable() {
-      @Override
-      public void run() {
-        for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
-          onPlaybackListener.onStopEvent();
-        }
+    mainHandler.post(() -> {
+      for (OnPlaybackListener onPlaybackListener : onPlaybackListeners) {
+        onPlaybackListener.onStopEvent();
       }
     });
   }

@@ -2,7 +2,6 @@ package agency.tango.skald.core.cache;
 
 import android.support.annotation.CallSuper;
 import android.support.v4.util.LruCache;
-
 import java.util.ArrayList;
 import java.util.List;
 
